@@ -1,16 +1,16 @@
 package org.profinef.repository;
 
-import org.profinef.dbo.TransactionDbo;
+import org.profinef.dto.TransactionDto;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 
-public interface TransactionRepository extends CrudRepository<TransactionDbo, Integer> {
+public interface TransactionRepository extends CrudRepository<TransactionDto, Integer> {
     @Override
-    <S extends TransactionDbo> S save(S entity);
+    <S extends TransactionDto> S save(S entity);
 
     @Override
-    Optional<TransactionDbo> findById(Integer integer);
+    Optional<TransactionDto> findById(Integer integer);
 
     @Override
     void deleteById(Integer integer);

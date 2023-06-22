@@ -1,20 +1,15 @@
 package org.profinef.repository;
 
-import org.profinef.dbo.CurrencyDbo;
+import org.profinef.dto.CurrencyDto;
 import org.springframework.data.repository.CrudRepository;
 
-import java.util.Optional;
+import java.util.List;
 
-public interface CurrencyRepository extends CrudRepository<CurrencyDbo, Integer> {
+public interface CurrencyRepository extends CrudRepository<CurrencyDto, Integer> {
     @Override
-    <S extends CurrencyDbo> S save(S entity);
-
-    @Override
-    Optional<CurrencyDbo> findById(Integer integer);
-
-    @Override
-    Iterable<CurrencyDbo> findAll();
-
+    <S extends CurrencyDto> S save(S entity);
+    List<CurrencyDto> findByClientId(int clientId);
+    CurrencyDto findByClientIdAndCurrencyId(int clientId, int currencyId);
     @Override
     void deleteById(Integer integer);
 }

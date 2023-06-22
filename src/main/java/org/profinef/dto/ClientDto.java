@@ -1,4 +1,4 @@
-package org.profinef.dbo;
+package org.profinef.dto;
 
 import jakarta.persistence.*;
 
@@ -6,26 +6,26 @@ import java.io.Serializable;
 
 @Entity
 @Table(name="client")
-public class ClientDbo implements Serializable {
+public class ClientDto implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int id;
+    Integer id;
     @Column
     String pib;
 
-    public ClientDbo() {
+    public ClientDto() {
     }
 
-    public ClientDbo(String pib) {
+    public ClientDto(String pib) {
         this.id = 0;
         this.pib = pib;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

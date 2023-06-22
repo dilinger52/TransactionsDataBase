@@ -1,27 +1,24 @@
 package org.profinef.entity;
 
-import jakarta.persistence.*;
-
 public class Currency {
-
-    int id;
+    Integer id;
     String name;
-    double exchangeRate;
+    double amount;
 
     public Currency() {
     }
 
-    public Currency(String name, double exchangeRate) {
-        this.id = 0;
+    public Currency(Integer id, String name, double amount) {
+        this.id = id;
         this.name = name;
-        this.exchangeRate = exchangeRate;
+        this.amount = amount;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -33,12 +30,12 @@ public class Currency {
         this.name = name;
     }
 
-    public double getExchangeRate() {
-        return exchangeRate;
+    public double getAmount() {
+        return amount;
     }
 
-    public void setExchangeRate(double exchangeRate) {
-        this.exchangeRate = exchangeRate;
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
     @Override
@@ -46,6 +43,7 @@ public class Currency {
         return "Currency{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", amount=" + amount +
                 '}';
     }
 }

@@ -1,40 +1,43 @@
-package org.profinef.dbo;
+package org.profinef.dto;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "client_has_currency")
+@Table(name = "currency")
 @IdClass(CompositeKey.class)
-public class ClientsCurrencyDbo {
+public class CurrencyDto {
     @Id
-    int clientId;
+    Integer clientId;
     @Id
-    int currencyId;
+    Integer currencyId;
+    @Column
+    String name;
     @Column
     double amount;
 
-    public ClientsCurrencyDbo() {
+    public CurrencyDto() {
     }
 
-    public ClientsCurrencyDbo(int clientId, int currencyId, double amount) {
+    public CurrencyDto(Integer clientId, Integer currencyId, String name, double amount) {
         this.clientId = clientId;
         this.currencyId = currencyId;
+        this.name = name;
         this.amount = amount;
     }
 
-    public int getClientId() {
+    public Integer getClientId() {
         return clientId;
     }
 
-    public void setClientId(int clientId) {
+    public void setClientId(Integer clientId) {
         this.clientId = clientId;
     }
 
-    public int getCurrencyId() {
+    public Integer getCurrencyId() {
         return currencyId;
     }
 
-    public void setCurrencyId(int currencyId) {
+    public void setCurrencyId(Integer currencyId) {
         this.currencyId = currencyId;
     }
 
@@ -46,11 +49,20 @@ public class ClientsCurrencyDbo {
         this.amount = amount;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
-        return "ClientsCurrency{" +
+        return "CurrencyDbo{" +
                 "clientId=" + clientId +
                 ", currencyId=" + currencyId +
+                ", name='" + name + '\'' +
                 ", amount=" + amount +
                 '}';
     }

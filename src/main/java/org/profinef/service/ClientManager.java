@@ -1,6 +1,6 @@
 package org.profinef.service;
 
-import org.profinef.dbo.ClientDbo;
+import org.profinef.dto.ClientDto;
 import org.profinef.entity.Client;
 import org.profinef.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,29 +19,36 @@ public class ClientManager {
     }
 
     public List<Client> getClients() {
-        List<ClientDbo> clientDboList = (List<ClientDbo>) clientRepository.findAll();
+        List<ClientDto> clientDtoList = (List<ClientDto>) clientRepository.findAll();
         List<Client> clients = new ArrayList<>();
-        for (ClientDbo clientDbo : clientDboList) {
-            clients.add(formatFromDbo(clientDbo));
+        for (ClientDto clientDto : clientDtoList) {
+            clients.add(formatFromDbo(clientDto));
         }
         return clients;
     }
 
-    private static Client formatFromDbo(ClientDbo clientDbo) {
-        Client client = new Client(clientDbo.getPib());
-        client.setId(clientDbo.getId());
+    private static Client formatFromDbo(ClientDto clientDto) {
+        if (clientDto == null) return null;
+        Client client = new Client(clientDto.getPib());
+        client.setId(clientDto.getId());
         return client;
     }
 
-    public Client getClient(int id) {
-        ClientDbo clientDbo = clientRepository.findById(id).get();
-        return formatFromDbo(clientDbo);
+    public Client getClient(Integer id) {
+        if (id == null) return null;
+        ClientDto clientDto = clientRepository.findById(id).get();
+        return formatFromDbo(clientDto);
+    }
+    public Client getClient(String name) {
+        if (name == null) return null;
+        ClientDto clientDto = clientRepository.findByPib(name);
+        return formatFromDbo(clientDto);
     }
 
     public void addClient(Client client) {
-        ClientDbo clientDbo = new ClientDbo(client.getPib());
-        clientDbo.setId(client.getId());
-        clientRepository.save(clientDbo);
+        ClientDto clientDto = new ClientDto(client.getPib());
+        clientDto.setId(client.getId());
+        clientRepository.save(clientDto);
     }
 
     public void deleteClient(Client client) {

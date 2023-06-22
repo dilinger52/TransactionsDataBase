@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 public class TransactionApplication {
     public static void main(String[] args) {
+        //SpringApplication.run(TransactionApplication.class, args);
         try {
             final SpringApplication application = new SpringApplication(TransactionApplication.class);
             application.setBannerMode(Banner.Mode.OFF);

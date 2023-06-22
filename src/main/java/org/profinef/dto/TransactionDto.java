@@ -1,49 +1,87 @@
-package org.profinef.entity;
+package org.profinef.dto;
 
-public class Transaction {
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "transaction")
+public class TransactionDto {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
-    Client client1;
-    Currency currency1;
+    @Column(name = "client1_id")
+    Integer client1Id;
+    @Column(name = "currency1_id")
+    Integer currency1Id;
+    @Column
     Double rate1;
+    @Column
     Double commission1;
+    @Column
     Double amount1;
-    Client client2;
-    Currency currency2;
+    @Column(name = "client2_id")
+    Integer client2Id;
+    @Column(name = "currency2_id")
+    Integer currency2Id;
+    @Column
     Double rate2;
+    @Column
     Double commission2;
+    @Column
     Double amount2;
-    Client client3;
-    Currency currency3;
+    @Column(name = "client3_id")
+    Integer client3Id;
+    @Column(name = "currency3_id")
+    Integer currency3Id;
+    @Column
     Double rate3;
+    @Column
     Double commission3;
+    @Column
     Double amount3;
-    Client client4;
-    Currency currency4;
+    @Column(name = "client4_id")
+    Integer client4Id;
+    @Column(name = "currency4_id")
+    Integer currency4Id;
+    @Column
     Double rate4;
+    @Column
     Double commission4;
+    @Column
     Double amount4;
-    Client client5;
-    Currency currency5;
+    @Column(name = "client5_id")
+    Integer client5Id;
+    @Column(name = "currency5_id")
+    Integer currency5Id;
+    @Column
     Double rate5;
+    @Column
     Double commission5;
+    @Column
     Double amount5;
-    Client client6;
-    Currency currency6;
+    @Column(name = "client6_id")
+    Integer client6Id;
+    @Column(name = "currency6_id")
+    Integer currency6Id;
+    @Column
     Double rate6;
+    @Column
     Double commission6;
+    @Column
     Double amount6;
 
-    public Transaction() {
+
+    public TransactionDto() {
     }
 
-    public Transaction(Integer id, Client client1, Currency currency1, Client client2, Currency currency2, Double amount1) {
-        this.id = id;
-        this.client1 = client1;
-        this.currency1 = currency1;
-        this.client2 = client2;
-        this.currency2 = currency2;
-        this.amount1 = amount1;
+    public TransactionDto(Integer client1Id, Integer currency1Id, Double rate1, Integer client2Id, Integer currency2Id, Double rate2, Double amount) {
+        this.id = 0;
+        this.client1Id = client1Id;
+        this.currency1Id = currency1Id;
+        this.client2Id = client2Id;
+        this.currency2Id = currency2Id;
+        this.amount1 = amount;
+        this.rate1 = rate1;
+        this.rate2 = rate2;
     }
 
     public Integer getId() {
@@ -54,44 +92,44 @@ public class Transaction {
         this.id = id;
     }
 
-    public Client getClient1() {
-        return client1;
+    public Integer getClient1Id() {
+        return client1Id;
     }
 
-    public void setClient1(Client client1) {
-        this.client1 = client1;
+    public void setClient1Id(Integer client1Id) {
+        this.client1Id = client1Id;
     }
 
-    public Currency getCurrency1() {
-        return currency1;
+    public Integer getCurrency1Id() {
+        return currency1Id;
     }
 
-    public void setCurrency1(Currency currency1) {
-        this.currency1 = currency1;
+    public void setCurrency1Id(Integer currency1Id) {
+        this.currency1Id = currency1Id;
     }
 
-    public Client getClient2() {
-        return client2;
+    public Integer getClient2Id() {
+        return client2Id;
     }
 
-    public void setClient2(Client client2) {
-        this.client2 = client2;
+    public void setClient2Id(Integer client2Id) {
+        this.client2Id = client2Id;
     }
 
-    public Currency getCurrency2() {
-        return currency2;
+    public Integer getCurrency2Id() {
+        return currency2Id;
     }
 
-    public void setCurrency2(Currency currency2) {
-        this.currency2 = currency2;
+    public void setCurrency2Id(Integer currency2Id) {
+        this.currency2Id = currency2Id;
     }
 
     public Double getAmount1() {
         return amount1;
     }
 
-    public void setAmount1(Double amount) {
-        this.amount1 = amount;
+    public void setAmount1(Double amount1) {
+        this.amount1 = amount1;
     }
 
     public Double getRate1() {
@@ -134,20 +172,20 @@ public class Transaction {
         this.amount2 = amount2;
     }
 
-    public Client getClient3() {
-        return client3;
+    public Integer getClient3Id() {
+        return client3Id;
     }
 
-    public void setClient3(Client client3) {
-        this.client3 = client3;
+    public void setClient3Id(Integer client3Id) {
+        this.client3Id = client3Id;
     }
 
-    public Currency getCurrency3() {
-        return currency3;
+    public Integer getCurrency3Id() {
+        return currency3Id;
     }
 
-    public void setCurrency3(Currency currency3) {
-        this.currency3 = currency3;
+    public void setCurrency3Id(Integer currency3Id) {
+        this.currency3Id = currency3Id;
     }
 
     public Double getRate3() {
@@ -174,20 +212,20 @@ public class Transaction {
         this.amount3 = amount3;
     }
 
-    public Client getClient4() {
-        return client4;
+    public Integer getClient4Id() {
+        return client4Id;
     }
 
-    public void setClient4(Client client4) {
-        this.client4 = client4;
+    public void setClient4Id(Integer client4Id) {
+        this.client4Id = client4Id;
     }
 
-    public Currency getCurrency4() {
-        return currency4;
+    public Integer getCurrency4Id() {
+        return currency4Id;
     }
 
-    public void setCurrency4(Currency currency4) {
-        this.currency4 = currency4;
+    public void setCurrency4Id(Integer currency4Id) {
+        this.currency4Id = currency4Id;
     }
 
     public Double getRate4() {
@@ -214,20 +252,20 @@ public class Transaction {
         this.amount4 = amount4;
     }
 
-    public Client getClient5() {
-        return client5;
+    public Integer getClient5Id() {
+        return client5Id;
     }
 
-    public void setClient5(Client client5) {
-        this.client5 = client5;
+    public void setClient5Id(Integer client5Id) {
+        this.client5Id = client5Id;
     }
 
-    public Currency getCurrency5() {
-        return currency5;
+    public Integer getCurrency5Id() {
+        return currency5Id;
     }
 
-    public void setCurrency5(Currency currency5) {
-        this.currency5 = currency5;
+    public void setCurrency5Id(Integer currency5Id) {
+        this.currency5Id = currency5Id;
     }
 
     public Double getRate5() {
@@ -254,20 +292,20 @@ public class Transaction {
         this.amount5 = amount5;
     }
 
-    public Client getClient6() {
-        return client6;
+    public Integer getClient6Id() {
+        return client6Id;
     }
 
-    public void setClient6(Client client6) {
-        this.client6 = client6;
+    public void setClient6Id(Integer client6Id) {
+        this.client6Id = client6Id;
     }
 
-    public Currency getCurrency6() {
-        return currency6;
+    public Integer getCurrency6Id() {
+        return currency6Id;
     }
 
-    public void setCurrency6(Currency currency6) {
-        this.currency6 = currency6;
+    public void setCurrency6Id(Integer currency6Id) {
+        this.currency6Id = currency6Id;
     }
 
     public Double getRate6() {
@@ -296,38 +334,39 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return "Transaction{" +
+        return "TransactionDbo{" +
                 "id=" + id +
-                ", client1=" + client1 +
-                ", currency1=" + currency1 +
+                ", client1Id=" + client1Id +
+                ", currency1Id=" + currency1Id +
                 ", rate1=" + rate1 +
                 ", commission1=" + commission1 +
                 ", amount1=" + amount1 +
-                ", client2=" + client2 +
-                ", currency2=" + currency2 +
+                ", client2Id=" + client2Id +
+                ", currency2Id=" + currency2Id +
                 ", rate2=" + rate2 +
                 ", commission2=" + commission2 +
                 ", amount2=" + amount2 +
-                ", client3=" + client3 +
-                ", currency3=" + currency3 +
+                ", client3Id=" + client3Id +
+                ", currency3Id=" + currency3Id +
                 ", rate3=" + rate3 +
                 ", commission3=" + commission3 +
                 ", amount3=" + amount3 +
-                ", client4=" + client4 +
-                ", currency4=" + currency4 +
+                ", client4Id=" + client4Id +
+                ", currency4Id=" + currency4Id +
                 ", rate4=" + rate4 +
                 ", commission4=" + commission4 +
                 ", amount4=" + amount4 +
-                ", client5=" + client5 +
-                ", currency5=" + currency5 +
+                ", client5Id=" + client5Id +
+                ", currency5Id=" + currency5Id +
                 ", rate5=" + rate5 +
                 ", commission5=" + commission5 +
                 ", amount5=" + amount5 +
-                ", client6=" + client6 +
-                ", currency6=" + currency6 +
+                ", client6Id=" + client6Id +
+                ", currency6Id=" + currency6Id +
                 ", rate6=" + rate6 +
                 ", commission6=" + commission6 +
                 ", amount6=" + amount6 +
                 '}';
     }
 }
+

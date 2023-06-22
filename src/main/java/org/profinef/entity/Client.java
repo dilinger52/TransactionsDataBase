@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 public class Client implements Serializable {
 
-    int id;
+    Integer id;
     String pib;
 
     public Client(String pib) {
@@ -14,11 +14,11 @@ public class Client implements Serializable {
         this.pib = pib;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

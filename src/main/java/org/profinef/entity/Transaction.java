@@ -8,42 +8,39 @@ public class Transaction {
     Double rate1;
     Double commission1;
     Double amount1;
+    Double balance1;
     Client client2;
     Currency currency2;
     Double rate2;
     Double commission2;
     Double amount2;
+    Double balance2;
     Client client3;
     Currency currency3;
     Double rate3;
     Double commission3;
     Double amount3;
+    Double balance3;
     Client client4;
     Currency currency4;
     Double rate4;
     Double commission4;
     Double amount4;
+    Double balance4;
     Client client5;
     Currency currency5;
     Double rate5;
     Double commission5;
     Double amount5;
+    Double balance5;
     Client client6;
     Currency currency6;
     Double rate6;
     Double commission6;
     Double amount6;
+    Double balance6;
 
     public Transaction() {
-    }
-
-    public Transaction(Integer id, Client client1, Currency currency1, Client client2, Currency currency2, Double amount1) {
-        this.id = id;
-        this.client1 = client1;
-        this.currency1 = currency1;
-        this.client2 = client2;
-        this.currency2 = currency2;
-        this.amount1 = amount1;
     }
 
     public Integer getId() {
@@ -294,6 +291,54 @@ public class Transaction {
         this.amount6 = amount6;
     }
 
+    public Double getBalance1() {
+        return balance1;
+    }
+
+    public void setBalance1(Double balance1) {
+        this.balance1 = balance1;
+    }
+
+    public Double getBalance2() {
+        return balance2;
+    }
+
+    public void setBalance2(Double balance2) {
+        this.balance2 = balance2;
+    }
+
+    public Double getBalance3() {
+        return balance3;
+    }
+
+    public void setBalance3(Double balance3) {
+        this.balance3 = balance3;
+    }
+
+    public Double getBalance4() {
+        return balance4;
+    }
+
+    public void setBalance4(Double balance4) {
+        this.balance4 = balance4;
+    }
+
+    public Double getBalance5() {
+        return balance5;
+    }
+
+    public void setBalance5(Double balance5) {
+        this.balance5 = balance5;
+    }
+
+    public Double getBalance6() {
+        return balance6;
+    }
+
+    public void setBalance6(Double balance6) {
+        this.balance6 = balance6;
+    }
+
     @Override
     public String toString() {
         return "Transaction{" +
@@ -303,31 +348,37 @@ public class Transaction {
                 ", rate1=" + rate1 +
                 ", commission1=" + commission1 +
                 ", amount1=" + amount1 +
+                ", balance1=" + balance1 +
                 ", client2=" + client2 +
                 ", currency2=" + currency2 +
                 ", rate2=" + rate2 +
                 ", commission2=" + commission2 +
                 ", amount2=" + amount2 +
+                ", balance2=" + balance2 +
                 ", client3=" + client3 +
                 ", currency3=" + currency3 +
                 ", rate3=" + rate3 +
                 ", commission3=" + commission3 +
                 ", amount3=" + amount3 +
+                ", balance3=" + balance3 +
                 ", client4=" + client4 +
                 ", currency4=" + currency4 +
                 ", rate4=" + rate4 +
                 ", commission4=" + commission4 +
                 ", amount4=" + amount4 +
+                ", balance4=" + balance4 +
                 ", client5=" + client5 +
                 ", currency5=" + currency5 +
                 ", rate5=" + rate5 +
                 ", commission5=" + commission5 +
                 ", amount5=" + amount5 +
+                ", balance5=" + balance5 +
                 ", client6=" + client6 +
                 ", currency6=" + currency6 +
                 ", rate6=" + rate6 +
                 ", commission6=" + commission6 +
                 ", amount6=" + amount6 +
+                ", balance6=" + balance6 +
                 '}';
     }
 }

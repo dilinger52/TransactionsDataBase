@@ -18,6 +18,8 @@ public class TransactionDto {
     Double commission1;
     @Column
     Double amount1;
+    @Column
+    Double balance1;
     @Column(name = "client2_id")
     Integer client2Id;
     @Column(name = "currency2_id")
@@ -28,6 +30,8 @@ public class TransactionDto {
     Double commission2;
     @Column
     Double amount2;
+    @Column
+    Double balance2;
     @Column(name = "client3_id")
     Integer client3Id;
     @Column(name = "currency3_id")
@@ -38,6 +42,8 @@ public class TransactionDto {
     Double commission3;
     @Column
     Double amount3;
+    @Column
+    Double balance3;
     @Column(name = "client4_id")
     Integer client4Id;
     @Column(name = "currency4_id")
@@ -48,6 +54,8 @@ public class TransactionDto {
     Double commission4;
     @Column
     Double amount4;
+    @Column
+    Double balance4;
     @Column(name = "client5_id")
     Integer client5Id;
     @Column(name = "currency5_id")
@@ -58,6 +66,8 @@ public class TransactionDto {
     Double commission5;
     @Column
     Double amount5;
+    @Column
+    Double balance5;
     @Column(name = "client6_id")
     Integer client6Id;
     @Column(name = "currency6_id")
@@ -68,6 +78,8 @@ public class TransactionDto {
     Double commission6;
     @Column
     Double amount6;
+    @Column
+    Double balance6;
 
 
     public TransactionDto() {
@@ -332,40 +344,94 @@ public class TransactionDto {
         this.amount6 = amount6;
     }
 
+    public Double getBalance1() {
+        return balance1;
+    }
+
+    public void setBalance1(Double balance1) {
+        this.balance1 = balance1;
+    }
+
+    public Double getBalance2() {
+        return balance2;
+    }
+
+    public void setBalance2(Double balance2) {
+        this.balance2 = balance2;
+    }
+
+    public Double getBalance3() {
+        return balance3;
+    }
+
+    public void setBalance3(Double balance3) {
+        this.balance3 = balance3;
+    }
+
+    public Double getBalance4() {
+        return balance4;
+    }
+
+    public void setBalance4(Double balance4) {
+        this.balance4 = balance4;
+    }
+
+    public Double getBalance5() {
+        return balance5;
+    }
+
+    public void setBalance5(Double balance5) {
+        this.balance5 = balance5;
+    }
+
+    public Double getBalance6() {
+        return balance6;
+    }
+
+    public void setBalance6(Double balance6) {
+        this.balance6 = balance6;
+    }
+
     @Override
     public String toString() {
-        return "TransactionDbo{" +
+        return "TransactionDto{" +
                 "id=" + id +
                 ", client1Id=" + client1Id +
                 ", currency1Id=" + currency1Id +
                 ", rate1=" + rate1 +
                 ", commission1=" + commission1 +
                 ", amount1=" + amount1 +
+                ", balance1=" + balance1 +
                 ", client2Id=" + client2Id +
                 ", currency2Id=" + currency2Id +
                 ", rate2=" + rate2 +
                 ", commission2=" + commission2 +
                 ", amount2=" + amount2 +
+                ", balance2=" + balance2 +
                 ", client3Id=" + client3Id +
                 ", currency3Id=" + currency3Id +
                 ", rate3=" + rate3 +
                 ", commission3=" + commission3 +
                 ", amount3=" + amount3 +
+                ", balance3=" + balance3 +
                 ", client4Id=" + client4Id +
                 ", currency4Id=" + currency4Id +
                 ", rate4=" + rate4 +
                 ", commission4=" + commission4 +
                 ", amount4=" + amount4 +
+                ", balance4=" + balance4 +
                 ", client5Id=" + client5Id +
                 ", currency5Id=" + currency5Id +
                 ", rate5=" + rate5 +
                 ", commission5=" + commission5 +
                 ", amount5=" + amount5 +
+                ", balance5=" + balance5 +
                 ", client6Id=" + client6Id +
                 ", currency6Id=" + currency6Id +
                 ", rate6=" + rate6 +
                 ", commission6=" + commission6 +
                 ", amount6=" + amount6 +
+                ", balance6=" + balance6 +
                 '}';
     }
 }

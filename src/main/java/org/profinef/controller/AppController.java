@@ -50,6 +50,7 @@ public class AppController {
         List<Transaction> transactions = transManager.getAllTransactions();
         session.setAttribute("transactions", transactions);
         session.setAttribute("clients", clients);
+        System.out.println(clients);
         return "example";
     }
 

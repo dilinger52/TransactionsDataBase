@@ -3,6 +3,7 @@ package org.profinef.repository;
 import org.profinef.dto.TransactionDto;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TransactionRepository extends CrudRepository<TransactionDto, Integer> {
@@ -14,4 +15,6 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
 
     @Override
     void deleteById(Integer integer);
+
+    List<TransactionDto> findAllByClient1IdAndCurrency1Id(int client1Id, int currency1Id);
 }

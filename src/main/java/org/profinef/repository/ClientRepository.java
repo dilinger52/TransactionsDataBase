@@ -13,7 +13,7 @@ public interface ClientRepository extends CrudRepository<ClientDto, Integer> {
     @Override
     Optional<ClientDto> findById(Integer integer);
 
-    ClientDto findByPib(String name);
+    ClientDto findByPibIgnoreCase(String name);
 
     @Override
     Iterable<ClientDto> findAll();

@@ -8,11 +8,10 @@
 <body>
 <form method="get" action="client">
     <label for="client_name">Client</label>
-    <input type="text" id="client_name" onclick="myFunction()" placeholder="Поиск.." onkeyup="filterFunction()">
-    <div id="myDropdown">
-        <button name="client_name" value="">All clients</button>
-        <button th:each="client : ${session.clients}" name="client_name" th:value="${client.client.pib}" th:text="${client.client.pib}"></button>
-    </div>
+    <input type="text" list="client_datalist" id="client_name" name="client_name" onclick="myFunction()" placeholder="Поиск.." onkeyup="filterFunction()">
+    <datalist id="client_datalist">
+        <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
+    </datalist>
     <table>
         <tr>
             <th>PIB</th>

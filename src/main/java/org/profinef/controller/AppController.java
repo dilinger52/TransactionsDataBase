@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 @Controller
@@ -35,6 +36,8 @@ public class AppController {
 
     @GetMapping("/add_transaction")
     public String addTransaction(HttpSession session) {
+        List<Account> clients = accountManager.getAllAccounts();
+        session.setAttribute("clients", clients);
         return "addTransaction";
     }
 
@@ -46,6 +49,11 @@ public class AppController {
         } else {
             clients = new ArrayList<>();
             clients.add(accountManager.getAccount(clientName));
+            try {
+                transManager.findByClient1(clients.get(0).getClient().getId(), clients.get(0).getCurrencies().get(1).getId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         List<Transaction> transactions = transManager.getAllTransactions();
         session.setAttribute("transactions", transactions);
@@ -57,6 +65,8 @@ public class AppController {
     @GetMapping(path = "/edit")
     public String editTransactionPage(@RequestParam(name = "transaction_id") int transactionId,
                                   HttpSession session) {
+        List<Account> clients = accountManager.getAllAccounts();
+        session.setAttribute("clients", clients);
         System.out.println(transactionId);
         Transaction transaction = transManager.getTransaction(transactionId);
         session.setAttribute("transaction", transaction);

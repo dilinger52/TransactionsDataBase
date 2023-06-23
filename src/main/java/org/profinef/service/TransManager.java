@@ -171,6 +171,10 @@ public class TransManager {
         return transaction;
     }
 
+    public void findByClient1(int clientId, int currencyId) {
+        System.out.println("test" +clientId + currencyId + transactionRepository.findAllByClient1IdAndCurrency1Id(clientId, currencyId));
+    }
+
     private double updateCurrencyAmount(int clientId, int currencyId, double rate, double commission, double amount) {
         CurrencyDto currencyDto = currencyRepository.findByClientIdAndCurrencyId(clientId, currencyId);
         double balance = currencyDto.getAmount() + amount/rate - Math.abs(amount/rate) * (commission/100);

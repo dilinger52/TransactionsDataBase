@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="main.js"></script>
 </head>
 <body>
 <form method="post" action="edit">
@@ -16,8 +17,8 @@
   <label for="commission1">Commission1</label>
   <input type="text" id="commission1" name="commission1" th:value="${session.transaction.commission1}" required>
   <label for="amount1">Amount1</label>
-  <input type="text" id="amount1" name="amount1" th:value="${session.transaction.amount1}" required>
-  <th:block th:if="${session.transaction.client2 != null}">
+  <input type="text" id="amount1" name="amount1" th:value="${session.transaction.amount1}" onkeyup="sumInputs()" required>
+  <th:block th:if="${session.transaction.client2 != null}" style="min-width: 1250px;">
     <label for="client2_name">Client2</label>
     <input type="text" id="client2_name" name="client2_name" th:value="${session.transaction.client2.pib}">
     <label for="currency2_id">Currency2</label>
@@ -27,11 +28,11 @@
     <label for="commission2">Commission2</label>
     <input type="text" id="commission2" name="commission2" th:value="${session.transaction.commission2}">
     <label for="amount2">Amount2</label>
-    <input type="text" id="amount2" name="amount2" th:value="${session.transaction.amount2}">
+    <input type="text" id="amount2" name="amount2" th:value="${session.transaction.amount2}" onkeyup="sumInputs()">
   </th:block>
-  <th:block th:if="${session.transaction.client3 != null}">
+  <th:block th:if="${session.transaction.client3 != null}" style="min-width: 1250px;">
     <label for="client3_name">Client3</label>
-    <input type="text" id="client3_name" name="client3_name" th:value="${session.transaction.client3.pib}">>
+    <input type="text" id="client3_name" name="client3_name" th:value="${session.transaction.client3.pib}">
     <label for="currency3_id">Currency3</label>
     <input type="text" id="currency3_id" name="currency3_id" th:value="${session.transaction.currency3.id}">
     <label for="rate3">Rate3</label>
@@ -39,9 +40,9 @@
     <label for="commission3">Commission3</label>
     <input type="text" id="commission3" name="commission3" th:value="${session.transaction.commission3}">
     <label for="amount3">Amount3</label>
-    <input type="text" id="amount3" name="amount3" th:value="${session.transaction.amount3}">
+    <input type="text" id="amount3" name="amount3" th:value="${session.transaction.amount3}" onkeyup="sumInputs()">
   </th:block>
-  <th:block th:if="${session.transaction.client4 != null}">
+  <th:block th:if="${session.transaction.client4 != null}" style="min-width: 1250px;">
     <label for="client4_name">Client4</label>
     <input type="text" id="client4_name" name="client4_name" th:value="${session.transaction.client4.pib}">>
     <label for="currency4_id">Currency4</label>
@@ -51,9 +52,9 @@
     <label for="commission4">Commission4</label>
     <input type="text" id="commission4" name="commission4" th:value="${session.transaction.commission4}">
     <label for="amount4">Amount4</label>
-    <input type="text" id="amount4" name="amount4" th:value="${session.transaction.amount4}">
+    <input type="text" id="amount4" name="amount4" th:value="${session.transaction.amount4}" onkeyup="sumInputs()">
   </th:block>
-  <th:block th:if="${session.transaction.client5 != null}">
+  <th:block th:if="${session.transaction.client5 != null}" style="min-width: 1250px;">
     <label for="client5_name">Client5</label>
     <input type="text" id="client5_name" name="client5_name" th:value="${session.transaction.client5.pib}">>
     <label for="currency5_id">Currency5</label>
@@ -63,9 +64,9 @@
     <label for="commission5">Commission5</label>
     <input type="text" id="commission5" name="commission5" th:value="${session.transaction.commission5}">
     <label for="amount5">Amount5</label>
-    <input type="text" id="amount5" name="amount5" th:value="${session.transaction.amount5}">
+    <input type="text" id="amount5" name="amount5" th:value="${session.transaction.amount5}" onkeyup="sumInputs()">
   </th:block>
-  <th:block th:if="${session.transaction.client6 != null}">
+  <th:block th:if="${session.transaction.client6 != null}" style="min-width: 1250px;">
     <label for="client6_name">Client6</label>
     <input type="text" id="client6_name" name="client6_name" th:value="${session.transaction.client6.pib}">>
     <label for="currency6_id">Currency6</label>
@@ -75,9 +76,10 @@
     <label for="commission6">Commission6</label>
     <input type="text" id="commission6" name="commission6" th:value="${session.transaction.commission6}">
     <label for="amount6">Amount6</label>
-    <input type="text" id="amount6" name="amount6" th:value="${session.transaction.amount6}">
+    <input type="text" id="amount6" name="amount6" th:value="${session.transaction.amount6}" onkeyup="sumInputs()">
   </th:block>
   <input type="submit">
+  <p>Total Amounts Sum: <span id="out"></span></p>
 </form>
 </body>
 </html>

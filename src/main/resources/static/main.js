@@ -17,3 +17,16 @@ function filterFunction() {
     }
   }
 }
+
+function sumInputs() {
+
+   let num1 = Number( document.getElementById("amount1").value );
+   let num2 = Number( document.getElementById("amount2").value );
+   let num3 = Number( document.getElementById("amount3").value );
+   let num4 = Number( document.getElementById("amount4").value );
+   let num5 = Number( document.getElementById("amount5").value );
+   let num6 = Number( document.getElementById("amount6").value );
+
+   document.getElementById("out").innerHTML = num1 + num2 + num3 + num4 + num5 + num6;
+
+}

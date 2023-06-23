@@ -41,7 +41,7 @@ public class ClientManager {
     }
     public Client getClient(String name) {
         if (name == null) return null;
-        ClientDto clientDto = clientRepository.findByPib(name);
+        ClientDto clientDto = clientRepository.findByPibIgnoreCase(name);
         return formatFromDbo(clientDto);
     }
 

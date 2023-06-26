@@ -3,6 +3,7 @@ package org.profinef.repository;
 import org.profinef.dto.TransactionDto;
 import org.springframework.data.repository.CrudRepository;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,11 +11,12 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
     @Override
     <S extends TransactionDto> S save(S entity);
 
-    @Override
-    Optional<TransactionDto> findById(Integer integer);
+    List<TransactionDto> findAllById(Integer integer);
 
     @Override
     void deleteById(Integer integer);
 
-    List<TransactionDto> findAllByClient1IdAndCurrency1Id(int client1Id, int currency1Id);
+    List<TransactionDto> findAllByClientIdAndCurrencyIdAndDateAfter(int clientId, int currencyId, Timestamp date);
+
+    TransactionDto findByIdAndClientId(int id, int clientId);
 }

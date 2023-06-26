@@ -12,119 +12,29 @@
     <datalist id="client_datalist">
         <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
     </datalist>
+</form>
     <table>
         <tr>
             <th>PIB</th>
             <th>USD</th>
             <th>UAH</th>
+            <th>Details</th>
         </tr>
         <tr th:each="client : ${session.clients}">
             <th th:text="${client.client.pib}"></th>
             <th:block th:each="currency : ${client.currencies}">
-                <th th:text="|${currency.amount} ${currency.name}|"></th>
+                <th th:text="${#numbers.formatDecimal(currency.amount, 1, 'POINT', 2, 'COMMA')}"></th>
             </th:block>
-        </tr>
-    </table>
-</form>
-<form method="get" action="add_transaction">
-    <input type="submit" value="New transaction">
-</form>
-    <table>
-        <tr>
-            <th>Edit</th>
-            <th>id</th>
-            <th>Client1</th>
-            <th>Currency1</th>
-            <th>Balance1</th>
-            <th>Rate1</th>
-            <th>Commission1</th>
-            <th>Amount1 in UAH</th>
-            <th>Client2</th>
-            <th>Currency2</th>
-            <th>Balance2</th>
-            <th>Rate2</th>
-            <th>Commission2</th>
-            <th>Amount2 in UAH</th>
-            <th>Client3</th>
-            <th>Currency3</th>
-            <th>Balance3</th>
-            <th>Rate3</th>
-            <th>Commission3</th>
-            <th>Amount3 in UAH</th>
-            <th>Client4</th>
-            <th>Currency4</th>
-            <th>Balance4</th>
-            <th>Rate4</th>
-            <th>Commission4</th>
-            <th>Amount4 in UAH</th>
-            <th>Client5</th>
-            <th>Currency5</th>
-            <th>Balance5</th>
-            <th>Rate5</th>
-            <th>Commission5</th>
-            <th>Amount5 in UAH</th>
-            <th>Client6</th>
-            <th>Currency6</th>
-            <th>Balance6</th>
-            <th>Rate6</th>
-            <th>Commission6</th>
-            <th>Amount6 in UAH</th>
-        </tr>
-        <tr th:each="transaction : ${session.transactions}">
-            <th>
-                <form method="get" action="edit">
-                    <input type="hidden" name="transaction_id" th:value="${transaction.id}">
-                    <input type="submit" value="edit">
+            <th th:if="${client.client.pib != 'Total'}">
+                <form metod="get" action="client_info">
+                    <input type="hidden" name="client_id" th:value="${client.client.id}">
+                    <input type="submit" value="view info">
                 </form>
             </th>
-            <th th:text="${transaction.id}"></th>
-            <th th:text="${transaction.client1.pib}"></th>
-            <th th:text="${transaction.currency1.name}"></th>
-            <th th:text="${transaction.balance1}"></th>
-            <th th:text="${transaction.rate1}"></th>
-            <th th:text="${transaction.commission1}"></th>
-            <th th:text="${transaction.amount1}"></th>
-            <th:block th:if="${transaction.client2 != null}">
-                <th th:text="${transaction.client2.pib}"></th>
-                <th th:text="${transaction.currency2.name}"></th>
-                <th th:text="${transaction.balance2}"></th>
-                <th th:text="${transaction.rate2}"></th>
-                <th th:text="${transaction.commission2}"></th>
-                <th th:text="${transaction.amount2}"></th>
-            </th:block>
-            <th:block th:if="${transaction.client3 != null}">
-            <th th:text="${transaction.client3.pib}"></th>
-            <th th:text="${transaction.currency3.name}"></th>
-            <th th:text="${transaction.balance3}"></th>
-            <th th:text="${transaction.rate3}"></th>
-            <th th:text="${transaction.commission3}"></th>
-            <th th:text="${transaction.amount3}"></th>
-            </th:block>
-            <th:block th:if="${transaction.client4 != null}">
-            <th th:text="${transaction.client4.pib}"></th>
-            <th th:text="${transaction.currency4.name}"></th>
-            <th th:text="${transaction.balance4"></th>
-            <th th:text="${transaction.rate4}"></th>
-            <th th:text="${transaction.commission4}"></th>
-            <th th:text="${transaction.amount4}"></th>
-            </th:block>
-                <th:block th:if="${transaction.client5 != null}">
-            <th th:text="${transaction.client5.pib}"></th>
-            <th th:text="${transaction.currency5.name}"></th>
-            <th th:text="${transaction.balance5}"></th>
-            <th th:text="${transaction.rate5}"></th>
-            <th th:text="${transaction.commission5}"></th>
-            <th th:text="${transaction.amount5}"></th>
-                </th:block>
-            <th:block th:if="${transaction.client6 != null}">
-            <th th:text="${transaction.client6.pib}"></th>
-            <th th:text="${transaction.currency6.name}"></th>
-            <th th:text="${transaction.balance6}"></th>
-            <th th:text="${transaction.rate6}"></th>
-            <th th:text="${transaction.commission6}"></th>
-            <th th:text="${transaction.amount6}"></th>
-            </th:block>
         </tr>
     </table>
 
+<form method="get" action="add_transaction">
+    <input type="submit" value="New transaction">
+</form>
 </body>

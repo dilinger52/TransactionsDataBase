@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="get" action="add_transaction">
+    <input type="submit" value="New transaction">
+</form>
+<table>
+    <tr>
+        <th>Edit</th>
+        <th>id</th>
+        <th>Also in transaction</th>
+        <th>Date</th>
+        <th>Currency</th>
+        <th>Balance</th>
+        <th>Rate</th>
+        <th>Commission</th>
+        <th>Amount in UAH</th>
+        <th>Transportation</th>
+    </tr>
+    <tr th:each="transaction : ${session.transactions}">
+        <th>
+            <form method="get" action="edit">
+                <input type="hidden" name="transaction_id" th:value="${transaction.id}">
+                <input type="submit" value="edit">
+            </form>
+        </th>
+        <th th:text="${transaction.id}"></th>
+        <th th:text="${transaction.client.pib}"></th>
+        <th th:text="${transaction.date}"></th>
+        <th th:text="${transaction.currency.name}"></th>
+        <th th:text="${transaction.balance}"></th>
+        <th th:text="${transaction.rate}"></th>
+        <th th:text="${transaction.commission}"></th>
+        <th th:text="${transaction.amount}"></th>
+        <th th:text="${transaction.transportation}"></th>
+    </tr>
+</table>
+</body>
+</html>

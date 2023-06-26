@@ -54,78 +54,19 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `transactions`.`transaction` ;
 
 CREATE TABLE IF NOT EXISTS `transactions`.`transaction` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `client1_id` INT NOT NULL,
-  `currency1_id` INT NOT NULL,
-  `rate1` DECIMAL NOT NULL,
-  `commission1` DECIMAL NULL,
-  `amount1` DOUBLE NOT NULL COMMENT 'HRN',
-  `client2_id` INT NULL,
-  `currency2_id` INT NULL,
-  `rate2` DECIMAL NULL,
-  `commission2` DECIMAL NULL,
-  `amount2` DOUBLE NULL COMMENT 'HRN',
-  `client3_id` INT NULL,
-  `currency3_id` INT NULL,
-  `rate3` DECIMAL NULL,
-  `commission3` DECIMAL NULL,
-  `amount3` DOUBLE NULL COMMENT 'HRN',
-  `client4_id` INT NULL,
-  `currency4_id` INT NULL,
-  `rate4` DECIMAL NULL,
-  `commission4` DECIMAL NULL,
-  `amount4` DOUBLE NULL COMMENT 'HRN',
-  `client5_id` INT NULL,
-  `currency5_id` INT NULL,
-  `rate5` DECIMAL NULL,
-  `commission5` DECIMAL NULL,
-  `amount5` DOUBLE NULL COMMENT 'HRN',
-  `client6_id` INT NULL,
-  `currency6_id` INT NULL,
-  `rate6` DECIMAL NULL,
-  `commission6` DECIMAL NULL,
-  `amount6` DOUBLE NULL COMMENT 'HRN',
-  `balance1` DECIMAL NOT NULL,
-  `balance2` DECIMAL NULL,
-  `balance3` DECIMAL NULL,
-  `balance4` DECIMAL NULL,
-  `balance5` DECIMAL NULL,
-  `balance6` DECIMAL NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_client_has_currency_has_client_has_currency_client_has_c_idx` (`client2_id` ASC, `currency2_id` ASC) VISIBLE,
-  INDEX `fk_client_has_currency_has_client_has_currency_client_has_c_idx1` (`client1_id` ASC, `currency1_id` ASC) VISIBLE,
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
-  INDEX `fk_transaction_currency1_idx` (`client3_id` ASC, `currency3_id` ASC) VISIBLE,
-  INDEX `fk_transaction_currency2_idx` (`client4_id` ASC, `currency4_id` ASC) VISIBLE,
-  INDEX `fk_transaction_currency3_idx` (`client5_id` ASC, `currency5_id` ASC) VISIBLE,
-  INDEX `fk_transaction_currency4_idx` (`client6_id` ASC, `currency6_id` ASC) VISIBLE,
+  `id` INT NOT NULL,
+  `date` DATETIME NOT NULL,
+  `client_id` INT NOT NULL,
+  `currency_id` INT NOT NULL,
+  `rate` DOUBLE NOT NULL,
+  `balance` DOUBLE NOT NULL,
+  `commission` DOUBLE NULL,
+  `amount` DOUBLE NOT NULL COMMENT 'HRN',
+  `transportation` DOUBLE NULL,
+  PRIMARY KEY (`id`, `client_id`),
+  INDEX `fk_client_has_currency_has_client_has_currency_client_has_c_idx1` (`client_id` ASC, `currency_id` ASC) VISIBLE,
   CONSTRAINT `fk_client_has_currency_has_client_has_currency_client_has_cur1`
-    FOREIGN KEY (`client1_id` , `currency1_id`)
-    REFERENCES `transactions`.`currency` (`client_id` , `currency_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_client_has_currency_has_client_has_currency_client_has_cur2`
-    FOREIGN KEY (`client2_id` , `currency2_id`)
-    REFERENCES `transactions`.`currency` (`client_id` , `currency_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_transaction_currency1`
-    FOREIGN KEY (`client3_id` , `currency3_id`)
-    REFERENCES `transactions`.`currency` (`client_id` , `currency_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_transaction_currency2`
-    FOREIGN KEY (`client4_id` , `currency4_id`)
-    REFERENCES `transactions`.`currency` (`client_id` , `currency_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_transaction_currency3`
-    FOREIGN KEY (`client5_id` , `currency5_id`)
-    REFERENCES `transactions`.`currency` (`client_id` , `currency_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_transaction_currency4`
-    FOREIGN KEY (`client6_id` , `currency6_id`)
+    FOREIGN KEY (`client_id` , `currency_id`)
     REFERENCES `transactions`.`currency` (`client_id` , `currency_id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)

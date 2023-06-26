@@ -1,7 +1,9 @@
 package org.profinef.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.profinef.entity.Account;
+import org.profinef.entity.Client;
 import org.profinef.entity.Transaction;
 import org.profinef.service.ClientManager;
 import org.profinef.service.AccountManager;
@@ -10,9 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
+
 
 @Controller
 public class AppController {
@@ -22,6 +25,7 @@ public class AppController {
     private final AccountManager accountManager;
     @Autowired
     private final TransManager transManager;
+    private int transactionId = 0;
 
     public AppController(ClientManager clientManager, AccountManager accountManager, TransManager transManager) {
         this.clientManager = clientManager;
@@ -32,6 +36,27 @@ public class AppController {
     @GetMapping("/")
     public String viewHomePage(HttpSession session) {
         return "redirect:/client";
+    }
+
+    @GetMapping("/client_info")
+    public String viewClientTransactions(@RequestParam(name = "client_id") int clientId, HttpSession session) {
+        List<Transaction> transactions = transManager.findByClient(clientId, 980, new Timestamp(0));
+        System.out.println(transactions);
+        for (Transaction transaction :
+                transactions) {
+            List<Transaction> tl = transManager.getTransaction(transaction.getId());
+            StringBuilder clients = new StringBuilder();
+            for (Transaction t : tl) {
+                if (!t.getClient().getId().equals(transaction.getClient().getId())) {
+                    clients.append("\n");
+                    clients.append(t.getClient().getPib());
+                }
+            }
+           transaction.setClient(new Client(clients.toString()));
+        }
+        System.out.println(transactions);
+        session.setAttribute("transactions", transactions);
+        return "clientInfo";
     }
 
     @GetMapping("/add_transaction")
@@ -46,14 +71,10 @@ public class AppController {
         List<Account> clients;
         if (clientName == null || clientName.isEmpty()) {
             clients = accountManager.getAllAccounts();
+            //transManager.addTotal(clients);
         } else {
             clients = new ArrayList<>();
             clients.add(accountManager.getAccount(clientName));
-            try {
-                transManager.findByClient1(clients.get(0).getClient().getId(), clients.get(0).getCurrencies().get(1).getId());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         List<Transaction> transactions = transManager.getAllTransactions();
         session.setAttribute("transactions", transactions);
@@ -62,59 +83,31 @@ public class AppController {
         return "example";
     }
 
+
+
     @GetMapping(path = "/edit")
     public String editTransactionPage(@RequestParam(name = "transaction_id") int transactionId,
                                   HttpSession session) {
         List<Account> clients = accountManager.getAllAccounts();
         session.setAttribute("clients", clients);
         System.out.println(transactionId);
-        Transaction transaction = transManager.getTransaction(transactionId);
-        session.setAttribute("transaction", transaction);
+        List<Transaction> transactions = transManager.getTransaction(transactionId);
+
+        session.setAttribute("transactions", transactions);
         return "editTransaction";
     }
-
     @PostMapping(path = "edit")
-    public String editTransaction(@RequestParam(name = "transaction_id") int transactionId,
-                                  @RequestParam(name = "client1_name") String client1Name,
-                                  @RequestParam(name = "currency1_id") int currency1Id,
-                                  @RequestParam(name = "rate1") double rate1,
-                                  @RequestParam(name = "commission1") double commission1,
-                                  @RequestParam(name = "amount1") double amount1,
-                                  @RequestParam(name = "client2_name", required = false) String client2Name,
-                                  @RequestParam(name = "currency2_id", required = false, defaultValue = "0") int currency2Id,
-                                  @RequestParam(name = "rate2", required = false, defaultValue = "0") double rate2,
-                                  @RequestParam(name = "commission2", required = false, defaultValue = "0") double commission2,
-                                  @RequestParam(name = "amount2", required = false, defaultValue = "0") double amount2,
-                                  @RequestParam(name = "client3_name", required = false) String client3Name,
-                                  @RequestParam(name = "currency3_id", required = false, defaultValue = "0") int currency3Id,
-                                  @RequestParam(name = "rate3", required = false, defaultValue = "0") double rate3,
-                                  @RequestParam(name = "commission3", required = false, defaultValue = "0") double commission3,
-                                  @RequestParam(name = "amount3", required = false, defaultValue = "0") double amount3,
-                                  @RequestParam(name = "client4_name", required = false) String client4Name,
-                                  @RequestParam(name = "currency4_id", required = false, defaultValue = "0") int currency4Id,
-                                  @RequestParam(name = "rate4", required = false, defaultValue = "0") double rate4,
-                                  @RequestParam(name = "commission4", required = false, defaultValue = "0") double commission4,
-                                  @RequestParam(name = "amount4", required = false, defaultValue = "0") double amount4,
-                                  @RequestParam(name = "client5_name", required = false) String client5Name,
-                                  @RequestParam(name = "currency5_id", required = false, defaultValue = "0") int currency5Id,
-                                  @RequestParam(name = "rate5", required = false, defaultValue = "0") double rate5,
-                                  @RequestParam(name = "commission5", required = false, defaultValue = "0") double commission5,
-                                  @RequestParam(name = "amount5", required = false, defaultValue = "0") double amount5,
-                                  @RequestParam(name = "client6_name", required = false) String client6Name,
-                                  @RequestParam(name = "currency6_id", required = false, defaultValue = "0") int currency6Id,
-                                  @RequestParam(name = "rate6", required = false, defaultValue = "0") double rate6,
-                                  @RequestParam(name = "commission6", required = false, defaultValue = "0") double commission6,
-                                  @RequestParam(name = "amount6", required = false, defaultValue = "0") double amount6,
-                                  HttpSession session) {
+    public String editTransaction(@RequestParam(name = "transaction_id") List<Integer> transactionId,
+                                  @RequestParam(name = "client_name") List<String> clientName,
+                                  @RequestParam(name = "currency_id") List<Integer> currencyId,
+                                  @RequestParam(name = "rate") List<Double> rate,
+                                  @RequestParam(name = "commission") List<Double> commission,
+                                  @RequestParam(name = "amount") List<Double> amount,
+                                  @RequestParam(name = "transportation") List<Double> transportation) {
         try{
-            transManager.undoTransaction(transactionId);
-            transManager.remittance(transactionId, client1Name, currency1Id, rate1, commission1, amount1,
-                    client2Name, currency2Id, rate2, commission2, amount2,
-                    client3Name, currency3Id, rate3, commission3, amount3,
-                    client4Name, currency4Id, rate4, commission4, amount4,
-                    client5Name, currency5Id, rate5, commission5, amount5,
-                    client6Name, currency6Id, rate6, commission6, amount6);
-            session.setAttribute("client_id", 0);
+            for (int i = 0; i < clientName.size(); i++) {
+                transManager.update(transactionId.get(i), clientName.get(i), currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -122,44 +115,20 @@ public class AppController {
     }
 
     @RequestMapping(path = "/transaction")
-    public String doTransaction(@RequestParam(name = "client1_name") String client1Name,
-                                     @RequestParam(name = "currency1_id") int currency1Id,
-                                     @RequestParam(name = "rate1") double rate1,
-                                     @RequestParam(name = "commission1") double commission1,
-                                     @RequestParam(name = "amount1") double amount1,
-                                     @RequestParam(name = "client2_name", required = false) String client2Name,
-                                     @RequestParam(name = "currency2_id", required = false, defaultValue = "0") int currency2Id,
-                                     @RequestParam(name = "rate2", required = false, defaultValue = "0") double rate2,
-                                     @RequestParam(name = "commission2", required = false, defaultValue = "0") double commission2,
-                                     @RequestParam(name = "amount2", required = false, defaultValue = "0") double amount2,
-                                     @RequestParam(name = "client3_name", required = false) String client3Name,
-                                     @RequestParam(name = "currency3_id", required = false, defaultValue = "0") int currency3Id,
-                                     @RequestParam(name = "rate3", required = false, defaultValue = "0") double rate3,
-                                     @RequestParam(name = "commission3", required = false, defaultValue = "0") double commission3,
-                                     @RequestParam(name = "amount3", required = false, defaultValue = "0") double amount3,
-                                     @RequestParam(name = "client4_name", required = false) String client4Name,
-                                     @RequestParam(name = "currency4_id", required = false, defaultValue = "0") int currency4Id,
-                                     @RequestParam(name = "rate4", required = false, defaultValue = "0") double rate4,
-                                     @RequestParam(name = "commission4", required = false, defaultValue = "0") double commission4,
-                                     @RequestParam(name = "amount4", required = false, defaultValue = "0") double amount4,
-                                     @RequestParam(name = "client5_name", required = false) String client5Name,
-                                     @RequestParam(name = "currency5_id", required = false, defaultValue = "0") int currency5Id,
-                                     @RequestParam(name = "rate5", required = false, defaultValue = "0") double rate5,
-                                     @RequestParam(name = "commission5", required = false, defaultValue = "0") double commission5,
-                                     @RequestParam(name = "amount5", required = false, defaultValue = "0") double amount5,
-                                     @RequestParam(name = "client6_name", required = false) String client6Name,
-                                     @RequestParam(name = "currency6_id", required = false, defaultValue = "0") int currency6Id,
-                                     @RequestParam(name = "rate6", required = false, defaultValue = "0") double rate6,
-                                     @RequestParam(name = "commission6", required = false, defaultValue = "0") double commission6,
-                                     @RequestParam(name = "amount6", required = false, defaultValue = "0") double amount6,
+    public String doTransaction(@RequestParam(name = "client_name") List<String> clientName,
+                                     @RequestParam(name = "currency_id") List<Integer> currencyId,
+                                     @RequestParam(name = "rate") List<Double> rate,
+                                     @RequestParam(name = "commission") List<Double> commission,
+                                     @RequestParam(name = "amount") List<Double> amount,
+                                     @RequestParam(name = "transportation") List<Double> transportation,
                                      HttpSession session) {
+        System.out.println(clientName);
         try{
-            transManager.remittance(0, client1Name, currency1Id, rate1, commission1, amount1,
-                    client2Name, currency2Id, rate2, commission2, amount2,
-                    client3Name, currency3Id, rate3, commission3, amount3,
-                    client4Name, currency4Id, rate4, commission4, amount4,
-                    client5Name, currency5Id, rate5, commission5, amount5,
-                    client6Name, currency6Id, rate6, commission6, amount6);
+            transactionId++;
+            for (int i = 0; i < clientName.size(); i++) {
+                transManager.remittance(transactionId, null, clientName.get(i), currencyId.get(i), rate.get(i),
+                        commission.get(i), amount.get(i), transportation.get(i));
+            }
             session.setAttribute("client_id", 0);
         } catch (Exception e) {
             e.printStackTrace();

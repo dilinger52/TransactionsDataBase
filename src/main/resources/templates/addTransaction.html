@@ -2,139 +2,58 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Add transaction</title>
+    <link href="main.css" rel="stylesheet">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="main.js"></script>
 </head>
 <body>
-<form method="post" action="transaction">
-  <div style="min-width: 1550px;">
-    <label for="client1_name">Client1</label>
-    <input type="text" list="client_datalist1" id="client1_name" name="client_name" required>
-    <datalist id="client_datalist1">
+<h2>Add transaction</h2>
+<form method="get" action="client">
+  <input type="submit" value="<- Back">
+</form>
+<form>
+  <input type="button" onclick="add_form()" value="Add fields" />
+</form>
+<form method="post" action="transaction" id="form_id">
+  <div id="divOut">
+  <div style="min-width: 1550px;" id="divIn">
+    <div class="inline">
+    <label for="client_name">Client</label>
+    <input type="text" list="client_datalist" id="client_name" name="client_name" required>
+    <datalist id="client_datalist">
       <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
     </datalist>
-    <label for="currency1_id">Currency1</label>
-    <input type="text" id="currency1_id" name="currency_id" value="980" list="currency_datalist1" required>
-    <datalist id="currency_datalist1">
+    </div>
+    <div class="inline">
+    <label for="currency_id">Currency</label>
+    <input type="text" id="currency_id" name="currency_id" value="980" list="currency_datalist" required>
+    <datalist id="currency_datalist">
       <option value="840"></option>
       <option value="980"></option>
     </datalist>
-    <label for="rate1">Rate1</label>
-    <input type="text" id="rate1" name="rate" value="1" required>
-    <label for="commission1">Commission1</label>
-    <input type="text" id="commission1" name="commission" value="0" required>
-    <label for="transportation1">Transportation1</label>
-    <input type="text" id="transportation1" name="transportation" value="0" required>
-    <label for="amount1">Amount1</label>
-    <input type="text" id="amount1" name="amount" onkeyup="sumInputs()" required>
+    </div>
+    <div class="inline">
+    <label for="rate">Rate</label>
+    <input type="text" id="rate" name="rate" value="1" required>
+    </div>
+    <div class="inline">
+    <label for="commission">Commission</label>
+    <input type="text" id="commission" name="commission" value="0" required>
+    </div>
+    <div class="inline">
+    <label for="transportation">Transportation</label>
+    <input type="text" id="transportation" name="transportation" value="0" required>
+    </div>
+    <div class="inline">
+    <label for="amount">Amount</label>
+    <input type="text" id="amount" name="amount" onkeyup="sumInputs()" required>
+    </div>
   </div>
-  <div style="min-width: 1550px;">
-    <label for="client2_name">Client2</label>
-    <input type="text" id="client2_name" name="client_name" list="client_datalist2">
-    <datalist id="client_datalist2">
-      <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
-    </datalist>
-    <label for="currency2_id">Currency2</label>
-    <input type="text" id="currency2_id" name="currency_id" list="currency_datalist2">
-    <datalist id="currency_datalist2">
-      <option value="840"></option>
-      <option value="980"></option>
-    </datalist>
-    <label for="rate2">Rate2</label>
-    <input type="text" id="rate2" name="rate">
-    <label for="commission2">Commission2</label>
-    <input type="text" id="commission2" name="commission">
-    <label for="transportation2">Transportation2</label>
-    <input type="text" id="transportation2" name="transportation" value="0" required>
-    <label for="amount2">Amount2</label>
-    <input type="text" id="amount2" name="amount" onkeyup="sumInputs()">
-  </div>
-  <div style="min-width: 1550px;">
-    <label for="client3_name">Client3</label>
-    <input type="text" id="client3_name" name="client_name"  list="client_datalist3">
-    <datalist id="client_datalist3">
-      <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
-    </datalist>
-    <label for="currency3_id">Currency3</label>
-    <input type="text" id="currency3_id" name="currency_id" list="currency_datalist3">
-    <datalist id="currency_datalist3">
-      <option value="840"></option>
-      <option value="980"></option>
-    </datalist>
-    <label for="rate3">Rate3</label>
-    <input type="text" id="rate3" name="rate">
-    <label for="commission3">Commission3</label>
-    <input type="text" id="commission3" name="commission">
-    <label for="transportation3">Transportation3</label>
-    <input type="text" id="transportation3" name="transportation" value="0" required>
-    <label for="amount3">Amount3</label>
-    <input type="text" id="amount3" name="amount" onkeyup="sumInputs()">
-  </div>
-  <div style="min-width: 1550px;">
-    <label for="client4_name">Client4</label>
-    <input type="text" id="client4_name" name="client_name" list="client_datalist4">
-    <datalist id="client_datalist4">
-      <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
-    </datalist>
-    <label for="currency4_id">Currency4</label>
-    <input type="text" id="currency4_id" name="currency_id" list="currency_datalist4">
-    <datalist id="currency_datalist4">
-      <option value="840"></option>
-      <option value="980"></option>
-    </datalist>
-    <label for="rate4">Rate4</label>
-    <input type="text" id="rate4" name="rate">
-    <label for="commission4">Commission4</label>
-    <input type="text" id="commission4" name="commission">
-    <label for="transportation4">Transportation4</label>
-    <input type="text" id="transportation4" name="transportation" value="0" required>
-    <label for="amount4">Amount4</label>
-    <input type="text" id="amount4" name="amount" onkeyup="sumInputs()">
-  </div>
-  <div style="min-width: 1550px;">
-    <label for="client5_name">Client5</label>
-    <input type="text" id="client5_name" name="client_name" list="client_datalist5">
-    <datalist id="client_datalist5">
-      <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
-    </datalist>
-    <label for="currency5_id">Currency5</label>
-    <input type="text" id="currency5_id" name="currency_id" list="currency_datalist5">
-    <datalist id="currency_datalist5">
-      <option value="840"></option>
-      <option value="980"></option>
-    </datalist>
-    <label for="rate5">Rate5</label>
-    <input type="text" id="rate5" name="rate">
-    <label for="commission5">Commission5</label>
-    <input type="text" id="commission5" name="commission">
-    <label for="transportation5">Transportation5</label>
-    <input type="text" id="transportation5" name="transportation" value="0" required>
-    <label for="amount5">Amount5</label>
-    <input type="text" id="amount5" name="amount" onkeyup="sumInputs()">
-  </div>
-  <div style="min-width: 1550px;">
-    <label for="client6_name">Client6</label>
-    <input type="text" id="client6_name" name="client_name" list="client_datalist6">
-    <datalist id="client_datalist6">
-      <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
-    </datalist>
-    <label for="currency6_id">Currency6</label>
-    <input type="text" id="currency6_id" name="currency_id" list="currency_datalist6">
-    <datalist id="currency_datalist6">
-      <option value="840"></option>
-      <option value="980"></option>
-    </datalist>
-    <label for="rate6">Rate6</label>
-    <input type="text" id="rate6" name="rate">
-    <label for="commission6">Commission6</label>
-    <input type="text" id="commission6" name="commission">
-    <label for="transportation6">Transportation6</label>
-    <input type="text" id="transportation6" name="transportation" value="0" required>
-    <label for="amount6">Amount6</label>
-    <input type="text" id="amount6" name="amount" onkeyup="sumInputs()">
   </div>
   <input type="submit">
   <p>Total Amounts Sum: <span id="out"></span></p>
 </form>
+
 </body>
 </html>

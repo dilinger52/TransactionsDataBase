@@ -2,33 +2,50 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Edit transaction</title>
     <script src="main.js"></script>
+  <link href="main.css" rel="stylesheet">
 </head>
 <body>
+<h2>Edit Transaction</h2>
+<form method="get" action="client">
+  <input type="submit" value="<- Back">
+</form>
 <form method="post" action="edit">
   <div th:each="transaction : ${session.transactions}" style="min-width: 1550px;">
+    <div class="inline">
     <input type="hidden" name="transaction_id" th:value="${transaction.id}">
     <label th:for="|client_name${transaction.client.pib}|">Client</label>
     <input type="text" th:id="|client_name${transaction.client.pib}|" name="client_name" th:list="|client_datalist${transaction.client.pib}|" th:value="${transaction.client.pib}" required>
     <datalist th:id="|client_datalist${transaction.client.pib}|">
       <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
     </datalist>
+    </div>
+    <div class="inline">
     <label th:for="|currency_id${transaction.client.pib}|">Currency</label>
     <input type="text" th:id="|currency1_id${transaction.client.pib}|" name="currency_id" th:list="|currency_datalist${transaction.client.pib}|" th:value="${transaction.currency.id}" required>
     <datalist th:id="|currency_datalist${transaction.client.pib}|">
       <option value="840"></option>
       <option value="980"></option>
     </datalist>
+    </div>
+    <div class="inline">
     <label th:for="|rate${transaction.client.pib}|">Rate</label>
     <input type="text" th:id="|rate${transaction.client.pib}|" name="rate" th:value="${transaction.rate}" required>
-    <label th:for="|commission${transaction.client.pib}|">Commission</label>
+    </div>
+    <div class="inline">
+      <label th:for="|commission${transaction.client.pib}|">Commission</label>
     <input type="text" th:id="|commission${transaction.client.pib}|" name="commission" th:value="${transaction.commission}" required>
-    <label th:for="|transportation${transaction.client.pib}|">Transportation</label>
+    </div>
+    <div class="inline">
+      <label th:for="|transportation${transaction.client.pib}|">Transportation</label>
     <input type="text" th:id="|transportation${transaction.client.pib}|" name="transportation" th:value="${transaction.transportation}" required>
-    <label th:for="|amount${transaction.client.pib}|">Amount</label>
+    </div>
+    <div class="inline">
+      <label th:for="|amount${transaction.client.pib}|">Amount</label>
     <input type="text" th:id="|amount${transaction.client.pib}|" name="amount" th:value="${transaction.amount}" onkeyup="sumInputs()" required>
-  </div>
+    </div>
+    </div>
   <input type="submit">
   <p>Total Amounts Sum: <span id="out"></span></p>
 </form>

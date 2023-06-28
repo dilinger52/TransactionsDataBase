@@ -1,5 +1,7 @@
 package org.profinef.entity;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.sql.Timestamp;
 
 public class Transaction {

@@ -23,6 +23,8 @@ DROP TABLE IF EXISTS `transactions`.`client` ;
 CREATE TABLE IF NOT EXISTS `transactions`.`client` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `pib` VARCHAR(45) NOT NULL,
+  `phone_number` VARCHAR(45) NULL,
+  `telegram` VARCHAR(45) NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE)
 ENGINE = InnoDB;
@@ -82,12 +84,12 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `transactions`;
-INSERT INTO `transactions`.`client` (`id`, `pib`) VALUES (1, 'Ivan');
-INSERT INTO `transactions`.`client` (`id`, `pib`) VALUES (2, 'Vasil');
-INSERT INTO `transactions`.`client` (`id`, `pib`) VALUES (3, 'Egor');
-INSERT INTO `transactions`.`client` (`id`, `pib`) VALUES (4, 'Pavel');
-INSERT INTO `transactions`.`client` (`id`, `pib`) VALUES (5, 'Artem');
-INSERT INTO `transactions`.`client` (`id`, `pib`) VALUES (6, 'Sofia');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (1, 'Ivan', '+38 (087) 675-09-36', '@ivan');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (2, 'Vasil', '+38 (076) 130-64-19', '@vasil');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (3, 'Egor', '+38 (092) 277-99-81', '@egor');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (4, 'Pavel', '+38 (077) 493-73-42', '@pavel');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (5, 'Artem', '+38 (058) 409-94-17', '@artem');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (6, 'Sofia', '+38 (038) 155-39-83', '@sofia');
 
 COMMIT;
 

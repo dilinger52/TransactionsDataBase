@@ -1,13 +1,30 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Client Info</title>
+    <link href="main.css" rel="stylesheet">
+    <script src="main.js"></script>
 </head>
 <body>
+<h2 th:text="${session.client.pib}"></h2>
+<h3>Balance after day: <span th:text="${#numbers.formatDecimal(session.total[balance], 1, 'POINT', 2, 'COMMA')}"></span></h3>
+<h3>Total transaction amount: <span th:text="${#numbers.formatDecimal(session.total[amount], 1, 'POINT', 2, 'COMMA')}"></span></h3>
+<form method="get" action="client">
+    <input type="submit" value="<- Back">
+</form>
 <form method="get" action="add_transaction">
     <input type="submit" value="New transaction">
 </form>
+
+<div>
+<form method="get" action="client_info" class="inline">
+    <input type="date" name="date" th:value="${session.date}">
+    <button name="currency_id" value="980">UAH</button>
+    <input type="hidden" name="client_id" th:value="${session.client.id}">
+    <button name="currency_id" value="840">USD</button>
+</form>
+</div>
 <table>
     <tr>
         <th>Edit</th>
@@ -32,11 +49,11 @@
         <th th:text="${transaction.client.pib}"></th>
         <th th:text="${transaction.date}"></th>
         <th th:text="${transaction.currency.name}"></th>
-        <th th:text="${transaction.balance}"></th>
-        <th th:text="${transaction.rate}"></th>
-        <th th:text="${transaction.commission}"></th>
-        <th th:text="${transaction.amount}"></th>
-        <th th:text="${transaction.transportation}"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.balance, 1, 'POINT', 2, 'COMMA')}"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.rate, 1, 'POINT', 2, 'COMMA')}"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.commission, 1, 'POINT', 2, 'COMMA')}"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')}"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.transportation, 1, 'POINT', 2, 'COMMA')}"></th>
     </tr>
 </table>
 </body>

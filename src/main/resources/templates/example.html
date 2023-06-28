@@ -4,37 +4,64 @@
     <meta charset="UTF-8">
     <link href="main.css" rel="stylesheet">
     <script src="main.js"></script>
+    <title>Main page</title>
 </head>
 <body>
-<form method="get" action="client">
-    <label for="client_name">Client</label>
-    <input type="text" list="client_datalist" id="client_name" name="client_name" onclick="myFunction()" placeholder="Поиск.." onkeyup="filterFunction()">
-    <datalist id="client_datalist">
-        <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
+<h2>Main page</h2>
+<form method="get" action="add_transaction">
+    <input type="submit" value="New transaction">
+</form>
+<div >
+<form method="get" action="client" class="inline">
+    <label for="client_name">Search by PIB</label>
+    <input type="text" list="client_name_datalist" id="client_name" name="client_name" placeholder="Поиск.." onkeyup="filterFunction()">
+    <datalist id="client_name_datalist">
+        <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Total'}" th:value="${client.client.pib}"></option>
     </datalist>
 </form>
+
+<form method="get" action="client" class="inline">
+    <label for="client_phone">Search by Phone</label>
+    <input type="text" list="client_phone_datalist" id="client_phone" name="client_phone" placeholder="Поиск.." onkeyup="filterFunction()">
+    <datalist id="client_phone_datalist">
+        <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Total'}" th:value="${client.client.phone}"></option>
+    </datalist>
+</form>
+
+<form method="get" action="client" class="inline">
+    <label for="client_telegram">Search by Telegram</label>
+    <input type="text" list="client_telegram_datalist" id="client_telegram" name="client_telegram" placeholder="Поиск.." onkeyup="filterFunction()">
+    <datalist id="client_telegram_datalist">
+        <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Total'}" th:value="${client.client.telegram}"></option>
+    </datalist>
+</form>
+</div>
     <table>
         <tr>
             <th>PIB</th>
+            <th>Phone Number</th>
+            <th>Telegram</th>
             <th>USD</th>
             <th>UAH</th>
             <th>Details</th>
         </tr>
         <tr th:each="client : ${session.clients}">
             <th th:text="${client.client.pib}"></th>
+            <th th:text="${client.client.phone}"></th>
+            <th th:text="${client.client.telegram}"></th>
             <th:block th:each="currency : ${client.currencies}">
                 <th th:text="${#numbers.formatDecimal(currency.amount, 1, 'POINT', 2, 'COMMA')}"></th>
             </th:block>
             <th th:if="${client.client.pib != 'Total'}">
                 <form metod="get" action="client_info">
                     <input type="hidden" name="client_id" th:value="${client.client.id}">
+                    <input type="hidden" name="currency_id" value="980">
+                    <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
                     <input type="submit" value="view info">
                 </form>
             </th>
         </tr>
     </table>
 
-<form method="get" action="add_transaction">
-    <input type="submit" value="New transaction">
-</form>
+
 </body>

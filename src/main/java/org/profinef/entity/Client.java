@@ -8,6 +8,9 @@ public class Client implements Serializable {
 
     Integer id;
     String pib;
+    String phone;
+    String telegram;
+
 
     public Client(String pib) {
         this.id = 0;
@@ -26,8 +29,22 @@ public class Client implements Serializable {
         return pib;
     }
 
-    public void setPib(String pib) {
-        this.pib = pib;
+    public void setPib(String pib){this.pib = pib;}
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getTelegram() {
+        return telegram;
+    }
+
+    public void setTelegram(String telegram) {
+        this.telegram = telegram;
     }
 
     @Override
@@ -35,6 +52,8 @@ public class Client implements Serializable {
         return "Client{" +
                 "id=" + id +
                 ", pib='" + pib + '\'' +
+                ", phone='" + phone + '\'' +
+                ", telegram='" + telegram + '\'' +
                 '}';
     }
 }

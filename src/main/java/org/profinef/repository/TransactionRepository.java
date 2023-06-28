@@ -5,7 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Optional;
 
 public interface TransactionRepository extends CrudRepository<TransactionDto, Integer> {
     @Override
@@ -16,7 +15,8 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
     @Override
     void deleteById(Integer integer);
 
-    List<TransactionDto> findAllByClientIdAndCurrencyIdAndDateAfter(int clientId, int currencyId, Timestamp date);
+    List<TransactionDto> findAllByClientIdAndCurrencyIdAndDateBetween(int clientId, int currencyId, Timestamp dateStart, Timestamp dateEnd);
+
 
     TransactionDto findByIdAndClientId(int id, int clientId);
 }

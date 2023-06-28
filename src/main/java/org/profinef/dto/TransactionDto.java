@@ -1,6 +1,7 @@
 package org.profinef.dto;
 
 import jakarta.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -12,6 +13,7 @@ public class TransactionDto {
     @Id
     Integer id;
     @Column
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     Timestamp date;
     @Id
     @Column(name = "client_id")

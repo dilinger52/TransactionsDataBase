@@ -12,6 +12,10 @@ public class ClientDto implements Serializable {
     Integer id;
     @Column
     String pib;
+    @Column(name = "phone_number")
+    String phone;
+    @Column
+    String telegram;
 
     public ClientDto() {
     }
@@ -37,11 +41,29 @@ public class ClientDto implements Serializable {
         this.pib = pib;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getTelegram() {
+        return telegram;
+    }
+
+    public void setTelegram(String telegram) {
+        this.telegram = telegram;
+    }
+
     @Override
     public String toString() {
-        return "Client{" +
+        return "ClientDto{" +
                 "id=" + id +
                 ", pib='" + pib + '\'' +
+                ", phone='" + phone + '\'' +
+                ", telegram='" + telegram + '\'' +
                 '}';
     }
 }

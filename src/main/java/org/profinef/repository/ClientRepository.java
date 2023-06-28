@@ -17,4 +17,8 @@ public interface ClientRepository extends CrudRepository<ClientDto, Integer> {
 
     @Override
     Iterable<ClientDto> findAll();
+
+    ClientDto findByPhone(String phone);
+
+    ClientDto findByTelegram(String telegram);
 }

@@ -1,3 +1,18 @@
-div {display: none;}
+*{
+margin: 7px;
+padding: 3px;
+}
 
-.show {display: block;}
+table, td, th {
+border: 1px solid;
+}
+
+table {
+border-collapse: collapse;
+}
+
+input, label {
+display: block;
+}
+.inline {
+display: inline-block;}

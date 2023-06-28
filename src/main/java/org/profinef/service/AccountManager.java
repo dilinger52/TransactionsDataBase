@@ -79,4 +79,18 @@ public class AccountManager {
         }
         return clientsCurrencies;
     }
+
+    public Account getAccountByPhone(String phone) {
+        if (phone == null) return null;
+        Client client = clientManager.getClientByPhone(phone);
+        List<CurrencyDto> currencyDtoList = currencyRepository.findByClientId(client.getId());
+        return formatFromDbo(currencyDtoList, client.getId());
+    }
+
+    public Account getAccountByTelegram(String telegram) {
+        if (telegram == null) return null;
+        Client client = clientManager.getClientByTelegram(telegram);
+        List<CurrencyDto> currencyDtoList = currencyRepository.findByClientId(client.getId());
+        return formatFromDbo(currencyDtoList, client.getId());
+    }
 }

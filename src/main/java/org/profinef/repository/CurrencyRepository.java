@@ -12,4 +12,6 @@ public interface CurrencyRepository extends CrudRepository<CurrencyDto, Integer>
     CurrencyDto findByClientIdAndCurrencyId(int clientId, int currencyId);
     @Override
     void deleteById(Integer integer);
+
+     CurrencyDto findFirstByCurrencyId(int currencyId);
 }

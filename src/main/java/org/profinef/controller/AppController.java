@@ -1,9 +1,9 @@
 package org.profinef.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.profinef.entity.Account;
 import org.profinef.entity.Client;
+import org.profinef.entity.Currency;
 import org.profinef.entity.Transaction;
 import org.profinef.service.ClientManager;
 import org.profinef.service.AccountManager;
@@ -12,9 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.IntStream;
 
 
 @Controller
@@ -25,7 +26,7 @@ public class AppController {
     private final AccountManager accountManager;
     @Autowired
     private final TransManager transManager;
-    private int transactionId = 0;
+
 
     public AppController(ClientManager clientManager, AccountManager accountManager, TransManager transManager) {
         this.clientManager = clientManager;
@@ -39,22 +40,37 @@ public class AppController {
     }
 
     @GetMapping("/client_info")
-    public String viewClientTransactions(@RequestParam(name = "client_id") int clientId, HttpSession session) {
-        List<Transaction> transactions = transManager.findByClient(clientId, 980, new Timestamp(0));
-        System.out.println(transactions);
+    public String viewClientTransactions(@RequestParam(name = "client_id") int clientId,
+                                         @RequestParam(name = "currency_id") int currencyId,
+                                         @RequestParam(name = "date") Date date,
+                                         HttpSession session) {
+        Client client = clientManager.getClient(clientId);
+        List<Transaction> transactions = transManager.findByClientForDate(clientId, currencyId, new Timestamp(date.getTime()));
+        Map<String, Double> total = new HashMap<>();
+        double sum = 0;
         for (Transaction transaction :
                 transactions) {
+            sum += transaction.getAmount();
             List<Transaction> tl = transManager.getTransaction(transaction.getId());
             StringBuilder clients = new StringBuilder();
             for (Transaction t : tl) {
                 if (!t.getClient().getId().equals(transaction.getClient().getId())) {
-                    clients.append("\n");
+                    clients.append(" ");
                     clients.append(t.getClient().getPib());
                 }
+
             }
            transaction.setClient(new Client(clients.toString()));
         }
-        System.out.println(transactions);
+        if (transactions.isEmpty()) {
+            total.put("balance", (double) 0);
+        } else {
+            total.put("balance", transactions.get(transactions.size() - 1).getBalance());
+        }
+        total.put("amount", sum);
+        session.setAttribute("total", total);
+        session.setAttribute("date", date);
+        session.setAttribute("client", client);
         session.setAttribute("transactions", transactions);
         return "clientInfo";
     }
@@ -67,19 +83,27 @@ public class AppController {
     }
 
     @GetMapping(path = "/client")
-    public String getClientsInfo(@RequestParam(name = "client_name", required = false) String clientName, HttpSession session) {
+    public String getClientsInfo(@RequestParam(name = "client_name", required = false) String clientName,
+                                 @RequestParam(name = "client_phone", required = false) String clientPhone,
+                                 @RequestParam(name = "client_telegram", required = false) String clientTelegram,
+                                 HttpSession session) {
         List<Account> clients;
-        if (clientName == null || clientName.isEmpty()) {
-            clients = accountManager.getAllAccounts();
-            //transManager.addTotal(clients);
-        } else {
+        if (clientName != null && !clientName.isEmpty()) {
             clients = new ArrayList<>();
             clients.add(accountManager.getAccount(clientName));
+        } else if(clientPhone != null && !clientPhone.isEmpty()){
+            clients = new ArrayList<>();
+            clients.add(accountManager.getAccountByPhone(clientPhone));
+        } else if(clientTelegram != null && !clientTelegram.isEmpty()) {
+            clients = new ArrayList<>();
+            clients.add(accountManager.getAccountByTelegram(clientTelegram));
+        } else {
+            clients = accountManager.getAllAccounts();
+            clients.add(transManager.addTotal(clients));
         }
         List<Transaction> transactions = transManager.getAllTransactions();
         session.setAttribute("transactions", transactions);
         session.setAttribute("clients", clients);
-        System.out.println(clients);
         return "example";
     }
 
@@ -90,7 +114,6 @@ public class AppController {
                                   HttpSession session) {
         List<Account> clients = accountManager.getAllAccounts();
         session.setAttribute("clients", clients);
-        System.out.println(transactionId);
         List<Transaction> transactions = transManager.getTransaction(transactionId);
 
         session.setAttribute("transactions", transactions);
@@ -124,7 +147,12 @@ public class AppController {
                                      HttpSession session) {
         System.out.println(clientName);
         try{
-            transactionId++;
+            int transactionId = transManager.getAllTransactions()
+                    .stream()
+                    .flatMapToInt(t -> IntStream.of(t.getId()))
+                    .max()
+                    .orElse(0) + 1;
+
             for (int i = 0; i < clientName.size(); i++) {
                 transManager.remittance(transactionId, null, clientName.get(i), currencyId.get(i), rate.get(i),
                         commission.get(i), amount.get(i), transportation.get(i));

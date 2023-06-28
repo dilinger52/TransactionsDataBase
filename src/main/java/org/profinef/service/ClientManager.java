@@ -31,6 +31,8 @@ public class ClientManager {
         if (clientDto == null) return null;
         Client client = new Client(clientDto.getPib());
         client.setId(clientDto.getId());
+        client.setPhone(clientDto.getPhone());
+        client.setTelegram(clientDto.getTelegram());
         return client;
     }
 
@@ -53,5 +55,17 @@ public class ClientManager {
 
     public void deleteClient(Client client) {
         clientRepository.deleteById(client.getId());
+    }
+
+    public Client getClientByPhone(String phone) {
+        if (phone == null) return null;
+        ClientDto clientDto = clientRepository.findByPhone(phone);
+        return formatFromDbo(clientDto);
+    }
+
+    public Client getClientByTelegram(String telegram) {
+        if (telegram == null) return null;
+        ClientDto clientDto = clientRepository.findByTelegram(telegram);
+        return formatFromDbo(clientDto);
     }
 }

@@ -18,6 +18,7 @@ public class TransactionDto {
     @Id
     @Column(name = "client_id")
     Integer clientId;
+    @Id
     @Column(name = "currency_id")
     Integer currencyId;
     @Column

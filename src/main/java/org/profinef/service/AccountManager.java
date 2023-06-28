@@ -7,6 +7,7 @@ import org.profinef.entity.Currency;
 import org.profinef.repository.CurrencyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -92,5 +93,15 @@ public class AccountManager {
         Client client = clientManager.getClientByTelegram(telegram);
         List<CurrencyDto> currencyDtoList = currencyRepository.findByClientId(client.getId());
         return formatFromDbo(currencyDtoList, client.getId());
+    }
+    @Transactional
+    public void addClient(Client newClient) {
+        int clientId = clientManager.addClient(newClient);
+        CurrencyDto currencyDto = new CurrencyDto();
+        currencyDto.setClientId(clientId);
+        currencyDto.setCurrencyId(980);
+        currencyDto.setName("UAH");
+        currencyDto.setAmount(0);
+        currencyRepository.save(currencyDto);
     }
 }

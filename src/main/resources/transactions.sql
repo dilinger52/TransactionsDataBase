@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `transactions`.`transaction` (
   `commission` DOUBLE NULL,
   `amount` DOUBLE NOT NULL COMMENT 'HRN',
   `transportation` DOUBLE NULL,
-  PRIMARY KEY (`id`, `client_id`),
+  PRIMARY KEY (`id`, `client_id`, `currency_id`),
   INDEX `fk_client_has_currency_has_client_has_currency_client_has_c_idx1` (`client_id` ASC, `currency_id` ASC) VISIBLE,
   CONSTRAINT `fk_client_has_currency_has_client_has_currency_client_has_cur1`
     FOREIGN KEY (`client_id` , `currency_id`)
@@ -84,12 +84,12 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `transactions`;
-INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (1, 'Ivan', '+38 (087) 675-09-36', '@ivan');
-INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (2, 'Vasil', '+38 (076) 130-64-19', '@vasil');
-INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (3, 'Egor', '+38 (092) 277-99-81', '@egor');
-INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (4, 'Pavel', '+38 (077) 493-73-42', '@pavel');
-INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (5, 'Artem', '+38 (058) 409-94-17', '@artem');
-INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (6, 'Sofia', '+38 (038) 155-39-83', '@sofia');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (1, 'Ivan', '+38 (056) 329-17-12', '@ivan');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (2, 'Vasil', '+38 (068) 111-11-11', '@vasil');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (3, 'Egor', '+38 (097) 678-23-12', '@egor');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (4, 'Pavel', '+38 (044) 514-74-18', '@pavel');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (5, 'Artem', '+38 (096) 552-64-58', '@artem');
+INSERT INTO `transactions`.`client` (`id`, `pib`, `phone_number`, `telegram`) VALUES (6, 'Sofia', '+38 (052) 968-68-68', '@sofia');
 
 COMMIT;
 

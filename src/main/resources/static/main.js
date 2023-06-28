@@ -17,9 +17,10 @@ function filterFunction() {
 function sumInputs() {
 
    var numList = document.getElementsByName("amount");
+   var rateList = document.getElementsByName("rate");
    var sum = 0;
    for (var i = 0; i < numList.length; i++) {
-        sum = sum + Number(numList[i].value);
+        sum = sum + Number(numList[i].value) * Number(rateList[i].value);
    }
    document.getElementById("out").innerHTML = sum;
 

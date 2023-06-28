@@ -55,7 +55,7 @@ public class TransManager {
             currencyRepository.save(new CurrencyDto(clientId, currencyId, currencyDto1.getName(), 0));
             currencyDto = currencyRepository.findByClientIdAndCurrencyId(clientId, currencyId);
         }
-        double balance = currencyDto.getAmount() + amount/rate - Math.abs(amount/rate) * (commission/100) - transportation;
+        double balance = currencyDto.getAmount() + amount * (1 - commission/100) - transportation/rate;
         currencyDto.setAmount(balance);
         currencyRepository.save(currencyDto);
         return balance;

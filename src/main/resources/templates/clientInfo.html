@@ -2,19 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
-    <title>Client Info</title>
+    <title>Страница клиента</title>
     <link href="main.css" rel="stylesheet">
     <script src="main.js"></script>
 </head>
 <body>
 <h2 th:text="${session.client.pib}"></h2>
-<h3>Balance after day: <span th:text="${#numbers.formatDecimal(session.total[balance], 1, 'POINT', 2, 'COMMA')}"></span></h3>
-<h3>Total transaction amount: <span th:text="${#numbers.formatDecimal(session.total[amount], 1, 'POINT', 2, 'COMMA')}"></span></h3>
+<h3>Баланс в конце дня: <span th:text="${#numbers.formatDecimal(session.total[balance], 1, 'POINT', 2, 'COMMA')}"></span></h3>
+<h3>Сальдо за день: <span th:text="${#numbers.formatDecimal(session.total[amount], 1, 'POINT', 2, 'COMMA')}"></span></h3>
 <form method="get" action="client">
-    <input type="submit" value="<- Back">
+    <input type="submit" value="<- Назад">
 </form>
 <form method="get" action="add_transaction">
-    <input type="submit" value="New transaction">
+    <input type="submit" value="Новая транзакция">
 </form>
 
 <div>
@@ -27,25 +27,23 @@
 </div>
 <table>
     <tr>
-        <th>Edit</th>
-        <th>id</th>
-        <th>Also in transaction</th>
-        <th>Date</th>
-        <th>Currency</th>
-        <th>Balance</th>
-        <th>Rate</th>
-        <th>Commission</th>
-        <th>Amount in UAH</th>
-        <th>Transportation</th>
+        <th>Редактировать</th>
+        <th>Остальные участники</th>
+        <th>Дата и время</th>
+        <th>Валюта</th>
+        <th>Баланс после транзакции</th>
+        <th>Курс валюты</th>
+        <th>Процент комиссии</th>
+        <th>Количество</th>
+        <th>Инкасация в гривнах</th>
     </tr>
     <tr th:each="transaction : ${session.transactions}">
         <th>
             <form method="get" action="edit">
                 <input type="hidden" name="transaction_id" th:value="${transaction.id}">
-                <input type="submit" value="edit">
+                <input type="submit" value="ред.">
             </form>
         </th>
-        <th th:text="${transaction.id}"></th>
         <th th:text="${transaction.client.pib}"></th>
         <th th:text="${transaction.date}"></th>
         <th th:text="${transaction.currency.name}"></th>

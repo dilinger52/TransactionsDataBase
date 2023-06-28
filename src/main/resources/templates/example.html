@@ -4,46 +4,53 @@
     <meta charset="UTF-8">
     <link href="main.css" rel="stylesheet">
     <script src="main.js"></script>
-    <title>Main page</title>
+    <title>Главная</title>
 </head>
 <body>
-<h2>Main page</h2>
-<form method="get" action="add_transaction">
-    <input type="submit" value="New transaction">
+<h2>Главная</h2>
+<form method="get" action="client">
+    <input type="submit" value="<- Назад">
 </form>
-<div >
+<form method="get" action="new_client">
+    <input type="submit" value="Добавить клиента">
+</form>
+<form method="get" action="add_transaction">
+    <input type="submit" value="Новая транзакция">
+</form>
+<div>
 <form method="get" action="client" class="inline">
-    <label for="client_name">Search by PIB</label>
+    <div class="inline">
+    <label for="client_name">Поиск по ФИО</label>
     <input type="text" list="client_name_datalist" id="client_name" name="client_name" placeholder="Поиск.." onkeyup="filterFunction()">
     <datalist id="client_name_datalist">
         <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Total'}" th:value="${client.client.pib}"></option>
     </datalist>
-</form>
-
-<form method="get" action="client" class="inline">
-    <label for="client_phone">Search by Phone</label>
+    </div>
+    <div class="inline">
+    <label for="client_phone">Поиск по телефону</label>
     <input type="text" list="client_phone_datalist" id="client_phone" name="client_phone" placeholder="Поиск.." onkeyup="filterFunction()">
     <datalist id="client_phone_datalist">
         <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Total'}" th:value="${client.client.phone}"></option>
     </datalist>
-</form>
-
-<form method="get" action="client" class="inline">
-    <label for="client_telegram">Search by Telegram</label>
+    </div>
+    <div class="inline">
+    <label for="client_telegram">Поиск по Telegram</label>
     <input type="text" list="client_telegram_datalist" id="client_telegram" name="client_telegram" placeholder="Поиск.." onkeyup="filterFunction()">
     <datalist id="client_telegram_datalist">
         <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Total'}" th:value="${client.client.telegram}"></option>
     </datalist>
+    </div>
+    <input type="submit" value="Поиск">
 </form>
 </div>
     <table>
         <tr>
-            <th>PIB</th>
-            <th>Phone Number</th>
+            <th>ФИО</th>
+            <th>Номер телефона</th>
             <th>Telegram</th>
             <th>USD</th>
             <th>UAH</th>
-            <th>Details</th>
+            <th>Детали</th>
         </tr>
         <tr th:each="client : ${session.clients}">
             <th th:text="${client.client.pib}"></th>
@@ -57,7 +64,7 @@
                     <input type="hidden" name="client_id" th:value="${client.client.id}">
                     <input type="hidden" name="currency_id" value="980">
                     <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
-                    <input type="submit" value="view info">
+                    <input type="submit" value="посмотреть">
                 </form>
             </th>
         </tr>

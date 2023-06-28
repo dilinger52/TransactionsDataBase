@@ -2,57 +2,57 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Add transaction</title>
+    <title>Добавление транзакции</title>
     <link href="main.css" rel="stylesheet">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="main.js"></script>
 </head>
 <body>
-<h2>Add transaction</h2>
+<h2>Добавление транзакции</h2>
 <form method="get" action="client">
-  <input type="submit" value="<- Back">
+  <input type="submit" value="<- Назад">
 </form>
 <form>
-  <input type="button" onclick="add_form()" value="Add fields" />
+  <input type="button" onclick="add_form()" value="Добавить строку" />
 </form>
 <form method="post" action="transaction" id="form_id">
   <div id="divOut">
   <div style="min-width: 1550px;" id="divIn">
     <div class="inline">
-    <label for="client_name">Client</label>
+    <label for="client_name">Клиент</label>
     <input type="text" list="client_datalist" id="client_name" name="client_name" required>
     <datalist id="client_datalist">
       <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
     </datalist>
     </div>
     <div class="inline">
-    <label for="currency_id">Currency</label>
-    <input type="text" id="currency_id" name="currency_id" value="980" list="currency_datalist" required>
+    <label for="currency_id">Валюта</label>
+    <input type="number" id="currency_id" name="currency_id" value="980" list="currency_datalist" required>
     <datalist id="currency_datalist">
       <option value="840"></option>
       <option value="980"></option>
     </datalist>
     </div>
     <div class="inline">
-    <label for="rate">Rate</label>
-    <input type="text" id="rate" name="rate" value="1" required>
+    <label for="rate">Курс валюты</label>
+    <input type="number" id="rate" name="rate" value="1" required>
     </div>
     <div class="inline">
-    <label for="commission">Commission</label>
-    <input type="text" id="commission" name="commission" value="0" required>
+    <label for="commission">Процент комиссии</label>
+    <input type="number" id="commission" name="commission" value="0" required>
     </div>
     <div class="inline">
-    <label for="transportation">Transportation</label>
-    <input type="text" id="transportation" name="transportation" value="0" required>
+    <label for="transportation">Инкасация в гринах</label>
+    <input type="number" id="transportation" name="transportation" value="0" required>
     </div>
     <div class="inline">
-    <label for="amount">Amount</label>
-    <input type="text" id="amount" name="amount" onkeyup="sumInputs()" required>
+    <label for="amount">Объем</label>
+    <input type="number" id="amount" name="amount" onkeyup="sumInputs()" required>
     </div>
   </div>
   </div>
   <input type="submit">
-  <p>Total Amounts Sum: <span id="out"></span></p>
+  <p>Общая сумма: <span id="out"></span></p>
 </form>
 
 </body>

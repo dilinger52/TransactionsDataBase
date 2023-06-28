@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавление Клиента</title>
+  <link href="main.css" rel="stylesheet">
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="main.js"></script>
+</head>
+<body>
+<h2>Добавление клиента</h2>
+<form method="get" action="client">
+  <input type="submit" value="<- Назад">
+</form>
+<form method="post" action="new_client">
+    <label for="client_name">ФИО</label>
+    <input type="text" id="client_name" name="client_name" required>
+    <label for="client_phone">Телефон</label>
+    <input type="tel" id="client_phone" name="client_phone">
+    <label for="client_telegram">Телеграм</label>
+    <input type="text" id="client_telegram" name="client_telegram">
+    <input type="submit" value="Сохранить">
+</form>
+</body>
+</html>

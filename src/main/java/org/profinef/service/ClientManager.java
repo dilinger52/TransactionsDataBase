@@ -5,6 +5,7 @@ import org.profinef.entity.Client;
 import org.profinef.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +48,13 @@ public class ClientManager {
         return formatFromDbo(clientDto);
     }
 
-    public void addClient(Client client) {
+    public int addClient(Client client) {
         ClientDto clientDto = new ClientDto(client.getPib());
-        clientDto.setId(client.getId());
-        clientRepository.save(clientDto);
+        clientDto.setId(0);
+        clientDto.setPhone(client.getPhone());
+        clientDto.setTelegram(client.getTelegram());
+        return clientRepository.save(clientDto).getId();
+
     }
 
     public void deleteClient(Client client) {

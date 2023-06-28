@@ -145,7 +145,8 @@ public class AppController {
                                      @RequestParam(name = "amount") List<Double> amount,
                                      @RequestParam(name = "transportation") List<Double> transportation,
                                      HttpSession session) {
-        System.out.println(clientName);
+
+        System.out.println(amount);
         try{
             int transactionId = transManager.getAllTransactions()
                     .stream()
@@ -163,4 +164,20 @@ public class AppController {
         }
         return "redirect:/client";
     }
+
+    @GetMapping(path = "/new_client")
+    public String newClient() {
+        return "addClient";
+    }
+    @PostMapping(path = "/new_client")
+    public String saveNewClient(@RequestParam(name = "client_name") String clientName,
+                                @RequestParam(name = "client_phone", required = false) String phone,
+                                @RequestParam(name = "client_telegram", required = false) String telegram) {
+        Client newClient = new Client(clientName);
+        if (phone != null) newClient.setPhone(phone);
+        if (telegram != null) newClient.setTelegram(telegram);
+        accountManager.addClient(newClient);
+        return "redirect:/client";
+    }
+
 }

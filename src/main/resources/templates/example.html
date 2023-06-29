@@ -7,16 +7,23 @@
     <title>Главная</title>
 </head>
 <body>
-<h2>Главная</h2>
-<form method="get" action="client">
+<div class="header">
+    <div>
+<h2 class="inline">Главная</h2>
+
+<form method="get" action="client" class="inline">
     <input type="submit" value="<- Назад">
 </form>
-<form method="get" action="new_client">
+<form method="get" action="new_client" class="inline">
     <input type="submit" value="Добавить клиента">
 </form>
-<form method="get" action="add_transaction">
+    <form method="get" action="new_currency" class="inline">
+        <input type="submit" value="Добавить валюту">
+    </form>
+<form method="get" action="add_transaction" class="inline">
     <input type="submit" value="Новая транзакция">
 </form>
+</div>
 <div>
 <form method="get" action="client" class="inline">
     <div class="inline">
@@ -40,16 +47,16 @@
         <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Total'}" th:value="${client.client.telegram}"></option>
     </datalist>
     </div>
-    <input type="submit" value="Поиск">
+    <input type="submit" value="Поиск" class="inline">
 </form>
 </div>
-    <table>
+</div>
+    <table class="under-header">
         <tr>
             <th>ФИО</th>
             <th>Номер телефона</th>
             <th>Telegram</th>
-            <th>USD</th>
-            <th>UAH</th>
+            <th th:each="currency : ${session.currencies}" th:text="${currency.name}"></th>
             <th>Детали</th>
         </tr>
         <tr th:each="client : ${session.clients}">
@@ -57,7 +64,7 @@
             <th th:text="${client.client.phone}"></th>
             <th th:text="${client.client.telegram}"></th>
             <th:block th:each="currency : ${client.currencies}">
-                <th th:text="${#numbers.formatDecimal(currency.amount, 1, 'POINT', 2, 'COMMA')}"></th>
+                <th th:text="${#numbers.formatDecimal(currency.value, 1, 'POINT', 2, 'COMMA')}"></th>
             </th:block>
             <th th:if="${client.client.pib != 'Total'}">
                 <form metod="get" action="client_info">

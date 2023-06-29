@@ -7,6 +7,7 @@ import org.profinef.entity.Currency;
 import org.profinef.entity.Transaction;
 import org.profinef.service.ClientManager;
 import org.profinef.service.AccountManager;
+import org.profinef.service.CurrencyManager;
 import org.profinef.service.TransManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,12 +27,15 @@ public class AppController {
     private final AccountManager accountManager;
     @Autowired
     private final TransManager transManager;
+    @Autowired
+    private final CurrencyManager currencyManager;
 
 
-    public AppController(ClientManager clientManager, AccountManager accountManager, TransManager transManager) {
+    public AppController(ClientManager clientManager, AccountManager accountManager, TransManager transManager, CurrencyManager currencyManager) {
         this.clientManager = clientManager;
         this.accountManager = accountManager;
         this.transManager = transManager;
+        this.currencyManager = currencyManager;
     }
 
     @GetMapping("/")
@@ -40,10 +44,13 @@ public class AppController {
     }
 
     @GetMapping("/client_info")
-    public String viewClientTransactions(@RequestParam(name = "client_id") int clientId,
+    public String viewClientTransactions(@RequestParam(name = "client_id", required = false, defaultValue = "0") int clientId,
                                          @RequestParam(name = "currency_id") int currencyId,
                                          @RequestParam(name = "date") Date date,
                                          HttpSession session) {
+        if (clientId == 0) {
+            clientId = ((Client)session.getAttribute("client")).getId();
+        }
         Client client = clientManager.getClient(clientId);
         List<Transaction> transactions = transManager.findByClientForDate(clientId, currencyId, new Timestamp(date.getTime()));
         Map<String, Double> total = new HashMap<>();
@@ -68,10 +75,13 @@ public class AppController {
             total.put("balance", transactions.get(transactions.size() - 1).getBalance());
         }
         total.put("amount", sum);
+        List<Currency> currencies = currencyManager.getAllCurrencies();
+        session.setAttribute("currencies", currencies);
         session.setAttribute("total", total);
         session.setAttribute("date", date);
         session.setAttribute("client", client);
         session.setAttribute("transactions", transactions);
+        session.setAttribute("currency_id", currencyId);
         return "clientInfo";
     }
 
@@ -79,6 +89,8 @@ public class AppController {
     public String addTransaction(HttpSession session) {
         List<Account> clients = accountManager.getAllAccounts();
         session.setAttribute("clients", clients);
+        List<Currency> currencies = currencyManager.getAllCurrencies();
+        session.setAttribute("currencies", currencies);
         return "addTransaction";
     }
 
@@ -87,6 +99,7 @@ public class AppController {
                                  @RequestParam(name = "client_phone", required = false) String clientPhone,
                                  @RequestParam(name = "client_telegram", required = false) String clientTelegram,
                                  HttpSession session) {
+        session.removeAttribute("error");
         List<Account> clients;
         if (clientName != null && !clientName.isEmpty()) {
             clients = new ArrayList<>();
@@ -101,9 +114,12 @@ public class AppController {
             clients = accountManager.getAllAccounts();
             clients.add(transManager.addTotal(clients));
         }
+        List<Currency> currencies = currencyManager.getAllCurrencies();
         List<Transaction> transactions = transManager.getAllTransactions();
+        session.setAttribute("currencies", currencies);
         session.setAttribute("transactions", transactions);
         session.setAttribute("clients", clients);
+        System.out.println(clients);
         return "example";
     }
 
@@ -115,7 +131,8 @@ public class AppController {
         List<Account> clients = accountManager.getAllAccounts();
         session.setAttribute("clients", clients);
         List<Transaction> transactions = transManager.getTransaction(transactionId);
-
+        List<Currency> currencies = currencyManager.getAllCurrencies();
+        session.setAttribute("currencies", currencies);
         session.setAttribute("transactions", transactions);
         return "editTransaction";
     }
@@ -172,11 +189,39 @@ public class AppController {
     @PostMapping(path = "/new_client")
     public String saveNewClient(@RequestParam(name = "client_name") String clientName,
                                 @RequestParam(name = "client_phone", required = false) String phone,
-                                @RequestParam(name = "client_telegram", required = false) String telegram) {
+                                @RequestParam(name = "client_telegram", required = false) String telegram,
+                                HttpSession session) {
         Client newClient = new Client(clientName);
         if (phone != null) newClient.setPhone(phone);
         if (telegram != null) newClient.setTelegram(telegram);
-        accountManager.addClient(newClient);
+        try {
+            accountManager.addClient(newClient);
+        } catch (Exception e) {
+            session.setAttribute("error", e.getMessage());
+            return "error";
+        }
+
+        return "redirect:/client";
+    }
+
+    @GetMapping(path = "/new_currency")
+    public String newCurrency() {
+        return "addCurrency";
+    }
+    @PostMapping(path = "/new_currency")
+    public String saveNewCurrency(@RequestParam(name = "currency_name") String currencyName,
+                                @RequestParam(name = "currency_id") int currencyId,
+                                HttpSession session) {
+        Currency newCurrency = new Currency();
+        newCurrency.setName(currencyName);
+        newCurrency.setId(currencyId);
+        try {
+            currencyManager.addCurrency(newCurrency);
+        } catch (Exception e) {
+            session.setAttribute("error", e.getMessage());
+            return "error";
+        }
+
         return "redirect:/client";
     }
 

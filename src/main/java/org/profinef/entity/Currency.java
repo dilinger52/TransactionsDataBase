@@ -1,17 +1,15 @@
 package org.profinef.entity;
 
-public class Currency {
+public class Currency implements Comparable<Currency> {
     Integer id;
     String name;
-    double amount;
 
     public Currency() {
     }
 
-    public Currency(Integer id, String name, double amount) {
+    public Currency(Integer id, String name) {
         this.id = id;
         this.name = name;
-        this.amount = amount;
     }
 
     public Integer getId() {
@@ -30,20 +28,17 @@ public class Currency {
         this.name = name;
     }
 
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
 
     @Override
     public String toString() {
         return "Currency{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", amount=" + amount +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Currency o) {
+        return this.getId().compareTo(o.getId());
     }
 }

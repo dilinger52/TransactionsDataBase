@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link href="main.css" rel="stylesheet">
+    <script src="main.js"></script>
+
+    <title>Ошибка</title>
+</head>
+<body>
+<h2>Ошибка</h2>
+<h3 th:text="${session.error}"></h3>
+<form method="get" action="client">
+  <input type="submit" value="<- Назад">
+</form>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавление валюты</title>
+  <link href="main.css" rel="stylesheet">
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="main.js"></script>
+</head>
+<body>
+<h2>Добавление валюты</h2>
+<form method="get" action="client">
+  <input type="submit" value="<- Назад">
+</form>
+<form method="post" action="new_currency">
+  <label for="currency_name">Название</label>
+  <input type="text" id="currency_name" name="currency_name" required>
+  <label for="currency_id">Код</label>
+  <input type="number" id="currency_id" name="currency_id">
+  <input type="submit" value="Сохранить">
+</form>
+</body>
+</html>

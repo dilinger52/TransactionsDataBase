@@ -25,8 +25,7 @@
     <label th:for="|currency_id${transaction.client.pib}|">Валюта</label>
     <input type="text" th:id="|currency1_id${transaction.client.pib}|" name="currency_id" th:list="|currency_datalist${transaction.client.pib}|" th:value="${transaction.currency.id}" required>
     <datalist th:id="|currency_datalist${transaction.client.pib}|">
-      <option value="840"></option>
-      <option value="980"></option>
+      <option th:each="currency : ${session.currencies}" th:value="${currency.id}"></option>
     </datalist>
     </div>
     <div class="inline">

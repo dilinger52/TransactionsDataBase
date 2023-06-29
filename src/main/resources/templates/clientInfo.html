@@ -7,25 +7,29 @@
     <script src="main.js"></script>
 </head>
 <body>
+<div class="header">
 <h2 th:text="${session.client.pib}"></h2>
 <h3>Баланс в конце дня: <span th:text="${#numbers.formatDecimal(session.total[balance], 1, 'POINT', 2, 'COMMA')}"></span></h3>
 <h3>Сальдо за день: <span th:text="${#numbers.formatDecimal(session.total[amount], 1, 'POINT', 2, 'COMMA')}"></span></h3>
-<form method="get" action="client">
+<form method="get" action="client" class="inline">
     <input type="submit" value="<- Назад">
 </form>
-<form method="get" action="add_transaction">
+<form method="get" action="add_transaction" class="inline">
     <input type="submit" value="Новая транзакция">
 </form>
 
 <div>
 <form method="get" action="client_info" class="inline">
-    <input type="date" name="date" th:value="${session.date}">
-    <button name="currency_id" value="980">UAH</button>
-    <input type="hidden" name="client_id" th:value="${session.client.id}">
-    <button name="currency_id" value="840">USD</button>
+    <input type="date" name="date" th:value="${session.date}" class="inline">
+    <th:block th:each="currency : ${session.currencies}">
+    <input type="radio" id="currency_id" name="currency_id" th:value="${currency.id}" th:checked="${session.currency_id == currency.id}" class="inline">
+    <label for="currency_id" class="inline" th:text="${currency.name}"></label>
+    </th:block>
+    <input type="submit" value="Найти" class="inline">
 </form>
 </div>
-<table>
+</div>
+<table class="under-header">
     <tr>
         <th>Редактировать</th>
         <th>Остальные участники</th>

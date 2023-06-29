@@ -36,17 +36,34 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `transactions`.`currency` ;
 
 CREATE TABLE IF NOT EXISTS `transactions`.`currency` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `transactions`.`account`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `transactions`.`account` ;
+
+CREATE TABLE IF NOT EXISTS `transactions`.`account` (
   `client_id` INT NOT NULL,
-  `currency_id` INT NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
   `amount` DOUBLE NULL,
+  `currency_id` INT NOT NULL,
   PRIMARY KEY (`client_id`, `currency_id`),
   INDEX `fk_client_has_currency_client1_idx` (`client_id` ASC) VISIBLE,
+  INDEX `fk_account_currency1_idx` (`currency_id` ASC) VISIBLE,
   CONSTRAINT `fk_client_has_currency_client1`
     FOREIGN KEY (`client_id`)
     REFERENCES `transactions`.`client` (`id`)
     ON DELETE CASCADE
-    ON UPDATE CASCADE)
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_account_currency1`
+    FOREIGN KEY (`currency_id`)
+    REFERENCES `transactions`.`currency` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -68,8 +85,8 @@ CREATE TABLE IF NOT EXISTS `transactions`.`transaction` (
   PRIMARY KEY (`id`, `client_id`, `currency_id`),
   INDEX `fk_client_has_currency_has_client_has_currency_client_has_c_idx1` (`client_id` ASC, `currency_id` ASC) VISIBLE,
   CONSTRAINT `fk_client_has_currency_has_client_has_currency_client_has_cur1`
-    FOREIGN KEY (`client_id` , `currency_id`)
-    REFERENCES `transactions`.`currency` (`client_id` , `currency_id`)
+    FOREIGN KEY (`client_id`)
+    REFERENCES `transactions`.`account` (`client_id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
@@ -99,14 +116,27 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `transactions`;
-INSERT INTO `transactions`.`currency` (`client_id`, `currency_id`, `name`, `amount`) VALUES (1, 980, 'UAH', 100.01);
-INSERT INTO `transactions`.`currency` (`client_id`, `currency_id`, `name`, `amount`) VALUES (1, 840, 'USD', 120.45);
-INSERT INTO `transactions`.`currency` (`client_id`, `currency_id`, `name`, `amount`) VALUES (2, 980, 'UAH', 500);
-INSERT INTO `transactions`.`currency` (`client_id`, `currency_id`, `name`, `amount`) VALUES (3, 980, 'UAH', 70.68);
-INSERT INTO `transactions`.`currency` (`client_id`, `currency_id`, `name`, `amount`) VALUES (3, 840, 'USD', 17.52);
-INSERT INTO `transactions`.`currency` (`client_id`, `currency_id`, `name`, `amount`) VALUES (4, 840, 'USD', 732);
-INSERT INTO `transactions`.`currency` (`client_id`, `currency_id`, `name`, `amount`) VALUES (5, 980, 'UAH', 1000);
-INSERT INTO `transactions`.`currency` (`client_id`, `currency_id`, `name`, `amount`) VALUES (6, 980, 'UAH', 5000);
+INSERT INTO `transactions`.`currency` (`id`, `name`) VALUES (980, 'UAH');
+INSERT INTO `transactions`.`currency` (`id`, `name`) VALUES (840, 'USD');
+INSERT INTO `transactions`.`currency` (`id`, `name`) VALUES (978, 'EUR');
+INSERT INTO `transactions`.`currency` (`id`, `name`) VALUES (985, 'PLN');
+
+COMMIT;
+
+
+-- -----------------------------------------------------
+-- Data for table `transactions`.`account`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `transactions`;
+INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (1, 100.01, 980);
+INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (1, 120.45, 840);
+INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (2, 500, 980);
+INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (3, 70.68, 980);
+INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (3, 17.52, 840);
+INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (4, 732, 840);
+INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (5, 1000, 980);
+INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (6, 5000, 980);
 
 COMMIT;
 

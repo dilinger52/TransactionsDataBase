@@ -16,3 +16,12 @@ display: block;
 }
 .inline {
 display: inline-block;}
+
+.header {
+position: fixed;
+background: white;
+}
+
+.under-header {
+margin-top: 280px;
+}

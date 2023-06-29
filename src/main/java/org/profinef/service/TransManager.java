@@ -1,20 +1,21 @@
 package org.profinef.service;
 
 import jakarta.transaction.Transactional;
+import org.profinef.dto.AccountDto;
 import org.profinef.dto.CurrencyDto;
 import org.profinef.dto.TransactionDto;
 import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
 import org.profinef.entity.Transaction;
+import org.profinef.repository.AccountRepository;
 import org.profinef.repository.CurrencyRepository;
 import org.profinef.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 @Service
@@ -22,17 +23,23 @@ public class TransManager {
     @Autowired
     private final TransactionRepository transactionRepository;
     @Autowired
-    private final CurrencyRepository currencyRepository;
+    private final AccountRepository accountRepository;
     @Autowired
     private final ClientManager clientManager;
     @Autowired
     private final AccountManager accountManager;
+    @Autowired
+    private final CurrencyManager currencyManager;
+    @Autowired
+    private final CurrencyRepository currencyRepository;
 
-    public TransManager(TransactionRepository transactionRepository, CurrencyRepository currencyRepository, ClientManager clientManager, AccountManager accountManager) {
+    public TransManager(TransactionRepository transactionRepository, AccountRepository accountRepository, ClientManager clientManager, AccountManager accountManager, CurrencyManager currencyManager, CurrencyRepository currencyRepository) {
         this.transactionRepository = transactionRepository;
-        this.currencyRepository = currencyRepository;
+        this.accountRepository = accountRepository;
         this.clientManager = clientManager;
         this.accountManager = accountManager;
+        this.currencyManager = currencyManager;
+        this.currencyRepository = currencyRepository;
     }
 
     @Transactional
@@ -49,15 +56,14 @@ public class TransManager {
     }
 
     private double updateCurrencyAmount(int clientId, int currencyId, double rate, double commission, double amount, double transportation) {
-        CurrencyDto currencyDto = currencyRepository.findByClientIdAndCurrencyId(clientId, currencyId);
-        if (currencyDto == null) {
-            CurrencyDto currencyDto1 = currencyRepository.findFirstByCurrencyId(currencyId);
-            currencyRepository.save(new CurrencyDto(clientId, currencyId, currencyDto1.getName(), 0));
-            currencyDto = currencyRepository.findByClientIdAndCurrencyId(clientId, currencyId);
+        AccountDto accountDto = accountRepository.findByClientIdAndCurrencyId(clientId, currencyId);
+        if (accountDto == null) {
+            accountRepository.save(new AccountDto(clientId, currencyId, 0));
+            accountDto = accountRepository.findByClientIdAndCurrencyId(clientId, currencyId);
         }
-        double balance = currencyDto.getAmount() + amount * (1 - commission/100) - transportation/rate;
-        currencyDto.setAmount(balance);
-        currencyRepository.save(currencyDto);
+        double balance = accountDto.getAmount() + amount * (1 - commission/100) - transportation/rate;
+        accountDto.setAmount(balance);
+        accountRepository.save(accountDto);
         return balance;
     }
 
@@ -73,7 +79,7 @@ public class TransManager {
         TransactionDto oldTransactionDto = transactionRepository.findByIdAndClientId(transactionId, client.getId());
         double oldTransactionBalance = oldTransactionDto.getBalance();
         System.out.println("oldTransactionBalance " + oldTransactionBalance);
-        double oldBalance = currencyRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
+        double oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
         undoTransaction(transactionId, clientName);
         System.out.println("oldBalance " + oldBalance);
         double newBalance = remittance(transactionId, oldTransactionDto.getDate(), clientName, currencyId, rate, commission, amount, transportation);
@@ -104,18 +110,33 @@ public class TransManager {
     public Account addTotal(List<Account> clients) {
         Account total = new Account();
         total.setClient(new Client("Total"));
-        List<Currency> currencies = new ArrayList<>();
-
-        double sumUsd = 0;
-        double sumUah = 0;
+        Map<Currency, Double> currencyDoubleMap = new TreeMap<>();
+        List<Currency> currencies = currencyManager.getAllCurrencies();
+        for (Currency currency :
+                currencies) {
+            double sum = 0;
             for (Account ac :
-                    clients) {
-                sumUsd += ac.getCurrencies().stream().filter(c -> c.getId()==840).findFirst().get().getAmount();
-                sumUah += ac.getCurrencies().stream().filter(c -> c.getId()==980).findFirst().get().getAmount();
+                    clients)  {
+                sum += ac.getCurrencies().entrySet().stream().filter(c -> Objects.equals(c.getKey().getId(), currency.getId())).findFirst().orElse(new Map.Entry<Currency, Double>() {
+                    @Override
+                    public Currency getKey() {
+                        return null;
+                    }
+
+                    @Override
+                    public Double getValue() {
+                        return 0.0;
+                    }
+
+                    @Override
+                    public Double setValue(Double value) {
+                        return null;
+                    }
+                }).getValue();
             }
-            currencies.add(new Currency(840, "USD", sumUsd));
-            currencies.add(new Currency(980, "UAH", sumUah));
-        total.setCurrencies(currencies);
+           currencyDoubleMap.put(currency, sum);
+        }
+        total.setCurrencies(currencyDoubleMap);
         return total;
     }
 
@@ -142,7 +163,7 @@ public class TransManager {
         transaction.setId(transactionDto.getId());
         transaction.setDate(transactionDto.getDate());
         transaction.setClient(clientManager.getClient(transactionDto.getClientId()));
-        transaction.setCurrency(accountManager.getCurrency(transactionDto.getClientId(), transactionDto.getCurrencyId()));
+        transaction.setCurrency(currencyManager.getCurrency(transactionDto.getCurrencyId()));
         transaction.setBalance(transactionDto.getBalance());
         transaction.setRate(transactionDto.getRate());
         transaction.setCommission(transactionDto.getCommission());

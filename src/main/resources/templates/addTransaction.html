@@ -29,8 +29,7 @@
     <label for="currency_id">Валюта</label>
     <input type="number" id="currency_id" name="currency_id" value="980" list="currency_datalist" required>
     <datalist id="currency_datalist">
-      <option value="840"></option>
-      <option value="980"></option>
+      <option th:each="currency : ${session.currencies}" th:value="${currency.id}"></option>
     </datalist>
     </div>
     <div class="inline">

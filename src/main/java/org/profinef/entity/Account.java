@@ -1,15 +1,16 @@
 package org.profinef.entity;
 
 import java.util.List;
+import java.util.Map;
 
 public class Account {
     Client client;
-    List<Currency> currencies;
+    Map<Currency, Double> currencies;
 
     public Account() {
     }
 
-    public Account(Client client, List<Currency> currencies) {
+    public Account(Client client, Map<Currency, Double> currencies) {
         this.client = client;
         this.currencies = currencies;
     }
@@ -22,11 +23,11 @@ public class Account {
         this.client = client;
     }
 
-    public List<Currency> getCurrencies() {
+    public Map<Currency, Double> getCurrencies() {
         return currencies;
     }
 
-    public void setCurrencies(List<Currency> currencies) {
+    public void setCurrencies(Map<Currency, Double> currencies) {
         this.currencies = currencies;
     }
 
@@ -38,4 +39,5 @@ public class Account {
                 '}';
     }
 }
+
 

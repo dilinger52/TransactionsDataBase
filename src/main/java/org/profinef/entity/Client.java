@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 
-public class Client implements Serializable {
+public class Client {
 
     Integer id;
     String pib;

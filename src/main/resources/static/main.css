@@ -3,12 +3,12 @@ margin: 7px;
 padding: 3px;
 }
 
-table, td, th {
+td, th, thead, tbody {
 border: 1px solid;
 }
 
 table {
-border-collapse: collapse;
+    border-spacing: 0px;
 }
 
 input, label {
@@ -20,8 +20,17 @@ display: inline-block;}
 .header {
 position: fixed;
 background: white;
+width: 100%;
+top: -8px;
+}
+
+thead {
+position: sticky;
+background: white;
+width: 100%;
+top: 236px;
 }
 
 .under-header {
-margin-top: 280px;
+margin-top: 213px;
 }

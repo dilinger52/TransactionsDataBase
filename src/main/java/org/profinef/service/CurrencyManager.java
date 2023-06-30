@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CurrencyManager {
@@ -20,9 +21,10 @@ public class CurrencyManager {
 
     public Currency getCurrency(Integer currencyId) {
         if (currencyId == null) return null;
-        CurrencyDto currencyDto = (CurrencyDto) currencyRepository.findById(currencyId).get();
-        Currency currency = formatFromDto(currencyDto);
-        return currency;
+        Optional<CurrencyDto> currencyOpt = currencyRepository.findById(currencyId);
+        if (currencyOpt.isEmpty()) throw new RuntimeException("Валюта не найдена");
+        CurrencyDto currencyDto =currencyOpt.get();
+        return formatFromDto(currencyDto);
     }
 
     private static Currency formatFromDto(CurrencyDto currencyDto) {

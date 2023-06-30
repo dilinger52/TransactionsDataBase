@@ -19,4 +19,5 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
 
 
     TransactionDto findByIdAndClientId(int id, int clientId);
+
 }

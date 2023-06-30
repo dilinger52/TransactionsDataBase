@@ -30,6 +30,7 @@ public class AccountManager {
     public Account getAccount(String name) {
         if (name == null) return null;
         Client client = clientManager.getClient(name);
+        if (client == null) throw new RuntimeException("Клиент не найден");
         List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
         return formatFromDbo(currencyDtoList, client.getId());
     }
@@ -70,6 +71,7 @@ public class AccountManager {
     public Account getAccountByPhone(String phone) {
         if (phone == null) return null;
         Client client = clientManager.getClientByPhone(phone);
+        if (client == null) throw new RuntimeException("Клиент не найден");
         List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
         return formatFromDbo(currencyDtoList, client.getId());
     }
@@ -77,13 +79,14 @@ public class AccountManager {
     public Account getAccountByTelegram(String telegram) {
         if (telegram == null) return null;
         Client client = clientManager.getClientByTelegram(telegram);
+        if (client == null) throw new RuntimeException("Клиент не найден");
         List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
         return formatFromDbo(currencyDtoList, client.getId());
     }
     @Transactional
-    public void addClient(Client newClient) throws Exception {
+    public void addClient(Client newClient) {
         if (clientManager.getClient(newClient.getPib()) != null) {
-            throw new Exception("Клиент с таким именем уже существует");
+            throw new RuntimeException("Клиент с таким именем уже существует");
         }
         int clientId = clientManager.addClient(newClient);
         AccountDto accountDto = new AccountDto();

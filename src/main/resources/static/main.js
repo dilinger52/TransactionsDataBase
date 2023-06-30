@@ -29,5 +29,30 @@ function sumInputs() {
 function add_form(){
             var divIn = document.getElementById("divIn");
             var divOut = document.getElementById("divOut");
-            $(divOut).append($(divIn).eq(0).clone().val(''));
-            }
+            $(divOut).append($(divIn).eq(0).clone());
+}
+
+function confirmDel(id) {
+var isConfirmed = confirm("Пользователь будет удален. Если вы уверены, что хотите удалить пользователя - нажмите OK. Если вы не хотите удалять пользователя - нажмите CANCEL");
+if (isConfirmed) {
+var tempId = id;
+$.ajax({
+    type : "POST",
+    url : "/delete_client",
+    data : {id:tempId},
+    timeout : 100000,
+    success : function(id) {
+        console.log("SUCCESS: ", id);
+        display(response);
+         alert(response);
+    },
+    error : function(e) {
+        console.log("ERROR: ", e);
+        display(e);
+    },
+    done : function(e) {
+        console.log("DONE");
+    }
+});
+}
+}

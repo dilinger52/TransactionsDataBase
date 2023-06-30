@@ -1,6 +1,8 @@
 package org.profinef.entity;
 
-public class Currency implements Comparable<Currency> {
+import java.io.Serializable;
+
+public class Currency implements Comparable<Currency>, Serializable {
     Integer id;
     String name;
 

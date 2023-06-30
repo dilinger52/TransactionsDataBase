@@ -1,9 +1,10 @@
 package org.profinef.entity;
 
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class Transaction {
+public class Transaction implements Serializable {
 
     Integer id;
     Timestamp date;

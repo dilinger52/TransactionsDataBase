@@ -1,18 +1,13 @@
 package org.profinef.entity;
 
-import java.util.List;
+import java.io.Serializable;
 import java.util.Map;
 
-public class Account {
+public class Account implements Serializable {
     Client client;
     Map<Currency, Double> currencies;
 
     public Account() {
-    }
-
-    public Account(Client client, Map<Currency, Double> currencies) {
-        this.client = client;
-        this.currencies = currencies;
     }
 
     public Client getClient() {

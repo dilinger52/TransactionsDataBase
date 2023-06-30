@@ -45,8 +45,13 @@
     <input type="text" th:id="|amount${transaction.client.pib}|" name="amount" th:value="${transaction.amount}" onkeyup="sumInputs()" required>
     </div>
     </div>
-  <input type="submit">
-  <p>Общая сумма: <span id="out"></span></p>
+  <input type="submit" value="Сохранить" class="inline">
 </form>
+<form method="post" action="delete_transaction">
+  <input type="hidden" name="transaction_id" th:value="${session.transactions[0].id}">
+  <input type="submit" value="Удалить" class="inline">
+</form>
+<p>Общая сумма: <span id="out"></span></p>
+
 </body>
 </html>

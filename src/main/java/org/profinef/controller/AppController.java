@@ -39,24 +39,24 @@ public class AppController {
     }
 
     @GetMapping("/")
-    public String viewHomePage(HttpSession session) {
+    public String viewHomePage() {
         return "redirect:/client";
     }
 
     @GetMapping("/client_info")
     public String viewClientTransactions(@RequestParam(name = "client_id", required = false, defaultValue = "0") int clientId,
-                                         @RequestParam(name = "currency_id") int currencyId,
-                                         @RequestParam(name = "date") Date date,
+                                         @RequestParam(name = "currency_id", required = false, defaultValue = "980") int currencyId,
+                                         @RequestParam(name = "date", required = false) Date date,
                                          HttpSession session) {
         if (clientId == 0) {
             clientId = ((Client)session.getAttribute("client")).getId();
         }
+        if (date == null) date = new Date(System.currentTimeMillis());
         Client client = clientManager.getClient(clientId);
         List<Transaction> transactions = transManager.findByClientForDate(clientId, currencyId, new Timestamp(date.getTime()));
         Map<String, Double> total = new HashMap<>();
         double sum = 0;
-        for (Transaction transaction :
-                transactions) {
+        for (Transaction transaction : transactions) {
             sum += transaction.getAmount();
             List<Transaction> tl = transManager.getTransaction(transaction.getId());
             StringBuilder clients = new StringBuilder();
@@ -65,7 +65,6 @@ public class AppController {
                     clients.append(" ");
                     clients.append(t.getClient().getPib());
                 }
-
             }
            transaction.setClient(new Client(clients.toString()));
         }
@@ -100,16 +99,32 @@ public class AppController {
                                  @RequestParam(name = "client_telegram", required = false) String clientTelegram,
                                  HttpSession session) {
         session.removeAttribute("error");
+        session.removeAttribute("client");
         List<Account> clients;
         if (clientName != null && !clientName.isEmpty()) {
             clients = new ArrayList<>();
-            clients.add(accountManager.getAccount(clientName));
+            try {
+                clients.add(accountManager.getAccount(clientName));
+            } catch (Exception e) {
+                session.setAttribute("error", e.getMessage());
+                return "error";
+            }
         } else if(clientPhone != null && !clientPhone.isEmpty()){
             clients = new ArrayList<>();
-            clients.add(accountManager.getAccountByPhone(clientPhone));
+            try {
+                clients.add(accountManager.getAccountByPhone(clientPhone));
+        } catch (Exception e) {
+            session.setAttribute("error", e.getMessage());
+            return "error";
+        }
         } else if(clientTelegram != null && !clientTelegram.isEmpty()) {
             clients = new ArrayList<>();
-            clients.add(accountManager.getAccountByTelegram(clientTelegram));
+            try {
+                clients.add(accountManager.getAccountByTelegram(clientTelegram));
+            } catch (Exception e) {
+        session.setAttribute("error", e.getMessage());
+        return "error";
+    }
         } else {
             clients = accountManager.getAllAccounts();
             clients.add(transManager.addTotal(clients));
@@ -136,7 +151,7 @@ public class AppController {
         session.setAttribute("transactions", transactions);
         return "editTransaction";
     }
-    @PostMapping(path = "edit")
+    @PostMapping(path = "/edit")
     public String editTransaction(@RequestParam(name = "transaction_id") List<Integer> transactionId,
                                   @RequestParam(name = "client_name") List<String> clientName,
                                   @RequestParam(name = "currency_id") List<Integer> currencyId,
@@ -154,7 +169,14 @@ public class AppController {
         return "redirect:/client";
     }
 
-    @RequestMapping(path = "/transaction")
+    @PostMapping(path = "delete_transaction")
+    public String deleteTransaction(@RequestParam(name = "transaction_id") int transactionId) {
+        List<Transaction> transaction = transManager.getTransaction(transactionId);
+        transManager.deleteTransaction(transaction);
+        return "redirect:/client";
+    }
+
+    @PostMapping(path = "/transaction")
     public String doTransaction(@RequestParam(name = "client_name") List<String> clientName,
                                      @RequestParam(name = "currency_id") List<Integer> currencyId,
                                      @RequestParam(name = "rate") List<Double> rate,
@@ -172,8 +194,13 @@ public class AppController {
                     .orElse(0) + 1;
 
             for (int i = 0; i < clientName.size(); i++) {
-                transManager.remittance(transactionId, null, clientName.get(i), currencyId.get(i), rate.get(i),
-                        commission.get(i), amount.get(i), transportation.get(i));
+                try {
+                    transManager.remittance(transactionId, null, clientName.get(i), currencyId.get(i), rate.get(i),
+                            commission.get(i), amount.get(i), transportation.get(i));
+                } catch (Exception e) {
+                    session.setAttribute("error", e.getMessage());
+                    return "error";
+                }
             }
             session.setAttribute("client_id", 0);
         } catch (Exception e) {
@@ -192,8 +219,20 @@ public class AppController {
                                 @RequestParam(name = "client_telegram", required = false) String telegram,
                                 HttpSession session) {
         Client newClient = new Client(clientName);
-        if (phone != null) newClient.setPhone(phone);
-        if (telegram != null) newClient.setTelegram(telegram);
+        if (phone != null) {
+            if (!phone.matches("\\+38 \\(0[0-9]{2}\\) [0-9]{3}-[0-9]{2}-[0-9]{2}")) {
+                session.setAttribute("error", "Номер телефона должен соответсвовать паттерну: +38 (011) 111-11-11");
+                return "error";
+            }
+            newClient.setPhone(phone);
+        }
+        if (telegram != null) {
+            if (!telegram.matches("@[a-z._0-9]+")) {
+                session.setAttribute("error", "Телеграм тег должен начинаться с @ содержать латинские буквы нижнего регистра, цифры, \".\" или \"_\"");
+                return "error";
+            }
+            newClient.setTelegram(telegram);
+        }
         try {
             accountManager.addClient(newClient);
         } catch (Exception e) {
@@ -201,6 +240,13 @@ public class AppController {
             return "error";
         }
 
+        return "redirect:/client";
+    }
+
+    @PostMapping(path = "delete_client")
+    public String deleteClient(@RequestParam(name = "id") int clientId) {
+        Client client = clientManager.getClient(clientId);
+        clientManager.deleteClient(client);
         return "redirect:/client";
     }
 
@@ -212,6 +258,10 @@ public class AppController {
     public String saveNewCurrency(@RequestParam(name = "currency_name") String currencyName,
                                 @RequestParam(name = "currency_id") int currencyId,
                                 HttpSession session) {
+        if (!currencyName.matches("[A-Z]{3}")) {
+            session.setAttribute("error", "В названии должны быть три заглавные латинские буквы");
+            return "error";
+        }
         Currency newCurrency = new Currency();
         newCurrency.setName(currencyName);
         newCurrency.setId(currencyId);

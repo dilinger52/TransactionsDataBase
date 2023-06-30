@@ -9,7 +9,7 @@
 <body>
 <div class="header">
     <div>
-<h2 class="inline">Главная</h2>
+<h2>Главная</h2>
 
 <form method="get" action="client" class="inline">
     <input type="submit" value="<- Назад">
@@ -52,6 +52,7 @@
 </div>
 </div>
     <table class="under-header">
+        <thead>
         <tr>
             <th>ФИО</th>
             <th>Номер телефона</th>
@@ -59,6 +60,8 @@
             <th th:each="currency : ${session.currencies}" th:text="${currency.name}"></th>
             <th>Детали</th>
         </tr>
+        </thead>
+        <tbody>
         <tr th:each="client : ${session.clients}">
             <th th:text="${client.client.pib}"></th>
             <th th:text="${client.client.phone}"></th>
@@ -66,15 +69,17 @@
             <th:block th:each="currency : ${client.currencies}">
                 <th th:text="${#numbers.formatDecimal(currency.value, 1, 'POINT', 2, 'COMMA')}"></th>
             </th:block>
-            <th th:if="${client.client.pib != 'Total'}">
-                <form metod="get" action="client_info">
+            <th th:if="${client.client.pib != 'Всего'}">
+                <form method="get" action="client_info">
                     <input type="hidden" name="client_id" th:value="${client.client.id}">
                     <input type="hidden" name="currency_id" value="980">
                     <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
                     <input type="submit" value="посмотреть">
                 </form>
             </th>
+            <th th:if="${client.client.pib == 'Всего'}"></th>
         </tr>
+        </tbody>
     </table>
 
 

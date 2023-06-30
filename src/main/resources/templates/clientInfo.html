@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Страница клиента</title>
     <link href="main.css" rel="stylesheet">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="main.js"></script>
 </head>
 <body>
@@ -17,19 +18,25 @@
 <form method="get" action="add_transaction" class="inline">
     <input type="submit" value="Новая транзакция">
 </form>
+    <form method="post" action="delete_client" class="inline">
+        <input type="hidden" name="id" th:value="${session.client.id}">
+        <input type="submit" value="Удалить пользователя">
+    </form>
+    <!--<button onclick="confirmDel(1)" class="inline">Удалить пользователя</button>-->
 
 <div>
 <form method="get" action="client_info" class="inline">
     <input type="date" name="date" th:value="${session.date}" class="inline">
     <th:block th:each="currency : ${session.currencies}">
-    <input type="radio" id="currency_id" name="currency_id" th:value="${currency.id}" th:checked="${session.currency_id == currency.id}" class="inline">
-    <label for="currency_id" class="inline" th:text="${currency.name}"></label>
+    <input type="radio" th:id="|currency_id${currency.id}|" name="currency_id" th:value="${currency.id}" th:checked="${session.currency_id == currency.id}" class="inline">
+    <label th:for="|currency_id${currency.id}|" class="inline" th:text="${currency.name}"></label>
     </th:block>
     <input type="submit" value="Найти" class="inline">
 </form>
 </div>
 </div>
 <table class="under-header">
+    <thead>
     <tr>
         <th>Редактировать</th>
         <th>Остальные участники</th>
@@ -41,6 +48,8 @@
         <th>Количество</th>
         <th>Инкасация в гривнах</th>
     </tr>
+    </thead>
+    <tbody>
     <tr th:each="transaction : ${session.transactions}">
         <th>
             <form method="get" action="edit">
@@ -57,6 +66,7 @@
         <th th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')}"></th>
         <th th:text="${#numbers.formatDecimal(transaction.transportation, 1, 'POINT', 2, 'COMMA')}"></th>
     </tr>
+    </tbody>
 </table>
 </body>
 </html>

@@ -20,7 +20,7 @@
   <div style="min-width: 1550px;" id="divIn">
     <div class="inline">
     <label for="client_name">Клиент</label>
-    <input type="text" list="client_datalist" id="client_name" name="client_name" required>
+    <input type="text" list="client_datalist" id="client_name" name="client_name" th:value="${session.client != null ? session.client.pib : ''}" required>
     <datalist id="client_datalist">
       <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
     </datalist>
@@ -41,7 +41,7 @@
     <input type="number" id="commission" name="commission" value="0" required>
     </div>
     <div class="inline">
-    <label for="transportation">Инкасация в гринах</label>
+    <label for="transportation">Инкасация в гривнах</label>
     <input type="number" id="transportation" name="transportation" value="0" required>
     </div>
     <div class="inline">
@@ -50,7 +50,7 @@
     </div>
   </div>
   </div>
-  <input type="submit">
+  <input type="submit" value="Сохранить">
   <p>Общая сумма: <span id="out"></span></p>
 </form>
 

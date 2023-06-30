@@ -27,25 +27,24 @@ public class TransManager {
     @Autowired
     private final ClientManager clientManager;
     @Autowired
-    private final AccountManager accountManager;
-    @Autowired
     private final CurrencyManager currencyManager;
     @Autowired
     private final CurrencyRepository currencyRepository;
 
-    public TransManager(TransactionRepository transactionRepository, AccountRepository accountRepository, ClientManager clientManager, AccountManager accountManager, CurrencyManager currencyManager, CurrencyRepository currencyRepository) {
+    public TransManager(TransactionRepository transactionRepository, AccountRepository accountRepository, ClientManager clientManager, CurrencyManager currencyManager, CurrencyRepository currencyRepository) {
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.clientManager = clientManager;
-        this.accountManager = accountManager;
         this.currencyManager = currencyManager;
         this.currencyRepository = currencyRepository;
     }
 
     @Transactional
     public double remittance(int transactionId, Timestamp date,
-                                  String clientName, int currencyId, double rate, double commission, double amount, double transportation) {
-
+                                  String clientName, int currencyId, double rate, double commission, double amount, double transportation) throws RuntimeException {
+        if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
+        if (commission < 0 || commission > 100) throw new RuntimeException("Неверная величина комиссии. Введите значение от 0 до 100 включительно");
+        if (transportation < 0) throw new RuntimeException("Неверная стоимость инкасации. Введите положительное значение");
         Client client = clientManager.getClient(clientName);
         if (date == null) date = new Timestamp(System.currentTimeMillis());
         double balance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
@@ -56,6 +55,8 @@ public class TransManager {
     }
 
     private double updateCurrencyAmount(int clientId, int currencyId, double rate, double commission, double amount, double transportation) {
+        Optional<CurrencyDto> currencyOpt = currencyRepository.findById(currencyId);
+        if (currencyOpt.isEmpty()) throw new RuntimeException("Валюта не найдена");
         AccountDto accountDto = accountRepository.findByClientIdAndCurrencyId(clientId, currencyId);
         if (accountDto == null) {
             accountRepository.save(new AccountDto(clientId, currencyId, 0));
@@ -75,6 +76,9 @@ public class TransManager {
     @Transactional
     public void update(int transactionId, String clientName, int currencyId, double rate, double commission, double amount, double transportation) {
         Client client = clientManager.getClient(clientName);
+        if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
+        if (commission < 0 || commission > 100) throw new RuntimeException("Неверная величина комиссии. Введите значение от 0 до 100 включительно");
+        if (transportation < 0) throw new RuntimeException("Неверная стоимость инкасации. Введите положительное значение");
 
         TransactionDto oldTransactionDto = transactionRepository.findByIdAndClientId(transactionId, client.getId());
         double oldTransactionBalance = oldTransactionDto.getBalance();
@@ -107,16 +111,28 @@ public class TransManager {
         }
     }
 
+    @Transactional
+    public void deleteTransaction(List<Transaction> transaction) {
+        List<TransactionDto> transactionDtoList = new ArrayList<>();
+        for (Transaction t : transaction) {
+            double oldBalance = accountRepository.findByClientIdAndCurrencyId(t.getClient().getId(), t.getCurrency().getId()).getAmount();
+            double newBalance = undoTransaction(t.getId(), t.getClient().getPib());
+            TransactionDto transactionDto = formatToDto(t.getId(), t.getDate(), t.getCurrency().getId(), t.getRate(), t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getBalance());
+            updateNext(t.getClient().getPib(), t.getCurrency().getId(), newBalance - oldBalance, transactionDto);
+            transactionDtoList.add(transactionDto);
+        }
+        transactionRepository.deleteAll(transactionDtoList);
+    }
+
     public Account addTotal(List<Account> clients) {
         Account total = new Account();
-        total.setClient(new Client("Total"));
+        total.setClient(new Client("Всего"));
         Map<Currency, Double> currencyDoubleMap = new TreeMap<>();
         List<Currency> currencies = currencyManager.getAllCurrencies();
         for (Currency currency :
                 currencies) {
             double sum = 0;
-            for (Account ac :
-                    clients)  {
+            for (Account ac : clients)  {
                 sum += ac.getCurrencies().entrySet().stream().filter(c -> Objects.equals(c.getKey().getId(), currency.getId())).findFirst().orElse(new Map.Entry<Currency, Double>() {
                     @Override
                     public Currency getKey() {
@@ -172,18 +188,6 @@ public class TransManager {
         return transaction;
     }
 
-    public List<Transaction> findByClient(int clientId, int currencyId, Timestamp date) {
-        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdAndDateBetween(clientId, currencyId, date, new Timestamp(System.currentTimeMillis()));
-        List<Transaction> transactions = new ArrayList<>();
-        for (TransactionDto transactionDto :
-                transactionDtoList) {
-            transactions.add(formatFromDto(transactionDto));
-        }
-        return transactions;
-    }
-
-
-
     public List<Transaction> getAllTransactions() {
         List<TransactionDto> transactionDtoList = (List<TransactionDto>) transactionRepository.findAll();
         List<Transaction> transactions = new ArrayList<>();
@@ -213,4 +217,5 @@ public class TransManager {
         }
         return transactions;
     }
+
 }

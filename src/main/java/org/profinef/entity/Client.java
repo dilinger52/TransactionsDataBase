@@ -1,10 +1,9 @@
 package org.profinef.entity;
 
-import jakarta.persistence.*;
 
 import java.io.Serializable;
 
-public class Client {
+public class Client implements Serializable{
 
     Integer id;
     String pib;

@@ -43,7 +43,6 @@ $.ajax({
     timeout : 100000,
     success : function(id) {
         console.log("SUCCESS: ", id);
-        display(response);
          alert(response);
     },
     error : function(e) {
@@ -55,4 +54,36 @@ $.ajax({
     }
 });
 }
+}
+
+function changeColor(id) {
+console.log(id);
+    var color = document.querySelector('input[name="color"]:checked').value;
+
+    id.style.color = color;
+}
+
+function saveColors() {
+    var elements = document.getElementsByTagName("th");
+    const colors = new Map();
+    for (var i = 0; i < elements.length; i++) {
+        colors.set(elements[i].id, elements[i].style.color);
+    }
+    $.ajax({
+        type : "POST",
+        url : "/save_colors",
+        data : {color:colors},
+        timeout : 100000,
+        success : function() {
+            console.log("SUCCESS: ", colors);
+        },
+        error : function(e) {
+            console.log("ERROR: ", e);
+            display(e);
+        },
+        done : function(e) {
+            console.log("DONE");
+        }
+    });
+
 }

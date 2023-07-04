@@ -12,10 +12,14 @@ import org.profinef.service.TransManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.HtmlUtils;
 
+import javax.swing.text.html.CSS;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
@@ -45,36 +49,49 @@ public class AppController {
 
     @GetMapping("/client_info")
     public String viewClientTransactions(@RequestParam(name = "client_id", required = false, defaultValue = "0") int clientId,
-                                         @RequestParam(name = "currency_id", required = false, defaultValue = "980") int currencyId,
+                                         @RequestParam(name = "currency_id", required = false) List<Integer> currencyId,
                                          @RequestParam(name = "date", required = false) Date date,
                                          HttpSession session) {
         if (clientId == 0) {
+            if (session.getAttribute("client") == null) {
+                return "redirect:/client";
+            }
             clientId = ((Client)session.getAttribute("client")).getId();
         }
-        if (date == null) date = new Date(System.currentTimeMillis());
+        if (currencyId == null) {
+            currencyId = new ArrayList<>();
+            List<Currency> currencies = currencyManager.getAllCurrencies();
+            for (Currency currency : currencies) {
+                currencyId.add(currency.getId());
+            }
+        }
+        if (date == null) date = Date.valueOf(LocalDate.now());
         Client client = clientManager.getClient(clientId);
         List<Transaction> transactions = transManager.findByClientForDate(clientId, currencyId, new Timestamp(date.getTime()));
         Map<String, Double> total = new HashMap<>();
-        double sum = 0;
-        for (Transaction transaction : transactions) {
-            sum += transaction.getAmount();
-            List<Transaction> tl = transManager.getTransaction(transaction.getId());
-            StringBuilder clients = new StringBuilder();
-            for (Transaction t : tl) {
-                if (!t.getClient().getId().equals(transaction.getClient().getId())) {
-                    clients.append(" ");
-                    clients.append(t.getClient().getPib());
-                }
-            }
-           transaction.setClient(new Client(clients.toString()));
-        }
-        if (transactions.isEmpty()) {
-            total.put("balance", (double) 0);
-        } else {
-            total.put("balance", transactions.get(transactions.size() - 1).getBalance());
-        }
-        total.put("amount", sum);
         List<Currency> currencies = currencyManager.getAllCurrencies();
+        for (Currency currency : currencies) {
+            List <Transaction> transactionList = transactions.stream().filter(transaction -> transaction.getCurrency().getId().equals(currency.getId())).collect(Collectors.toList());
+            if (transactionList.isEmpty()) {
+                total.put("balance" + currency.getId(), (double) 0);
+            } else {
+                total.put("balance" + currency.getId(), transactionList.get(transactionList.size() - 1).getBalance());
+            }
+            double sum = 0;
+            for (Transaction transaction : transactionList) {
+                sum += transaction.getAmount();
+                List<Transaction> tl = transManager.getTransaction(transaction.getId());
+                StringBuilder clients = new StringBuilder();
+                for (Transaction t : tl) {
+                    if (!t.getClient().getId().equals(transaction.getClient().getId())) {
+                        clients.append(" ");
+                        clients.append(t.getClient().getPib());
+                    }
+                }
+                transaction.setClient(new Client(clients.toString()));
+            }
+            total.put("amount" + currency.getId(), sum);
+        }
         session.setAttribute("currencies", currencies);
         session.setAttribute("total", total);
         session.setAttribute("date", date);
@@ -134,7 +151,6 @@ public class AppController {
         session.setAttribute("currencies", currencies);
         session.setAttribute("transactions", transactions);
         session.setAttribute("clients", clients);
-        System.out.println(clients);
         return "example";
     }
 
@@ -185,7 +201,6 @@ public class AppController {
                                      @RequestParam(name = "transportation") List<Double> transportation,
                                      HttpSession session) {
 
-        System.out.println(amount);
         try{
             int transactionId = transManager.getAllTransactions()
                     .stream()
@@ -202,11 +217,10 @@ public class AppController {
                     return "error";
                 }
             }
-            session.setAttribute("client_id", 0);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "redirect:/client";
+        return "redirect:/client_info";
     }
 
     @GetMapping(path = "/new_client")
@@ -275,4 +289,9 @@ public class AppController {
         return "redirect:/client";
     }
 
+    @PostMapping(path = "/save_colors")
+    public String saveColors(Map<String, String> color) {
+        System.out.println("success: " + color);
+        return "redirect:/client_info";
+    }
 }

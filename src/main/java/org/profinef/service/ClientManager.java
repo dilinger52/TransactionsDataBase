@@ -3,13 +3,10 @@ package org.profinef.service;
 import org.profinef.dto.ClientDto;
 import org.profinef.entity.Client;
 import org.profinef.repository.ClientRepository;
-import org.profinef.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,14 +29,14 @@ public class ClientManager {
 
     public Client getClient(Integer id) {
         if (id == null) return null;
-        Optional<ClientDto> clientOpt = clientRepository.findById(id);
+        Optional<ClientDto> clientOpt = clientRepository.findByIdOrderByPib(id);
         if (clientOpt.isEmpty()) throw new RuntimeException("Клиент не найден");
         ClientDto clientDto = clientOpt.get();
         return formatFromDbo(clientDto);
     }
     public Client getClient(String name) {
         if (name == null) return null;
-        ClientDto clientDto = clientRepository.findByPibIgnoreCase(name);
+        ClientDto clientDto = clientRepository.findByPibIgnoreCaseOrderByPib(name);
         return formatFromDbo(clientDto);
     }
 
@@ -58,14 +55,14 @@ public class ClientManager {
 
     public Client getClientByPhone(String phone) {
         if (phone == null) return null;
-        ClientDto clientDto = clientRepository.findByPhone(phone);
+        ClientDto clientDto = clientRepository.findByPhoneOrderByPib(phone);
         if (clientDto == null) throw new RuntimeException("Клиент не найден");
         return formatFromDbo(clientDto);
     }
 
     public Client getClientByTelegram(String telegram) {
         if (telegram == null) return null;
-        ClientDto clientDto = clientRepository.findByTelegram(telegram);
+        ClientDto clientDto = clientRepository.findByTelegramOrderByPib(telegram);
         if (clientDto == null) throw new RuntimeException("Клиент не найден");
         return formatFromDbo(clientDto);
     }

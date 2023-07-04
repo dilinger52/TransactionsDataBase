@@ -51,8 +51,8 @@
 </form>
 </div>
 </div>
-    <table class="under-header">
-        <thead>
+    <table class="under-header-main">
+        <thead class="main">
         <tr>
             <th>ФИО</th>
             <th>Номер телефона</th>
@@ -72,7 +72,6 @@
             <th th:if="${client.client.pib != 'Всего'}">
                 <form method="get" action="client_info">
                     <input type="hidden" name="client_id" th:value="${client.client.id}">
-                    <input type="hidden" name="currency_id" value="980">
                     <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
                     <input type="submit" value="посмотреть">
                 </form>

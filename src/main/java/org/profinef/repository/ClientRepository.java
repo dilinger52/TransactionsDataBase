@@ -10,15 +10,13 @@ public interface ClientRepository extends CrudRepository<ClientDto, Integer> {
     <S extends ClientDto> S save(S entity);
     @Override
     void deleteById(Integer integer);
-    @Override
-    Optional<ClientDto> findById(Integer integer);
 
-    ClientDto findByPibIgnoreCase(String name);
+    Optional<ClientDto> findByIdOrderByPib(Integer integer);
 
-    @Override
-    Iterable<ClientDto> findAll();
+    ClientDto findByPibIgnoreCaseOrderByPib(String name);
 
-    ClientDto findByPhone(String phone);
 
-    ClientDto findByTelegram(String telegram);
+    ClientDto findByPhoneOrderByPib(String phone);
+
+    ClientDto findByTelegramOrderByPib(String telegram);
 }

@@ -65,7 +65,7 @@ public class AccountManager {
             }
             clientsCurrencies.add(formatFromDbo(currencyDtoList, currencyDto.getClientId()));
         }
-        return clientsCurrencies;
+        return clientsCurrencies.stream().sorted(Comparator.comparing(o -> o.getClient().getPib().toLowerCase())).collect(Collectors.toList());
     }
 
     public Account getAccountByPhone(String phone) {

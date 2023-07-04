@@ -22,15 +22,28 @@ position: fixed;
 background: white;
 width: 100%;
 top: -8px;
+z-index: 10000;
 }
 
 thead {
 position: sticky;
 background: white;
 width: 100%;
-top: 236px;
+top: 337px;
+}
+
+thead.main {
+top: 255px;
 }
 
 .under-header {
-margin-top: 213px;
+margin-top: 315px;
+}
+
+.under-header-main {
+margin-top: 232px;
+}
+
+checkbox {
+display: none;
 }

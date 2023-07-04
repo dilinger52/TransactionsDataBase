@@ -70,7 +70,7 @@ public class TransManager {
 
     private double undoTransaction(int transactionId, String clientName) {
         Client client = clientManager.getClient(clientName);
-        TransactionDto transactionDto = transactionRepository.findByIdAndClientId(transactionId, client.getId());
+        TransactionDto transactionDto = transactionRepository.findByIdAndClientIdOrderByDate(transactionId, client.getId());
         return updateCurrencyAmount(client.getId(), transactionDto.getCurrencyId(), transactionDto.getRate(), transactionDto.getCommission(), -transactionDto.getAmount(), transactionDto.getTransportation());
     }
     @Transactional
@@ -80,7 +80,7 @@ public class TransManager {
         if (commission < 0 || commission > 100) throw new RuntimeException("Неверная величина комиссии. Введите значение от 0 до 100 включительно");
         if (transportation < 0) throw new RuntimeException("Неверная стоимость инкасации. Введите положительное значение");
 
-        TransactionDto oldTransactionDto = transactionRepository.findByIdAndClientId(transactionId, client.getId());
+        TransactionDto oldTransactionDto = transactionRepository.findByIdAndClientIdOrderByDate(transactionId, client.getId());
         double oldTransactionBalance = oldTransactionDto.getBalance();
         System.out.println("oldTransactionBalance " + oldTransactionBalance);
         double oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
@@ -88,19 +88,19 @@ public class TransManager {
         System.out.println("oldBalance " + oldBalance);
         double newBalance = remittance(transactionId, oldTransactionDto.getDate(), clientName, currencyId, rate, commission, amount, transportation);
         System.out.println("newBalance " + newBalance);
-        TransactionDto newTransactionDto = transactionRepository.findByIdAndClientId(transactionId, client.getId());
+        TransactionDto newTransactionDto = transactionRepository.findByIdAndClientIdOrderByDate(transactionId, client.getId());
         double balanceDif = newBalance - oldBalance;
         if (balanceDif != 0) {
             System.out.println("balanceDif " + balanceDif);
             newTransactionDto.setBalance(oldTransactionBalance + balanceDif);
             transactionRepository.save(newTransactionDto);
-            updateNext(clientName, currencyId, balanceDif, newTransactionDto);
+            updateNext(clientName, new ArrayList<>(currencyId), balanceDif, newTransactionDto);
         }
     }
 
-    private void updateNext(String clientName, int currencyId, Double balanceDif, TransactionDto newTransactionDto) {
+    private void updateNext(String clientName, List<Integer> currencyId, Double balanceDif, TransactionDto newTransactionDto) {
         Client client = clientManager.getClient(clientName);
-        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdAndDateBetween(client.getId(), currencyId, newTransactionDto.getDate(), new Timestamp(System.currentTimeMillis()));
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdsAndDateBetweenOrderByDate(client.getId(), currencyId, newTransactionDto.getDate(), new Timestamp(System.currentTimeMillis()));
         System.out.println(transactionDtoList);
         for (TransactionDto transactionDto :
                 transactionDtoList) {
@@ -118,7 +118,8 @@ public class TransManager {
             double oldBalance = accountRepository.findByClientIdAndCurrencyId(t.getClient().getId(), t.getCurrency().getId()).getAmount();
             double newBalance = undoTransaction(t.getId(), t.getClient().getPib());
             TransactionDto transactionDto = formatToDto(t.getId(), t.getDate(), t.getCurrency().getId(), t.getRate(), t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getBalance());
-            updateNext(t.getClient().getPib(), t.getCurrency().getId(), newBalance - oldBalance, transactionDto);
+
+            //updateNext(t.getClient().getPib(), new ArrayList<>().add(t.getCurrency().getId()), newBalance - oldBalance, transactionDto);
             transactionDtoList.add(transactionDto);
         }
         transactionRepository.deleteAll(transactionDtoList);
@@ -189,7 +190,7 @@ public class TransManager {
     }
 
     public List<Transaction> getAllTransactions() {
-        List<TransactionDto> transactionDtoList = (List<TransactionDto>) transactionRepository.findAll();
+        List<TransactionDto> transactionDtoList = (List<TransactionDto>) transactionRepository.findAllByOrderByDateDesc();
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto : transactionDtoList) {
             transactions.add(formatFromDto(transactionDto));
@@ -198,7 +199,7 @@ public class TransManager {
     }
 
     public List<Transaction> getTransaction(int transactionId) {
-        List<TransactionDto> transactionDtoList = transactionRepository.findAllById(transactionId);
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllByIdOrderByDate(transactionId);
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto :
                 transactionDtoList) {
@@ -208,8 +209,8 @@ public class TransManager {
     }
 
 
-    public List<Transaction> findByClientForDate(int clientId, int currencyId, Timestamp date) {
-        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdAndDateBetween(clientId, currencyId, date, new Timestamp(date.getTime() + 86400000));
+    public List<Transaction> findByClientForDate(int clientId, List<Integer> currencyId, Timestamp date) {
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdsAndDateBetweenOrderByDate(clientId, currencyId, date, new Timestamp(date.getTime() + 86400000));
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto :
                 transactionDtoList) {

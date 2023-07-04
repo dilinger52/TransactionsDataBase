@@ -1,6 +1,7 @@
 package org.profinef.repository;
 
 import org.profinef.dto.TransactionDto;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import java.sql.Timestamp;
@@ -10,14 +11,16 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
     @Override
     <S extends TransactionDto> S save(S entity);
 
-    List<TransactionDto> findAllById(Integer integer);
+    List<TransactionDto> findAllByIdOrderByDate(Integer integer);
 
     @Override
     void deleteById(Integer integer);
 
-    List<TransactionDto> findAllByClientIdAndCurrencyIdAndDateBetween(int clientId, int currencyId, Timestamp dateStart, Timestamp dateEnd);
+    @Query(nativeQuery = true, value = "SELECT * FROM transaction WHERE client_id=?1 AND currency_id in ?2 AND date BETWEEN ?3 AND ?4")
+    List<TransactionDto> findAllByClientIdAndCurrencyIdsAndDateBetweenOrderByDate(int clientId, List<Integer> currencyIds, Timestamp dateStart, Timestamp dateEnd);
 
 
-    TransactionDto findByIdAndClientId(int id, int clientId);
+    TransactionDto findByIdAndClientIdOrderByDate(int id, int clientId);
 
+    List<TransactionDto> findAllByOrderByDateDesc();
 }

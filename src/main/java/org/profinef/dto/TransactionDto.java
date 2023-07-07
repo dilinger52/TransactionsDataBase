@@ -31,7 +31,12 @@ public class TransactionDto {
     Double balance;
     @Column
     Double transportation;
-
+    @Column(name = "pib_color")
+    String pibColor;
+    @Column(name = "amount_color")
+    String amountColor;
+    @Column(name = "balance_color")
+    String balanceColor;
 
     public TransactionDto() {
     }
@@ -108,6 +113,30 @@ public class TransactionDto {
         this.transportation = transportation;
     }
 
+    public String getPibColor() {
+        return pibColor;
+    }
+
+    public void setPibColor(String pibColor) {
+        this.pibColor = pibColor;
+    }
+
+    public String getAmountColor() {
+        return amountColor;
+    }
+
+    public void setAmountColor(String amountColor) {
+        this.amountColor = amountColor;
+    }
+
+    public String getBalanceColor() {
+        return balanceColor;
+    }
+
+    public void setBalanceColor(String balanceColor) {
+        this.balanceColor = balanceColor;
+    }
+
     @Override
     public String toString() {
         return "TransactionDto{" +
@@ -120,6 +149,9 @@ public class TransactionDto {
                 ", amount=" + amount +
                 ", balance=" + balance +
                 ", transportation=" + transportation +
+                ", pibColor='" + pibColor + '\'' +
+                ", amountColor='" + amountColor + '\'' +
+                ", balanceColor='" + balanceColor + '\'' +
                 '}';
     }
 }

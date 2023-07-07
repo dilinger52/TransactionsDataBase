@@ -40,8 +40,9 @@ public class TransManager {
     }
 
     @Transactional
-    public double remittance(int transactionId, Timestamp date,
-                                  String clientName, int currencyId, double rate, double commission, double amount, double transportation) throws RuntimeException {
+    public double remittance(int transactionId, Timestamp date, String clientName, int currencyId, double rate,
+                             double commission, double amount, double transportation, String pibColor, String amountColor,
+                             String balanceColor) throws RuntimeException {
         if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
         if (commission < 0 || commission > 100) throw new RuntimeException("Неверная величина комиссии. Введите значение от 0 до 100 включительно");
         if (transportation < 0) throw new RuntimeException("Неверная стоимость инкасации. Введите положительное значение");
@@ -49,7 +50,8 @@ public class TransManager {
         if (date == null) date = new Timestamp(System.currentTimeMillis());
         double balance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
         TransactionDto transactionDto = formatToDto(transactionId, date,
-                currencyId, rate, commission, amount, transportation, client, balance);
+                currencyId, rate, commission, amount, transportation, client, balance, pibColor, amountColor, balanceColor);
+        System.out.println(transactionDto);
         transactionRepository.save(transactionDto);
         return balance;
     }
@@ -75,6 +77,7 @@ public class TransManager {
     }
     @Transactional
     public void update(int transactionId, String clientName, int currencyId, double rate, double commission, double amount, double transportation) {
+
         Client client = clientManager.getClient(clientName);
         if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
         if (commission < 0 || commission > 100) throw new RuntimeException("Неверная величина комиссии. Введите значение от 0 до 100 включительно");
@@ -86,7 +89,9 @@ public class TransManager {
         double oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
         undoTransaction(transactionId, clientName);
         System.out.println("oldBalance " + oldBalance);
-        double newBalance = remittance(transactionId, oldTransactionDto.getDate(), clientName, currencyId, rate, commission, amount, transportation);
+        double newBalance = remittance(transactionId, oldTransactionDto.getDate(), clientName, currencyId, rate,
+                commission, amount, transportation, oldTransactionDto.getPibColor(), oldTransactionDto.getAmountColor(),
+                oldTransactionDto.getBalanceColor());
         System.out.println("newBalance " + newBalance);
         TransactionDto newTransactionDto = transactionRepository.findByIdAndClientIdOrderByDate(transactionId, client.getId());
         double balanceDif = newBalance - oldBalance;
@@ -117,7 +122,9 @@ public class TransManager {
         for (Transaction t : transaction) {
             double oldBalance = accountRepository.findByClientIdAndCurrencyId(t.getClient().getId(), t.getCurrency().getId()).getAmount();
             double newBalance = undoTransaction(t.getId(), t.getClient().getPib());
-            TransactionDto transactionDto = formatToDto(t.getId(), t.getDate(), t.getCurrency().getId(), t.getRate(), t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getBalance());
+            TransactionDto transactionDto = formatToDto(t.getId(), t.getDate(), t.getCurrency().getId(), t.getRate(),
+                    t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getBalance(), t.getPibColor(),
+            t.getAmountColor(), t.getBalanceColor());
 
             //updateNext(t.getClient().getPib(), new ArrayList<>().add(t.getCurrency().getId()), newBalance - oldBalance, transactionDto);
             transactionDtoList.add(transactionDto);
@@ -159,7 +166,7 @@ public class TransManager {
 
     private TransactionDto formatToDto(int transactionId, Timestamp date,
                                        int currencyId, double rate, double commission, double amount, double transportation,
-                                       Client client, double balance) {
+                                       Client client, double balance, String pibColor, String amountColor, String balanceColor) {
 
         TransactionDto transactionDto = new TransactionDto();
         if (transactionId != 0) transactionDto.setId(transactionId);
@@ -171,6 +178,9 @@ public class TransManager {
         transactionDto.setAmount(amount);
         transactionDto.setBalance(balance);
         transactionDto.setTransportation(transportation);
+        transactionDto.setPibColor(pibColor);
+        transactionDto.setAmountColor(amountColor);
+        transactionDto.setBalanceColor(balanceColor);
         return transactionDto;
     }
 
@@ -186,11 +196,14 @@ public class TransManager {
         transaction.setCommission(transactionDto.getCommission());
         transaction.setAmount(transactionDto.getAmount());
         transaction.setTransportation(transactionDto.getTransportation());
+        transaction.setPibColor(transactionDto.getPibColor());
+        transaction.setAmountColor(transactionDto.getAmountColor());
+        transaction.setBalanceColor(transactionDto.getBalanceColor());
         return transaction;
     }
 
     public List<Transaction> getAllTransactions() {
-        List<TransactionDto> transactionDtoList = (List<TransactionDto>) transactionRepository.findAllByOrderByDateDesc();
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllByOrderByDateDesc();
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto : transactionDtoList) {
             transactions.add(formatFromDto(transactionDto));
@@ -219,4 +232,34 @@ public class TransManager {
         return transactions;
     }
 
+    public Transaction getTransactionByClientAndByIdAndByCurrencyId(int id, int clientId, int currencyId) {
+        return formatFromDto(transactionRepository.findByIdAndClientIdAndCurrencyIdOrderByDate(id, clientId, currencyId));
+    }
+
+    public void save(Transaction transaction) {
+        transactionRepository.save(formatToDto(transaction.getId(), transaction.getDate(), transaction.getCurrency().getId(),
+                transaction.getRate(), transaction.getCommission(), transaction.getAmount(), transaction.getTransportation(),
+                transaction.getClient(), transaction.getBalance(), transaction.getPibColor(), transaction.getAmountColor(),
+                transaction.getBalanceColor()));
+    }
+
+    public List<Transaction> findByClient(Client client) {
+        List<Transaction> transactions = new ArrayList<>();
+        List<TransactionDto> transactionDtoList = transactionRepository.findByClientIdOrderByDate(client.getId());
+        for (TransactionDto transactionDto :
+                transactionDtoList) {
+            transactions.add(formatFromDto(transactionDto));
+        }
+        return transactions;
+    }
+
+    public List<Transaction> findByClientAndCurrency(Client client, Currency currency) {
+        List<Transaction> transactions = new ArrayList<>();
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdOrderByDate(client.getId(), currency.getId());
+        for (TransactionDto transactionDto :
+                transactionDtoList) {
+            transactions.add(formatFromDto(transactionDto));
+        }
+        return transactions;
+    }
 }

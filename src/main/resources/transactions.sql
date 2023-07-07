@@ -49,8 +49,8 @@ DROP TABLE IF EXISTS `transactions`.`account` ;
 
 CREATE TABLE IF NOT EXISTS `transactions`.`account` (
   `client_id` INT NOT NULL,
-  `amount` DOUBLE NULL,
   `currency_id` INT NOT NULL,
+  `amount` DOUBLE NULL,
   PRIMARY KEY (`client_id`, `currency_id`),
   INDEX `fk_client_has_currency_client1_idx` (`client_id` ASC) VISIBLE,
   INDEX `fk_account_currency1_idx` (`currency_id` ASC) VISIBLE,
@@ -82,6 +82,9 @@ CREATE TABLE IF NOT EXISTS `transactions`.`transaction` (
   `commission` DOUBLE NULL,
   `amount` DOUBLE NOT NULL COMMENT 'HRN',
   `transportation` DOUBLE NULL,
+  `pib_color` VARCHAR(45) NULL,
+  `amount_color` VARCHAR(45) NULL,
+  `balance_color` VARCHAR(45) NULL,
   PRIMARY KEY (`id`, `client_id`, `currency_id`),
   INDEX `fk_client_has_currency_has_client_has_currency_client_has_c_idx1` (`client_id` ASC, `currency_id` ASC) VISIBLE,
   CONSTRAINT `fk_client_has_currency_has_client_has_currency_client_has_cur1`
@@ -129,14 +132,14 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `transactions`;
-INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (1, 100.01, 980);
-INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (1, 120.45, 840);
-INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (2, 500, 980);
-INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (3, 70.68, 980);
-INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (3, 17.52, 840);
-INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (4, 732, 840);
-INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (5, 1000, 980);
-INSERT INTO `transactions`.`account` (`client_id`, `amount`, `currency_id`) VALUES (6, 5000, 980);
+INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (1, 980, 100.01);
+INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (1, 840, 120.45);
+INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (2, 980, 500);
+INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (3, 980, 70.68);
+INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (3, 840, 17.52);
+INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (4, 840, 732);
+INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (5, 980, 1000);
+INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (6, 980, 5000);
 
 COMMIT;
 

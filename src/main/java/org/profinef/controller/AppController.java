@@ -1,6 +1,10 @@
 package org.profinef.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
@@ -10,11 +14,10 @@ import org.profinef.service.AccountManager;
 import org.profinef.service.CurrencyManager;
 import org.profinef.service.TransManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.HtmlUtils;
 
-import javax.swing.text.html.CSS;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -45,6 +48,11 @@ public class AppController {
     @GetMapping("/")
     public String viewHomePage() {
         return "redirect:/client";
+    }
+
+    @GetMapping("/excel")
+    public String loadPage() {
+        return "uploadFiles";
     }
 
     @GetMapping("/client_info")
@@ -100,6 +108,8 @@ public class AppController {
         session.setAttribute("currency_id", currencyId);
         return "clientInfo";
     }
+
+
 
     @GetMapping("/add_transaction")
     public String addTransaction(HttpSession session) {
@@ -211,7 +221,7 @@ public class AppController {
             for (int i = 0; i < clientName.size(); i++) {
                 try {
                     transManager.remittance(transactionId, null, clientName.get(i), currencyId.get(i), rate.get(i),
-                            commission.get(i), amount.get(i), transportation.get(i));
+                            commission.get(i), amount.get(i), transportation.get(i), null, null, null);
                 } catch (Exception e) {
                     session.setAttribute("error", e.getMessage());
                     return "error";
@@ -288,10 +298,25 @@ public class AppController {
 
         return "redirect:/client";
     }
-
-    @PostMapping(path = "/save_colors")
-    public String saveColors(Map<String, String> color) {
-        System.out.println("success: " + color);
+    @Transactional
+    @PostMapping(path = "/save_colors", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public String saveColors(@RequestBody String colors) throws JsonProcessingException {
+        System.out.println("success: " + colors);
+        List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {});
+        System.out.println(entryList);
+        for (List<String> list : entryList) {
+            String[] arrList = list.get(0).split("_");
+            Transaction transaction = transManager.getTransactionByClientAndByIdAndByCurrencyId(Integer.parseInt(arrList[1]), Integer.parseInt(arrList[2]), Integer.parseInt(arrList[3]));
+            switch (arrList[0]) {
+                case "pib" -> transaction.setPibColor(list.get(1));
+                case "amount" -> transaction.setAmountColor(list.get(1));
+                case "balance" -> transaction.setBalanceColor(list.get(1));
+            }
+            System.out.println(transaction);
+            transManager.save(transaction);
+        }
         return "redirect:/client_info";
     }
+
+
 }

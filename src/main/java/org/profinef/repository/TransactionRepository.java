@@ -23,4 +23,10 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
     TransactionDto findByIdAndClientIdOrderByDate(int id, int clientId);
 
     List<TransactionDto> findAllByOrderByDateDesc();
+
+    TransactionDto findByIdAndClientIdAndCurrencyIdOrderByDate(int id, int clientId, int currencyId);
+
+    List<TransactionDto> findByClientIdOrderByDate(int id);
+
+    List<TransactionDto> findAllByClientIdAndCurrencyIdOrderByDate(Integer id, Integer id1);
 }

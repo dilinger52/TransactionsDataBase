@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  <link href="main.css" rel="stylesheet">
+    <title>Загрузка эксель таблицы</title>
+</head>
+<body>
+  <h3>
+    Страница загрузки эксель таблицы
+  </h3>
+  <p>Данная страница позволяет загрузить данные из эксель таблицы. Обратите внимание, что перед добавлением добавлением
+  данных из таблицы ранее имеющиеся <span style="font-color: red;">данные в базе уничтожаются</span> для предотвращения их задвоения.</p>
+<form method="post" action="upload/full" enctype="multipart/form-data">
+  <input type="file" name="file">
+  <input type="submit" value="Подтвердить">
+</form>
+</body>
+</html>

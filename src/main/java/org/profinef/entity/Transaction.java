@@ -15,6 +15,9 @@ public class Transaction implements Serializable {
     Double amount;
     Double balance;
     Double transportation;
+    String pibColor;
+    String amountColor;
+    String balanceColor;
 
 
     public Transaction() {
@@ -92,6 +95,30 @@ public class Transaction implements Serializable {
         this.transportation = transportation;
     }
 
+    public String getPibColor() {
+        return pibColor;
+    }
+
+    public void setPibColor(String pibColor) {
+        this.pibColor = pibColor;
+    }
+
+    public String getAmountColor() {
+        return amountColor;
+    }
+
+    public void setAmountColor(String amountColor) {
+        this.amountColor = amountColor;
+    }
+
+    public String getBalanceColor() {
+        return balanceColor;
+    }
+
+    public void setBalanceColor(String balanceColor) {
+        this.balanceColor = balanceColor;
+    }
+
     @Override
     public String toString() {
         return "Transaction{" +
@@ -104,6 +131,9 @@ public class Transaction implements Serializable {
                 ", amount=" + amount +
                 ", balance=" + balance +
                 ", transportation=" + transportation +
+                ", pibColor='" + pibColor + '\'' +
+                ", amountColor='" + amountColor + '\'' +
+                ", balanceColor='" + balanceColor + '\'' +
                 '}';
     }
 }

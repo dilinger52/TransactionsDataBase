@@ -19,6 +19,9 @@
 <form method="get" action="client" class="inline">
     <input type="submit" value="<- Назад">
 </form>
+        <form method="post" action="download/client_info" class="inline">
+            <input type="submit" value="Скачать таблицу">
+        </form>
 <!--<form method="get" action="add_transaction" class="inline">
     <input type="submit" value="Новая транзакция">
 </form>-->
@@ -38,22 +41,7 @@
     <input type="submit" value="Найти" class="inline">
 </form>
     <form id="color" class="inline">
-    <label for="white" class="inline">Б</label>
-    <input type="radio" name="color" id="white" value="#FFFFFF" class="inline">
-    <label for="red" class="inline">К</label>
-    <input type="radio" name="color" id="red" value="#FF0000" class="inline">
-    <label for="yellow" class="inline">Ж</label>
-    <input type="radio" name="color" id="yellow" value="#FFFF00" class="inline">
-    <label for="blue" class="inline">Г</label>
-    <input type="radio" name="color" id="blue" value="#0000FF" class="inline">
-    <label for="orange" class="inline">О</label>
-    <input type="radio" name="color" id="orange" value="#FFA500" class="inline">
-    <label for="green" class="inline">З</label>
-    <input type="radio" name="color" id="green" value="#008000" class="inline">
-    <label for="violet" class="inline">Ф</label>
-    <input type="radio" name="color" id="violet" value="#EE82EE" class="inline">
-        <label for="black" class="inline">Ч</label>
-        <input type="radio" name="color" id="black" value="#000000" class="inline">
+        <input type="color">
     </form>
     <button onclick="saveColors()" class="inline">Сохранить расцветку</button>
 </div>
@@ -80,14 +68,14 @@
                 <input type="submit" value="ред.">
             </form>
         </th>
-        <th th:text="${transaction.client.pib}" th:onclick="|changeColor(pib${transaction.id})|" th:id="|pib${transaction.id}|"></th>
-        <th th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}" th:onclick="|changeColor(date${transaction.id})|" th:id="|date${transaction.id}|"></th>
-        <th th:text="${transaction.currency.name}" th:onclick="|changeColor(currency${transaction.id})|" th:id="|currency${transaction.id}|"></th>
-        <th th:text="${#numbers.formatDecimal(transaction.balance, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(balance${transaction.id})|" th:id="|balance${transaction.id}|"></th>
-        <th th:text="${#numbers.formatDecimal(transaction.rate, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(rate${transaction.id})|" th:id="|rate${transaction.id}|"></th>
-        <th th:text="${#numbers.formatDecimal(transaction.commission, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(commission${transaction.id})|" th:id="|commission${transaction.id}|"></th>
-        <th th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(amount${transaction.id})|" th:id="|amount${transaction.id}|"></th>
-        <th th:text="${#numbers.formatDecimal(transaction.transportation, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(transportation${transaction.id})|" th:id="|transportation${transaction.id}|"></th>
+        <th th:style="|color: ${transaction.pibColor}|" th:text="${transaction.client.pib}" th:onclick="|changeColor(pib_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|pib_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}" th:onclick="|changeColor(date_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|date_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:text="${transaction.currency.name}" th:onclick="|changeColor(currency_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|currency_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:style="|color: ${transaction.balanceColor}|" th:text="${#numbers.formatDecimal(transaction.balance, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(balance_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|balance_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.rate, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(rate_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|rate_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.commission, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(commission_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|commission_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:style="|color: ${transaction.amountColor}|" th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(amount_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|amount_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.transportation, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(transportation_${transaction.id}_${session.client.id})|" th:id="|transportation_${transaction.id}_${session.client.id}|"></th>
     </tr>
     </tbody>
 </table>

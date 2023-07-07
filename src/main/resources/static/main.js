@@ -41,9 +41,9 @@ $.ajax({
     url : "/delete_client",
     data : {id:tempId},
     timeout : 100000,
-    success : function(id) {
-        console.log("SUCCESS: ", id);
-         alert(response);
+    success : function(response) {
+        console.log("SUCCESS: ", response);
+        alert(response);
     },
     error : function(e) {
         console.log("ERROR: ", e);
@@ -58,8 +58,7 @@ $.ajax({
 
 function changeColor(id) {
 console.log(id);
-    var color = document.querySelector('input[name="color"]:checked').value;
-
+    var color = document.querySelector('input[type="color"]').value;
     id.style.color = color;
 }
 
@@ -67,23 +66,36 @@ function saveColors() {
     var elements = document.getElementsByTagName("th");
     const colors = new Map();
     for (var i = 0; i < elements.length; i++) {
-        colors.set(elements[i].id, elements[i].style.color);
+        if (elements[i].style.color.length > 0) {
+            colors.set(elements[i].id, elements[i].style.color);
+        }
     }
+    console.log(colors);
+    const colorsTemp = JSON.stringify(colors, mapAwareReplacer);
+    console.log(colorsTemp);
     $.ajax({
         type : "POST",
         url : "/save_colors",
-        data : {color:colors},
+        contentType : "application/json",
+        data : colorsTemp,
         timeout : 100000,
-        success : function() {
-            console.log("SUCCESS: ", colors);
+        success : function(colorsTemp) {
+            console.log("SUCCESS: ", colorsTemp);
+            alert("Сохранено");
         },
         error : function(e) {
             console.log("ERROR: ", e);
-            display(e);
         },
         done : function(e) {
             console.log("DONE");
         }
     });
 
+}
+
+function mapAwareReplacer(key, value) {
+    if (value instanceof Map && typeof value.toJSON !== "function") {
+        return [...value.entries()]
+    }
+    return value
 }

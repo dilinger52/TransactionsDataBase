@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,6 +30,7 @@ public class ClientManager {
     }
 
     public Client getClient(Integer id) {
+        System.out.println("clientId=" + id);
         if (id == null) return null;
         Optional<ClientDto> clientOpt = clientRepository.findByIdOrderByPib(id);
         if (clientOpt.isEmpty()) throw new RuntimeException("Клиент не найден");
@@ -65,5 +68,18 @@ public class ClientManager {
         ClientDto clientDto = clientRepository.findByTelegramOrderByPib(telegram);
         if (clientDto == null) throw new RuntimeException("Клиент не найден");
         return formatFromDbo(clientDto);
+    }
+
+    public void deleteAll() {
+        clientRepository.deleteAll();
+    }
+
+    public List<Client> findAll() {
+        List<Client> clients = new ArrayList<>();
+        Iterable<ClientDto> clientIterable = clientRepository.findAll();
+        for (ClientDto clientDto : clientIterable) {
+            clients.add(formatFromDbo(clientDto));
+        }
+        return clients;
     }
 }

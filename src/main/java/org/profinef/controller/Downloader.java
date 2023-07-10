@@ -6,11 +6,11 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.STBorderStyle;
 import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
 import org.profinef.entity.Transaction;
+import org.profinef.service.AccountManager;
 import org.profinef.service.ClientManager;
 import org.profinef.service.CurrencyManager;
 import org.profinef.service.TransManager;
@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.*;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(path = "/download")
@@ -36,12 +38,15 @@ public class Downloader {
     private final CurrencyManager currencyManager;
     @Autowired
     private final TransManager transManager;
+    @Autowired
+    private final AccountManager accountManager;
     private final int columnPerCurrency = 8;
 
-    public Downloader(ClientManager clientManager, CurrencyManager currencyManager, TransManager transManager) {
+    public Downloader(ClientManager clientManager, CurrencyManager currencyManager, TransManager transManager, AccountManager accountManager) {
         this.clientManager = clientManager;
         this.currencyManager = currencyManager;
         this.transManager = transManager;
+        this.accountManager = accountManager;
     }
 
     @RequestMapping(path = "/client_info")
@@ -121,6 +126,13 @@ public class Downloader {
             nameStyle.setBorderTop(BorderStyle.THICK);
             nameStyle.setBorderRight(BorderStyle.THICK);
 
+            CellStyle lastForDateStyle = book.createCellStyle();
+            lastForDateStyle.setBorderBottom(BorderStyle.THICK);
+
+            CellStyle dateLastForDateStyle = book.createCellStyle();
+            dateLastForDateStyle.setBorderBottom(BorderStyle.THICK);
+            dateLastForDateStyle.setDataFormat(format.getFormat("dd.mm.yyyy"));
+
             List<Client> clients = clientManager.findAll();
             for (Client client : clients) {
                 Sheet sheet = book.createSheet(client.getPib());
@@ -155,21 +167,35 @@ public class Downloader {
                        secondRow.getCell(i).setCellStyle(headerStyle);
                     }
                     List<Transaction> transactions = transManager.findByClientAndCurrency(client, currency);
-                    System.out.println(transactions);
                     int rowNum = 1;
                     for (Transaction transaction : transactions) {
+
                         Row row = sheet.getRow(++rowNum);
                         if (row == null) {
                             row = sheet.createRow(rowNum);
                         }
 
-                        /*while (row.getCell(0) != null && row.getCell(0).getDateCellValue().getTime() != transaction.getDate().getTime()) {
-                            sheet.shiftRows(rowNum, sheet.getLastRowNum(), 1);
-                            row = sheet.getRow(rowNum);
-                            if (row == null) {
-                                row = sheet.createRow(rowNum);
+                        if (row.getCell(0) != null) {
+                            if (row.getCell(0).getDateCellValue().toInstant()
+                                    .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay().isAfter(transaction.getDate().toInstant()
+                                    .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay())) {
+                                sheet.createRow(sheet.getLastRowNum() + 1);
+                                sheet.shiftRows(rowNum, sheet.getLastRowNum(), 1);
+                                row = sheet.getRow(rowNum);
+                                if (row == null) {
+                                    row = sheet.createRow(rowNum);
+                                }
                             }
-                        }*/
+                            while (row.getCell(0) != null && row.getCell(0).getDateCellValue().toInstant()
+                                    .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay().isBefore(transaction.getDate().toInstant()
+                                            .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay())) {
+                                row = sheet.getRow(++rowNum);
+                                if (row == null) {
+                                    row = sheet.createRow(rowNum);
+                                }
+                            }
+
+                        }
 
                         if (row.getCell(0) == null) {
                             Cell cell = row.createCell(0);
@@ -177,9 +203,6 @@ public class Downloader {
                             cell.setCellValue(transaction.getDate());
                             sheet.autoSizeColumn(0);
                         }
-
-
-
 
                         List<Transaction> tl = transManager.getTransaction(transaction.getId());
                         StringBuilder anotherClients = new StringBuilder();
@@ -196,7 +219,8 @@ public class Downloader {
                             CellStyle clientsStyle = book.createCellStyle();
                             XSSFFont clientsFont = (XSSFFont) book.createFont();
                             String[] s = transaction.getPibColor().substring(4).split(",");
-                            byte[] color = {(byte) Integer.parseInt(s[0]), (byte) Integer.parseInt(s[1]), (byte) Integer.parseInt(s[2].substring(0, s[2].length() - 1))};
+                            System.out.println(Arrays.toString(s));
+                            byte[] color = {(byte) Integer.parseInt(s[0].trim()), (byte) Integer.parseInt(s[1].trim()), (byte) Integer.parseInt(s[2].substring(0, s[2].length() - 1).trim())};
                             clientsFont.setColor(new XSSFColor(color, null));
                             clientsStyle.setFont(clientsFont);
                             clientsCell.setCellStyle(clientsStyle);
@@ -216,7 +240,7 @@ public class Downloader {
                             CellStyle amountStyle = book.createCellStyle();
                             XSSFFont amountFont = (XSSFFont) book.createFont();
                             String[] sa = transaction.getAmountColor().substring(4).split(",");
-                            byte[] colora = {(byte) Integer.parseInt(sa[0]), (byte) Integer.parseInt(sa[1]), (byte) Integer.parseInt(sa[2].substring(0, sa[2].length() - 1))};
+                            byte[] colora = {(byte) Integer.parseInt(sa[0].trim()), (byte) Integer.parseInt(sa[1].trim()), (byte) Integer.parseInt(sa[2].substring(0, sa[2].length() - 1).trim())};
                             amountFont.setColor(new XSSFColor(colora, null));
                             amountStyle.setFont(amountFont);
                             amountCell.setCellStyle(amountStyle);
@@ -237,15 +261,105 @@ public class Downloader {
                             CellStyle balanceStyle = book.createCellStyle();
                             XSSFFont balanceFont = (XSSFFont) book.createFont();
                             String[] sb = transaction.getBalanceColor().substring(4).split(",");
-                            byte[] colorb = {(byte) Integer.parseInt(sb[0]), (byte) Integer.parseInt(sb[1]), (byte) Integer.parseInt(sb[2].substring(0, sb[2].length() - 1))};
+                            byte[] colorb = {(byte) Integer.parseInt(sb[0].trim()), (byte) Integer.parseInt(sb[1].trim()), (byte) Integer.parseInt(sb[2].substring(0, sb[2].length() - 1).trim())};
                             balanceFont.setColor(new XSSFColor(colorb, null));
                             balanceStyle.setFont(balanceFont);
                             balanceCell.setCellStyle(balanceStyle);
                         }
                     }
                 }
+                sheet.shiftRows(0,0,0); //magick string that do nothing, but needed to program work
+                for (Row row : sheet) {
+                    if (row.getRowNum() < 3) continue;
+                    if (row.getRowNum() == sheet.getLastRowNum()) break;
+                    if (row.getCell(0).getDateCellValue().toInstant().atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay().isAfter(
+                            sheet.getRow(row.getRowNum() - 1).getCell(0).getDateCellValue().toInstant().atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay())) {
+                        System.out.println("here");
+                        Row row1 = sheet.getRow(row.getRowNum() - 1);
+                                row1.setRowStyle(lastForDateStyle);
+                        for (Cell cell : row1) {
+                            if (cell.getColumnIndex() == 0) {
+                               cell.setCellStyle(dateLastForDateStyle);
+                               continue;
+                            }
+                            cell.setCellStyle(lastForDateStyle);
+                        }
+                    }
+
+                }
             }
 
+            Sheet total = book.createSheet("Итоговый");
+            CellStyle boldStyle = book.createCellStyle();
+            Font bold = book.createFont();
+            bold.setBold(true);
+            boldStyle.setFont(bold);
+
+            CellStyle redBoldStyle = book.createCellStyle();
+            Font redBold = book.createFont();
+            redBold.setBold(true);
+            redBold.setColor(Font.COLOR_RED);
+            redBoldStyle.setFont(redBold);
+            redBoldStyle.setBorderTop(BorderStyle.THICK);
+
+            Row firstRow = total.createRow(0);
+            Cell firstCell = firstRow.createCell(2);
+            firstCell.setCellStyle(boldStyle);
+            firstCell.setCellValue("Итоговый лист");
+
+            Row secondRow = total.createRow(1);
+            Cell secondCell = secondRow.createCell(2);
+            secondCell.setCellStyle(dateStyle);
+            secondCell.setCellValue(LocalDate.now());
+            total.autoSizeColumn(2);
+
+            Row thirdRow = total.createRow(2);
+            List<Currency> currencies = currencyManager.getAllCurrencies();
+            int headerCellNum = 0;
+            for (Currency currency : currencies){
+                Cell headerCell = thirdRow.createCell(++headerCellNum);
+                headerCell.setCellStyle(boldStyle);
+                headerCell.setCellValue(currency.getName());
+            }
+            int rowNum = 2;
+            for (Client client : clients) {
+                Row row = total.createRow(++rowNum);
+                Cell nameCell = row.createCell(0);
+                nameCell.setCellStyle(boldStyle);
+                nameCell.setCellValue(client.getPib());
+                int cellNum = 0;
+                Set<Map.Entry<Currency, Double>> currencySet = accountManager.getAccount(client.getPib()).getCurrencies().entrySet();
+                for (Map.Entry<Currency, Double> currency : currencySet) {
+                    Cell cell = row.createCell(++cellNum);
+                    cell.setCellStyle(boldStyle);
+                    cell.setCellValue(currency.getValue());
+                }
+            }
+
+            Row totalRow = total.createRow(++rowNum);
+            Cell nameTotalCell = totalRow.createCell(0);
+            nameTotalCell.setCellStyle(redBoldStyle);
+            nameTotalCell.setCellValue("Итог");
+
+            List<Map.Entry<Currency, Double>> currencyList = accountManager.getAllAccounts()
+                    .stream()
+                    .map(account -> account.getCurrencies().entrySet())
+                    .flatMap(Collection::stream)
+                    .toList();
+            Map<Integer, Double> totalMap = new HashMap<>();
+            for (Map.Entry<Currency, Double> entry : currencyList) {
+                if (totalMap.containsKey(entry.getKey().getId())) {
+                    totalMap.put(entry.getKey().getId(), totalMap.get(entry.getKey().getId()) + entry.getValue());
+                } else {
+                    totalMap.put(entry.getKey().getId(), entry.getValue());
+                }
+            }
+            int totalCellNum = 0;
+            for (Map.Entry<Integer, Double> entry : totalMap.entrySet()) {
+                Cell totalCell = totalRow.createCell(++totalCellNum);
+                totalCell.setCellStyle(redBoldStyle);
+                totalCell.setCellValue(entry.getValue());
+            }
 
             // Записываем всё в файл
             book.write(new FileOutputStream("src/main/resources/info.xlsx"));

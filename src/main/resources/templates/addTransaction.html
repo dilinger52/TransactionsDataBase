@@ -27,26 +27,26 @@
     </div>
     <div class="inline">
     <label for="currency_id">Валюта</label>
-    <input type="number" id="currency_id" name="currency_id" value="980" list="currency_datalist" required>
+    <input type="number" id="currency_id" name="currency_name" value="980" list="currency_datalist" required>
     <datalist id="currency_datalist">
-      <option th:each="currency : ${session.currencies}" th:value="${currency.id}"></option>
+      <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
     </datalist>
     </div>
     <div class="inline">
     <label for="rate">Курс валюты</label>
-    <input type="number" id="rate" name="rate" value="1" required>
+    <input type="text" id="rate" name="rate" value="1" required>
     </div>
     <div class="inline">
     <label for="commission">Процент комиссии</label>
-    <input type="number" id="commission" name="commission" value="0" required>
+    <input type="text" id="commission" name="commission" value="0" required>
     </div>
     <div class="inline">
     <label for="transportation">Инкасация в гривнах</label>
-    <input type="number" id="transportation" name="transportation" value="0" required>
+    <input type="text" id="transportation" name="transportation" value="0" required>
     </div>
     <div class="inline">
     <label for="amount">Объем</label>
-    <input type="number" id="amount" name="amount" onkeyup="sumInputs()" required>
+    <input type="text" id="amount" name="amount" onkeyup="sumInputs()" required>
     </div>
   </div>
   </div>

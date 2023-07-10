@@ -36,7 +36,6 @@ public class AccountManager {
     }
 
 
-
     private Account formatFromDbo(List<AccountDto> accountDtoList, int id) {
         Account account = new Account();
         account.setClient(clientManager.getClient(id));
@@ -61,7 +60,7 @@ public class AccountManager {
         List<Account> clientsCurrencies = new ArrayList<>();
         for (AccountDto currencyDto : currencyDtoList) {
             if (clientsCurrencies.stream().anyMatch(c -> Objects.equals(c.getClient().getId(), currencyDto.getClientId()))) {
-            continue;
+                continue;
             }
             clientsCurrencies.add(formatFromDbo(currencyDtoList, currencyDto.getClientId()));
         }
@@ -83,6 +82,7 @@ public class AccountManager {
         List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
         return formatFromDbo(currencyDtoList, client.getId());
     }
+
     @Transactional
     public void addClient(Client newClient) {
         if (clientManager.getClient(newClient.getPib()) != null) {
@@ -95,5 +95,5 @@ public class AccountManager {
         accountDto.setAmount(0);
         accountRepository.save(accountDto);
     }
-
 }
+

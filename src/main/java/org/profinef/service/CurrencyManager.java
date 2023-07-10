@@ -27,6 +27,13 @@ public class CurrencyManager {
         return formatFromDto(currencyDto);
     }
 
+    public Currency getCurrency(String currencyName) {
+        if (currencyName == null) return null;
+        CurrencyDto currencyDto = currencyRepository.findByName(currencyName);
+        if (currencyDto == null) throw new RuntimeException("Валюта не найдена");
+        return formatFromDto(currencyDto);
+    }
+
     private static Currency formatFromDto(CurrencyDto currencyDto) {
         Currency currency = new Currency();
         currency.setId(currencyDto.getId());

@@ -30,7 +30,6 @@ public class ClientManager {
     }
 
     public Client getClient(Integer id) {
-        System.out.println("clientId=" + id);
         if (id == null) return null;
         Optional<ClientDto> clientOpt = clientRepository.findByIdOrderByPib(id);
         if (clientOpt.isEmpty()) throw new RuntimeException("Клиент не найден");
@@ -40,6 +39,7 @@ public class ClientManager {
     public Client getClient(String name) {
         if (name == null) return null;
         ClientDto clientDto = clientRepository.findByPibIgnoreCaseOrderByPib(name);
+        if (clientDto == null) throw new RuntimeException("Клиент не найден");
         return formatFromDbo(clientDto);
     }
 
@@ -81,5 +81,15 @@ public class ClientManager {
             clients.add(formatFromDbo(clientDto));
         }
         return clients;
+    }
+
+    public void updateClient(Client client) {
+        Optional<ClientDto> clientDtoOpt = clientRepository.findById(client.getId());
+        if (clientDtoOpt.isEmpty()) throw new RuntimeException("Клиент не найден");
+        ClientDto clientDto = clientDtoOpt.get();
+        clientDto.setPib(client.getPib());
+        clientDto.setPhone(client.getPhone());
+        clientDto.setTelegram(client.getTelegram());
+        clientRepository.save(clientDto);
     }
 }

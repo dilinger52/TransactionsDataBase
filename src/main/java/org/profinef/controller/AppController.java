@@ -51,7 +51,8 @@ public class AppController {
     }
 
     @GetMapping("/excel")
-    public String loadPage() {
+    public String loadPage(HttpSession session) {
+        session.setAttribute("path", "/excel");
         return "uploadFiles";
     }
 
@@ -66,11 +67,17 @@ public class AppController {
             }
             clientId = ((Client)session.getAttribute("client")).getId();
         }
+        List<String> currencyName = new ArrayList<>();
         if (currencyId == null) {
             currencyId = new ArrayList<>();
             List<Currency> currencies = currencyManager.getAllCurrencies();
             for (Currency currency : currencies) {
+                currencyName.add(currency.getName());
                 currencyId.add(currency.getId());
+            }
+        } else {
+            for (int id : currencyId) {
+                currencyName.add(currencyManager.getCurrency(id).getName());
             }
         }
         if (date == null) date = Date.valueOf(LocalDate.now());
@@ -100,12 +107,13 @@ public class AppController {
             }
             total.put("amount" + currency.getId(), sum);
         }
+        session.setAttribute("path", "/client_info");
         session.setAttribute("currencies", currencies);
         session.setAttribute("total", total);
         session.setAttribute("date", date);
         session.setAttribute("client", client);
         session.setAttribute("transactions", transactions);
-        session.setAttribute("currency_id", currencyId);
+        session.setAttribute("currency_name", currencyName);
         return "clientInfo";
     }
 
@@ -116,6 +124,7 @@ public class AppController {
         List<Account> clients = accountManager.getAllAccounts();
         session.setAttribute("clients", clients);
         List<Currency> currencies = currencyManager.getAllCurrencies();
+        session.setAttribute("path", "/add_transaction");
         session.setAttribute("currencies", currencies);
         return "addTransaction";
     }
@@ -158,6 +167,7 @@ public class AppController {
         }
         List<Currency> currencies = currencyManager.getAllCurrencies();
         List<Transaction> transactions = transManager.getAllTransactions();
+        session.setAttribute("path", "/client");
         session.setAttribute("currencies", currencies);
         session.setAttribute("transactions", transactions);
         session.setAttribute("clients", clients);
@@ -175,36 +185,44 @@ public class AppController {
         List<Currency> currencies = currencyManager.getAllCurrencies();
         session.setAttribute("currencies", currencies);
         session.setAttribute("transactions", transactions);
+        session.setAttribute("path", "/edit");
         return "editTransaction";
     }
     @PostMapping(path = "/edit")
     public String editTransaction(@RequestParam(name = "transaction_id") List<Integer> transactionId,
                                   @RequestParam(name = "client_name") List<String> clientName,
-                                  @RequestParam(name = "currency_id") List<Integer> currencyId,
+                                  @RequestParam(name = "currency_name") List<String> currencyName,
                                   @RequestParam(name = "rate") List<Double> rate,
                                   @RequestParam(name = "commission") List<Double> commission,
                                   @RequestParam(name = "amount") List<Double> amount,
-                                  @RequestParam(name = "transportation") List<Double> transportation) {
+                                  @RequestParam(name = "transportation") List<Double> transportation,
+                                  HttpSession session) {
         try{
+            List<Integer> currencyId = new ArrayList<>();
+            for (String name : currencyName) {
+                currencyId.add(currencyManager.getCurrency(name).getId());
+            }
             for (int i = 0; i < clientName.size(); i++) {
                 transManager.update(transactionId.get(i), clientName.get(i), currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        session.setAttribute("path", "/edit");
         return "redirect:/client";
     }
 
     @PostMapping(path = "delete_transaction")
-    public String deleteTransaction(@RequestParam(name = "transaction_id") int transactionId) {
+    public String deleteTransaction(@RequestParam(name = "transaction_id") int transactionId, HttpSession session) {
         List<Transaction> transaction = transManager.getTransaction(transactionId);
         transManager.deleteTransaction(transaction);
+        session.setAttribute("path", "/delete_transaction");
         return "redirect:/client";
     }
 
     @PostMapping(path = "/transaction")
     public String doTransaction(@RequestParam(name = "client_name") List<String> clientName,
-                                     @RequestParam(name = "currency_id") List<Integer> currencyId,
+                                     @RequestParam(name = "currency_name") List<String> currencyName,
                                      @RequestParam(name = "rate") List<Double> rate,
                                      @RequestParam(name = "commission") List<Double> commission,
                                      @RequestParam(name = "amount") List<Double> amount,
@@ -220,6 +238,10 @@ public class AppController {
 
             for (int i = 0; i < clientName.size(); i++) {
                 try {
+                    List<Integer> currencyId = new ArrayList<>();
+                    for (String name : currencyName) {
+                        currencyId.add(currencyManager.getCurrency(name).getId());
+                    }
                     transManager.remittance(transactionId, null, clientName.get(i), currencyId.get(i), rate.get(i),
                             commission.get(i), amount.get(i), transportation.get(i), null, null, null);
                 } catch (Exception e) {
@@ -230,11 +252,21 @@ public class AppController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        session.setAttribute("path", "/transaction");
         return "redirect:/client_info";
     }
 
     @GetMapping(path = "/new_client")
-    public String newClient() {
+    public String newClient(HttpSession session) {
+        session.setAttribute("path", "/new_client");
+        return "addClient";
+    }
+
+    @GetMapping(path = "/edit_client")
+    public String editClient(HttpSession session, @RequestParam(name = "client_id") int clientId) {
+        Client client = clientManager.getClient(clientId);
+        session.setAttribute("client", client);
+        session.setAttribute("path", "/edit_client");
         return "addClient";
     }
     @PostMapping(path = "/new_client")
@@ -242,40 +274,47 @@ public class AppController {
                                 @RequestParam(name = "client_phone", required = false) String phone,
                                 @RequestParam(name = "client_telegram", required = false) String telegram,
                                 HttpSession session) {
-        Client newClient = new Client(clientName);
+        Client client = new Client(clientName);
         if (phone != null) {
             if (!phone.matches("\\+38 \\(0[0-9]{2}\\) [0-9]{3}-[0-9]{2}-[0-9]{2}")) {
                 session.setAttribute("error", "Номер телефона должен соответсвовать паттерну: +38 (011) 111-11-11");
                 return "error";
             }
-            newClient.setPhone(phone);
+            client.setPhone(phone);
         }
         if (telegram != null) {
             if (!telegram.matches("@[a-z._0-9]+")) {
                 session.setAttribute("error", "Телеграм тег должен начинаться с @ содержать латинские буквы нижнего регистра, цифры, \".\" или \"_\"");
                 return "error";
             }
-            newClient.setTelegram(telegram);
+            client.setTelegram(telegram);
         }
         try {
-            accountManager.addClient(newClient);
+            if (session.getAttribute("path") == "/edit_client") {
+                clientManager.updateClient(client);
+            }
+            if (session.getAttribute("path") == "/new_client") {
+                accountManager.addClient(client);
+            }
         } catch (Exception e) {
             session.setAttribute("error", e.getMessage());
             return "error";
         }
-
+        session.setAttribute("path", "/new_client");
         return "redirect:/client";
     }
 
     @PostMapping(path = "delete_client")
-    public String deleteClient(@RequestParam(name = "id") int clientId) {
+    public String deleteClient(@RequestParam(name = "id") int clientId, HttpSession session) {
         Client client = clientManager.getClient(clientId);
         clientManager.deleteClient(client);
+        session.setAttribute("path", "/delete_client");
         return "redirect:/client";
     }
 
     @GetMapping(path = "/new_currency")
-    public String newCurrency() {
+    public String newCurrency(HttpSession session) {
+        session.setAttribute("path", "/new_currency");
         return "addCurrency";
     }
     @PostMapping(path = "/new_currency")
@@ -295,12 +334,12 @@ public class AppController {
             session.setAttribute("error", e.getMessage());
             return "error";
         }
-
+        session.setAttribute("path", "/new_currency");
         return "redirect:/client";
     }
     @Transactional
     @PostMapping(path = "/save_colors", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String saveColors(@RequestBody String colors) throws JsonProcessingException {
+    public String saveColors(@RequestBody String colors, HttpSession session) throws JsonProcessingException {
         System.out.println("success: " + colors);
         List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {});
         System.out.println(entryList);
@@ -315,6 +354,7 @@ public class AppController {
             System.out.println(transaction);
             transManager.save(transaction);
         }
+        session.setAttribute("path", "/save_colors");
         return "redirect:/client_info";
     }
 

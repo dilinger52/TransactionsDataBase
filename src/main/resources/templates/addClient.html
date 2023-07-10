@@ -14,11 +14,11 @@
 </form>
 <form method="post" action="new_client">
     <label for="client_name">ФИО</label>
-    <input type="text" id="client_name" name="client_name" required>
+    <input type="text" id="client_name" name="client_name" th:value="${session.client ? session.client.pib : ''}" required>
     <label for="client_phone">Телефон</label>
-    <input type="tel" id="client_phone" name="client_phone">
+    <input type="tel" id="client_phone" name="client_phone" th:value="${session.client ? session.client.phone : ''}">
     <label for="client_telegram">Телеграм</label>
-    <input type="text" id="client_telegram" name="client_telegram">
+    <input type="text" id="client_telegram" name="client_telegram" th:value="${session.client ? session.client.telegram : ''}">
     <input type="submit" value="Сохранить">
 </form>
 </body>

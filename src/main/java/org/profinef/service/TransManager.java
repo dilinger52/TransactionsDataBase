@@ -93,6 +93,7 @@ public class TransManager {
                 commission, amount, transportation, oldTransactionDto.getPibColor(), oldTransactionDto.getAmountColor(),
                 oldTransactionDto.getBalanceColor());
         System.out.println("newBalance " + newBalance);
+        System.out.println("transactionId" + transactionId + "client.getId()" + client.getId());
         TransactionDto newTransactionDto = transactionRepository.findByIdAndClientIdOrderByDate(transactionId, client.getId());
         double balanceDif = newBalance - oldBalance;
         if (balanceDif != 0) {
@@ -105,7 +106,7 @@ public class TransManager {
 
     private void updateNext(String clientName, List<Integer> currencyId, Double balanceDif, TransactionDto newTransactionDto) {
         Client client = clientManager.getClient(clientName);
-        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdsAndDateBetweenOrderByDate(client.getId(), currencyId, newTransactionDto.getDate(), new Timestamp(System.currentTimeMillis()));
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByCurrencyIdAscDateAsc(client.getId(), currencyId, newTransactionDto.getDate(), new Timestamp(System.currentTimeMillis()));
         System.out.println(transactionDtoList);
         for (TransactionDto transactionDto :
                 transactionDtoList) {
@@ -223,7 +224,7 @@ public class TransManager {
 
 
     public List<Transaction> findByClientForDate(int clientId, List<Integer> currencyId, Timestamp date) {
-        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdsAndDateBetweenOrderByDate(clientId, currencyId, date, new Timestamp(date.getTime() + 86400000));
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByCurrencyIdAscDateAsc(clientId, currencyId, date, new Timestamp(date.getTime() + 86400000));
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto :
                 transactionDtoList) {
@@ -255,7 +256,7 @@ public class TransManager {
 
     public List<Transaction> findByClientAndCurrency(Client client, Currency currency) {
         List<Transaction> transactions = new ArrayList<>();
-        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdOrderByDate(client.getId(), currency.getId());
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllByClientIdAndCurrencyIdOrderByCurrencyIdAscDateAsc(client.getId(), currency.getId());
         for (TransactionDto transactionDto :
                 transactionDtoList) {
             transactions.add(formatFromDto(transactionDto));

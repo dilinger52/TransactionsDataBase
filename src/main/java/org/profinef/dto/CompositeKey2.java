@@ -11,7 +11,8 @@ public class CompositeKey2 {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof CompositeKey2 that)) return false;
-        return Objects.equals(clientId, that.clientId) && Objects.equals(id, that.id) && Objects.equals(currencyId, that.currencyId);
+        return Objects.equals(clientId, that.clientId) && Objects.equals(id, that.id) &&
+                Objects.equals(currencyId, that.currencyId);
     }
 
     @Override

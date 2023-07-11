@@ -13,5 +13,4 @@ public interface AccountRepository extends CrudRepository<AccountDto, Integer> {
     @Override
     void deleteById(Integer integer);
 
-     AccountDto findFirstByCurrencyId(int currencyId);
 }

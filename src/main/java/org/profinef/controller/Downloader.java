@@ -2,6 +2,7 @@ package org.profinef.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -25,8 +26,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(path = "/download")
@@ -42,7 +41,8 @@ public class Downloader {
     private final AccountManager accountManager;
     private final int columnPerCurrency = 8;
 
-    public Downloader(ClientManager clientManager, CurrencyManager currencyManager, TransManager transManager, AccountManager accountManager) {
+    public Downloader(ClientManager clientManager, CurrencyManager currencyManager, TransManager transManager,
+                      AccountManager accountManager) {
         this.clientManager = clientManager;
         this.currencyManager = currencyManager;
         this.transManager = transManager;
@@ -53,9 +53,9 @@ public class Downloader {
     public void downloadClientInfo(HttpServletResponse response, HttpSession session) throws IOException {
         List<Transaction> transactions = (List<Transaction>) session.getAttribute("transactions");
         StringBuilder content = new StringBuilder();
-        content.append("Остальные участники,Дата и время,Валюта,Баланс после транзакции,Курс валюты,Процент комиссии,Количество,Инкасация в гривнах\n");
-        for (Transaction transaction :
-                transactions) {
+        content.append("Остальные участники,Дата и время,Валюта,Баланс после транзакции,Курс валюты,Процент комиссии," +
+                "Количество,Инкасация в гривнах\n");
+        for (Transaction transaction : transactions) {
             content.append(transaction.getClient().getPib()).append(",");
             content.append(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(transaction.getDate())).append(",");
             content.append(transaction.getCurrency().getName()).append(",");
@@ -99,6 +99,8 @@ public class Downloader {
 
         sendFile(response);
     }
+
+    @Transactional
     @RequestMapping(path = "/all")
     public void writeIntoExcel(HttpServletResponse response) throws FileNotFoundException, IOException{
         try {
@@ -169,7 +171,6 @@ public class Downloader {
                     List<Transaction> transactions = transManager.findByClientAndCurrency(client, currency);
                     int rowNum = 1;
                     for (Transaction transaction : transactions) {
-
                         Row row = sheet.getRow(++rowNum);
                         if (row == null) {
                             row = sheet.createRow(rowNum);
@@ -177,9 +178,9 @@ public class Downloader {
 
                         if (row.getCell(0) != null) {
                             if (row.getCell(0).getDateCellValue().toInstant()
-                                    .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay().isAfter(transaction.getDate().toInstant()
+                                    .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay()
+                                    .isAfter(transaction.getDate().toInstant()
                                     .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay())) {
-                                sheet.createRow(sheet.getLastRowNum() + 1);
                                 sheet.shiftRows(rowNum, sheet.getLastRowNum(), 1);
                                 row = sheet.getRow(rowNum);
                                 if (row == null) {
@@ -187,8 +188,9 @@ public class Downloader {
                                 }
                             }
                             while (row.getCell(0) != null && row.getCell(0).getDateCellValue().toInstant()
-                                    .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay().isBefore(transaction.getDate().toInstant()
-                                            .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay())) {
+                                    .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay()
+                                    .isBefore(transaction.getDate().toInstant().atZone(ZoneId.of("Europe/Kyiv"))
+                                            .toLocalDate().atStartOfDay())) {
                                 row = sheet.getRow(++rowNum);
                                 if (row == null) {
                                     row = sheet.createRow(rowNum);
@@ -199,8 +201,8 @@ public class Downloader {
 
                         if (row.getCell(0) == null) {
                             Cell cell = row.createCell(0);
-                            cell.setCellStyle(dateStyle);
                             cell.setCellValue(transaction.getDate());
+                            cell.setCellStyle(dateStyle);
                             sheet.autoSizeColumn(0);
                         }
 
@@ -219,8 +221,8 @@ public class Downloader {
                             CellStyle clientsStyle = book.createCellStyle();
                             XSSFFont clientsFont = (XSSFFont) book.createFont();
                             String[] s = transaction.getPibColor().substring(4).split(",");
-                            System.out.println(Arrays.toString(s));
-                            byte[] color = {(byte) Integer.parseInt(s[0].trim()), (byte) Integer.parseInt(s[1].trim()), (byte) Integer.parseInt(s[2].substring(0, s[2].length() - 1).trim())};
+                            byte[] color = {(byte) Integer.parseInt(s[0].trim()), (byte) Integer.parseInt(s[1].trim()),
+                                    (byte) Integer.parseInt(s[2].substring(0, s[2].length() - 1).trim())};
                             clientsFont.setColor(new XSSFColor(color, null));
                             clientsStyle.setFont(clientsFont);
                             clientsCell.setCellStyle(clientsStyle);
@@ -240,19 +242,25 @@ public class Downloader {
                             CellStyle amountStyle = book.createCellStyle();
                             XSSFFont amountFont = (XSSFFont) book.createFont();
                             String[] sa = transaction.getAmountColor().substring(4).split(",");
-                            byte[] colora = {(byte) Integer.parseInt(sa[0].trim()), (byte) Integer.parseInt(sa[1].trim()), (byte) Integer.parseInt(sa[2].substring(0, sa[2].length() - 1).trim())};
+                            byte[] colora = {(byte) Integer.parseInt(sa[0].trim()),
+                                    (byte) Integer.parseInt(sa[1].trim()),
+                                    (byte) Integer.parseInt(sa[2].substring(0, sa[2].length() - 1).trim())};
                             amountFont.setColor(new XSSFColor(colora, null));
                             amountStyle.setFont(amountFont);
                             amountCell.setCellStyle(amountStyle);
                         }
 
-                        row.createCell(4 + columnPerCurrency * initial).setCellValue(transaction.getCommission());
+                        row.createCell(4 + columnPerCurrency * initial)
+                                .setCellValue(transaction.getCommission());
 
-                        row.createCell(5 + columnPerCurrency * initial).setCellValue(Math.abs(transaction.getCommission()/100 * transaction.getAmount()));
+                        row.createCell(5 + columnPerCurrency * initial)
+                                .setCellValue(Math.abs(transaction.getCommission()/100 * transaction.getAmount()));
 
-                        row.createCell(6 + columnPerCurrency * initial).setCellValue(transaction.getRate());
+                        row.createCell(6 + columnPerCurrency * initial)
+                                .setCellValue(transaction.getRate());
 
-                        row.createCell(7 + columnPerCurrency * initial).setCellValue(transaction.getTransportation());
+                        row.createCell(7 + columnPerCurrency * initial)
+                                .setCellValue(transaction.getTransportation());
 
                         Cell balanceCell = row.createCell(8 + columnPerCurrency * initial);
                         balanceCell.setCellValue(transaction.getBalance());
@@ -261,7 +269,9 @@ public class Downloader {
                             CellStyle balanceStyle = book.createCellStyle();
                             XSSFFont balanceFont = (XSSFFont) book.createFont();
                             String[] sb = transaction.getBalanceColor().substring(4).split(",");
-                            byte[] colorb = {(byte) Integer.parseInt(sb[0].trim()), (byte) Integer.parseInt(sb[1].trim()), (byte) Integer.parseInt(sb[2].substring(0, sb[2].length() - 1).trim())};
+                            byte[] colorb = {(byte) Integer.parseInt(sb[0].trim()),
+                                    (byte) Integer.parseInt(sb[1].trim()),
+                                    (byte) Integer.parseInt(sb[2].substring(0, sb[2].length() - 1).trim())};
                             balanceFont.setColor(new XSSFColor(colorb, null));
                             balanceStyle.setFont(balanceFont);
                             balanceCell.setCellStyle(balanceStyle);
@@ -271,12 +281,12 @@ public class Downloader {
                 sheet.shiftRows(0,0,0); //magick string that do nothing, but needed to program work
                 for (Row row : sheet) {
                     if (row.getRowNum() < 3) continue;
-                    if (row.getRowNum() == sheet.getLastRowNum()) break;
-                    if (row.getCell(0).getDateCellValue().toInstant().atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay().isAfter(
-                            sheet.getRow(row.getRowNum() - 1).getCell(0).getDateCellValue().toInstant().atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay())) {
-                        System.out.println("here");
+                    if (row.getCell(0).getDateCellValue().toInstant().atZone(ZoneId.of("Europe/Kyiv"))
+                            .toLocalDate().atStartOfDay().isAfter(
+                            sheet.getRow(row.getRowNum() - 1).getCell(0).getDateCellValue().toInstant()
+                                    .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay())) {
                         Row row1 = sheet.getRow(row.getRowNum() - 1);
-                                row1.setRowStyle(lastForDateStyle);
+                        row1.setRowStyle(lastForDateStyle);
                         for (Cell cell : row1) {
                             if (cell.getColumnIndex() == 0) {
                                cell.setCellStyle(dateLastForDateStyle);
@@ -285,8 +295,8 @@ public class Downloader {
                             cell.setCellStyle(lastForDateStyle);
                         }
                     }
-
                 }
+
             }
 
             Sheet total = book.createSheet("Итоговый");
@@ -328,7 +338,8 @@ public class Downloader {
                 nameCell.setCellStyle(boldStyle);
                 nameCell.setCellValue(client.getPib());
                 int cellNum = 0;
-                Set<Map.Entry<Currency, Double>> currencySet = accountManager.getAccount(client.getPib()).getCurrencies().entrySet();
+                Set<Map.Entry<Currency, Double>> currencySet = accountManager.getAccount(client.getPib())
+                        .getCurrencies().entrySet();
                 for (Map.Entry<Currency, Double> currency : currencySet) {
                     Cell cell = row.createCell(++cellNum);
                     cell.setCellStyle(boldStyle);

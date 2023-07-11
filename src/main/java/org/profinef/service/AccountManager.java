@@ -21,7 +21,8 @@ public class AccountManager {
     @Autowired
     private final CurrencyManager currencyManager;
 
-    public AccountManager(AccountRepository accountRepository, ClientManager clientManager, CurrencyManager currencyManager) {
+    public AccountManager(AccountRepository accountRepository, ClientManager clientManager,
+                          CurrencyManager currencyManager) {
         this.accountRepository = accountRepository;
         this.clientManager = clientManager;
         this.currencyManager = currencyManager;
@@ -59,12 +60,14 @@ public class AccountManager {
         List<AccountDto> currencyDtoList = (List<AccountDto>) accountRepository.findAll();
         List<Account> clientsCurrencies = new ArrayList<>();
         for (AccountDto currencyDto : currencyDtoList) {
-            if (clientsCurrencies.stream().anyMatch(c -> Objects.equals(c.getClient().getId(), currencyDto.getClientId()))) {
+            if (clientsCurrencies.stream().anyMatch(c -> Objects.equals(c.getClient().getId(),
+                    currencyDto.getClientId()))) {
                 continue;
             }
             clientsCurrencies.add(formatFromDbo(currencyDtoList, currencyDto.getClientId()));
         }
-        return clientsCurrencies.stream().sorted(Comparator.comparing(o -> o.getClient().getPib().toLowerCase())).collect(Collectors.toList());
+        return clientsCurrencies.stream().sorted(Comparator.comparing(o -> o.getClient().getPib().toLowerCase()))
+                .collect(Collectors.toList());
     }
 
     public Account getAccountByPhone(String phone) {
@@ -85,15 +88,18 @@ public class AccountManager {
 
     @Transactional
     public void addClient(Client newClient) {
-        if (clientManager.getClient(newClient.getPib()) != null) {
-            throw new RuntimeException("Клиент с таким именем уже существует");
-        }
+        try {
+            clientManager.getClient(newClient.getPib());
+        } catch (Exception e) {
         int clientId = clientManager.addClient(newClient);
         AccountDto accountDto = new AccountDto();
         accountDto.setClientId(clientId);
         accountDto.setCurrencyId(980);
         accountDto.setAmount(0);
         accountRepository.save(accountDto);
+        return;
+        }
+        throw new RuntimeException("Клиент с таким именем уже существует");
     }
 }
 

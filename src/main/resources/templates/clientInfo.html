@@ -19,14 +19,14 @@
 <form method="get" action="client" class="inline">
     <input type="submit" value="<- Назад">
 </form>
-        <form method="post" action="download/client_info" class="inline">
+        <form method="post" action="download/all" class="inline">
             <input type="submit" value="Скачать таблицу">
         </form>
 <!--<form method="get" action="add_transaction" class="inline">
     <input type="submit" value="Новая транзакция">
 </form>-->
-        <form method="post" action="edit_client" class="inline">
-            <input type="hidden" name="id" th:value="${session.client.id}">
+        <form method="get" action="edit_client" class="inline">
+            <input type="hidden" name="client_id" th:value="${session.client.id}">
             <input type="submit" value="Изменить данные пользователя">
         </form>
     <form method="post" action="delete_client" class="inline">
@@ -39,13 +39,28 @@
 <form method="get" action="client_info" class="inline">
     <input type="date" name="date" th:value="${session.date}" class="inline">
     <th:block th:each="currency : ${session.currencies}">
-    <input type="checkbox" th:id="|currency_id${currency.id}|" name="currency_id" th:value="${currency.id}" th:checked="${#lists.contains(session.currency_id, currency.id)}" class="inline">
+    <input type="checkbox" th:id="|currency_id${currency.id}|" name="currency_id" th:value="${currency.id}" th:checked="${#lists.contains(session.currency_name, currency.name)}" class="inline">
     <label th:for="|currency_id${currency.id}|" class="inline" th:text="${currency.name}"></label>
     </th:block>
     <input type="submit" value="Найти" class="inline">
 </form>
     <form id="color" class="inline">
-        <input type="color">
+        <input type="radio" name="color" id="white" value="rgb(255,255,255)" class="inline check-with-label">
+        <label for="white" class="inline sphere white label-for-check"></label>
+        <input type="radio" name="color" id="red" value="rgb(255,0,0)" class="inline check-with-label">
+        <label for="red" class="inline sphere red label-for-check"></label>
+        <input type="radio" name="color" id="yellow" value="rgb(255,255,0)" class="inline check-with-label">
+        <label for="yellow" class="inline sphere yellow label-for-check"></label>
+        <input type="radio" name="color" id="blue" value="rgb(0,0,255)" class="inline check-with-label">
+        <label for="blue" class="inline sphere blue label-for-check"></label>
+        <input type="radio" name="color" id="orange" value="rgb(255,165,0)" class="inline check-with-label">
+        <label for="orange" class="inline sphere orange label-for-check"></label>
+        <input type="radio" name="color" id="green" value="rgb(0,128,0)" class="inline check-with-label">
+        <label for="green" class="inline sphere green label-for-check"></label>
+        <input type="radio" name="color" id="violet" value="rgb(238,130,238)" class="inline check-with-label">
+        <label for="violet" class="inline sphere violet label-for-check"></label>
+        <input type="radio" name="color" id="black" value="rgb(0,0,0)" class="inline check-with-label">
+        <label for="black" class="inline sphere black label-for-check"></label>
     </form>
     <button onclick="saveColors()" class="inline">Сохранить расцветку</button>
 </div>
@@ -89,7 +104,7 @@
 </form>
 <form method="post" action="transaction" id="form_id">
     <div id="divOut">
-        <div style="min-width: 1550px;" id="divIn">
+        <div style="min-width: 1550px;" id="divIn0">
             <div class="inline">
                 <label for="client_name">Клиент</label>
                 <input type="text" list="client_datalist" id="client_name" name="client_name" th:value="${session.client != null ? session.client.pib : ''}" required>
@@ -99,14 +114,14 @@
             </div>
             <div class="inline">
                 <label for="currency_id">Валюта</label>
-                <input type="text" id="currency_id" name="currency_name" value="UAH" list="currency_datalist" required>
+                <input type="text" id="currency_id" name="currency_name" list="currency_datalist" required>
                 <datalist id="currency_datalist">
                     <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
                 </datalist>
             </div>
             <div class="inline">
                 <label for="rate">Курс валюты</label>
-                <input type="text" id="rate" name="rate" value="1" required>
+                <input type="text" id="rate" name="rate" onkeyup="sumInputs()" required>
             </div>
             <div class="inline">
                 <label for="commission">Процент комиссии</label>
@@ -119,6 +134,9 @@
             <div class="inline">
                 <label for="amount">Объем</label>
                 <input type="text" id="amount" name="amount" onkeyup="sumInputs()" required>
+            </div>
+            <div class="inline">
+                <p>Величина в гривне: <span id="value"></span></p>
             </div>
         </div>
     </div>

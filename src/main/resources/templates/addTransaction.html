@@ -17,7 +17,7 @@
 </form>
 <form method="post" action="transaction" id="form_id">
   <div id="divOut">
-  <div style="min-width: 1550px;" id="divIn">
+  <div style="min-width: 1550px;" id="divIn0">
     <div class="inline">
     <label for="client_name">Клиент</label>
     <input type="text" list="client_datalist" id="client_name" name="client_name" th:value="${session.client != null ? session.client.pib : ''}" required>
@@ -34,7 +34,7 @@
     </div>
     <div class="inline">
     <label for="rate">Курс валюты</label>
-    <input type="text" id="rate" name="rate" value="1" required>
+    <input type="text" id="rate" name="rate" value="1" onkeyup="sumInputs()" required>
     </div>
     <div class="inline">
     <label for="commission">Процент комиссии</label>
@@ -47,6 +47,9 @@
     <div class="inline">
     <label for="amount">Объем</label>
     <input type="text" id="amount" name="amount" onkeyup="sumInputs()" required>
+    </div>
+    <div class="inline">
+      <p>Величина в гривне: <span id="value"></span></p>
     </div>
   </div>
   </div>

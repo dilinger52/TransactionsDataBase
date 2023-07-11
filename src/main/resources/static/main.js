@@ -20,16 +20,22 @@ function sumInputs() {
    var rateList = document.getElementsByName("rate");
    var sum = 0;
    for (var i = 0; i < numList.length; i++) {
-        sum = sum + Number(numList[i].value) * Number(rateList[i].value);
+        var div = document.getElementById("divIn" + i);
+        var value = Number(numList[i].value) * Number(rateList[i].value);
+        div.querySelector('span[id="value"]').innerHTML = value;
+        sum = sum + value;
    }
    document.getElementById("out").innerHTML = sum;
 
 }
 
 function add_form(){
-            var divIn = document.getElementById("divIn");
+            var $divIn = $('div[id^="divIn"]:last');
+            var num = parseInt( $divIn.prop("id").match(/\d+/g), 10 ) +1;
+            //var divIn = document.getElementById("divIn");
             var divOut = document.getElementById("divOut");
-            $(divOut).append($(divIn).eq(0).clone());
+            $(divOut).append($divIn.eq(0).clone().prop('id', 'divIn'+num ));
+            sumInputs();
 }
 
 function confirmDel(id) {
@@ -58,7 +64,7 @@ $.ajax({
 
 function changeColor(id) {
 console.log(id);
-    var color = document.querySelector('input[type="color"]').value;
+    var color = document.querySelector('input[name="color"]:checked').value;
     id.style.color = color;
 }
 

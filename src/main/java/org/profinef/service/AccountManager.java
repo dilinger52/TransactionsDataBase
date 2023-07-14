@@ -1,10 +1,13 @@
 package org.profinef.service;
 
+import org.profinef.controller.WebMvcConfig;
 import org.profinef.dto.AccountDto;
 import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
 import org.profinef.repository.AccountRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +23,7 @@ public class AccountManager {
     private final ClientManager clientManager;
     @Autowired
     private final CurrencyManager currencyManager;
+    private static Logger logger = LoggerFactory.getLogger(AccountManager.class);
 
     public AccountManager(AccountRepository accountRepository, ClientManager clientManager,
                           CurrencyManager currencyManager) {
@@ -29,6 +33,7 @@ public class AccountManager {
     }
 
     public Account getAccount(String name) {
+        logger.debug("Getting account");
         if (name == null) return null;
         Client client = clientManager.getClient(name);
         if (client == null) throw new RuntimeException("Клиент не найден");
@@ -38,6 +43,7 @@ public class AccountManager {
 
 
     private Account formatFromDbo(List<AccountDto> accountDtoList, int id) {
+        logger.debug("Formatting account from dto to entity");
         Account account = new Account();
         account.setClient(clientManager.getClient(id));
         Map<Currency, Double> currencies = new TreeMap<>();
@@ -53,10 +59,12 @@ public class AccountManager {
             }
         }
         account.setCurrencies(currencies);
+        logger.trace("Account: " + account);
         return account;
     }
 
     public List<Account> getAllAccounts() {
+        logger.debug("Getting all accounts");
         List<AccountDto> currencyDtoList = (List<AccountDto>) accountRepository.findAll();
         List<Account> clientsCurrencies = new ArrayList<>();
         for (AccountDto currencyDto : currencyDtoList) {
@@ -66,11 +74,15 @@ public class AccountManager {
             }
             clientsCurrencies.add(formatFromDbo(currencyDtoList, currencyDto.getClientId()));
         }
-        return clientsCurrencies.stream().sorted(Comparator.comparing(o -> o.getClient().getPib().toLowerCase()))
+        clientsCurrencies =  clientsCurrencies.stream()
+                .sorted(Comparator.comparing(o -> o.getClient().getPib().toLowerCase()))
                 .collect(Collectors.toList());
+        logger.trace("Accounts: " + clientsCurrencies);
+        return clientsCurrencies;
     }
 
     public Account getAccountByPhone(String phone) {
+        logger.debug("Getting account by phone");
         if (phone == null) return null;
         Client client = clientManager.getClientByPhone(phone);
         if (client == null) throw new RuntimeException("Клиент не найден");
@@ -79,6 +91,7 @@ public class AccountManager {
     }
 
     public Account getAccountByTelegram(String telegram) {
+        logger.debug("Getting account by telegram");
         if (telegram == null) return null;
         Client client = clientManager.getClientByTelegram(telegram);
         if (client == null) throw new RuntimeException("Клиент не найден");
@@ -88,6 +101,7 @@ public class AccountManager {
 
     @Transactional
     public void addClient(Client newClient) {
+        logger.debug("Adding client");
         try {
             clientManager.getClient(newClient.getPib());
         } catch (Exception e) {
@@ -97,6 +111,7 @@ public class AccountManager {
         accountDto.setCurrencyId(980);
         accountDto.setAmount(0);
         accountRepository.save(accountDto);
+        logger.debug("Client saved");
         return;
         }
         throw new RuntimeException("Клиент с таким именем уже существует");

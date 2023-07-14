@@ -22,6 +22,8 @@ public class TransactionDto {
     @Column(name = "currency_id")
     Integer currencyId;
     @Column
+    String comment;
+    @Column
     Double rate;
     @Column
     Double commission;
@@ -71,6 +73,14 @@ public class TransactionDto {
 
     public void setCurrencyId(Integer currencyId) {
         this.currencyId = currencyId;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public Double getRate() {
@@ -144,6 +154,7 @@ public class TransactionDto {
                 ", date=" + date +
                 ", clientId=" + clientId +
                 ", currencyId=" + currencyId +
+                ", comment=" + comment +
                 ", rate=" + rate +
                 ", commission=" + commission +
                 ", amount=" + amount +

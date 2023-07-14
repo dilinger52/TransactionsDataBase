@@ -22,9 +22,9 @@
         <form method="post" action="download/all" class="inline">
             <input type="submit" value="Скачать таблицу">
         </form>
-<!--<form method="get" action="add_transaction" class="inline">
-    <input type="submit" value="Новая транзакция">
-</form>-->
+        <!--<form method="get" action="convertation" class="inline">
+            <input type="submit" value="Обмен валют">
+        </form>-->
         <form method="get" action="edit_client" class="inline">
             <input type="hidden" name="client_id" th:value="${session.client.id}">
             <input type="submit" value="Изменить данные пользователя">
@@ -70,13 +70,14 @@
     <tr>
         <th>Редактировать</th>
         <th>Остальные участники</th>
+        <th>Комментарий</th>
         <th>Дата и время</th>
         <th>Валюта</th>
         <th>Баланс после транзакции</th>
         <th>Курс валюты</th>
         <th>Процент комиссии</th>
         <th>Количество</th>
-        <th>Инкасация в гривнах</th>
+        <th>Инкасация</th>
     </tr>
     </thead>
     <tbody>
@@ -88,60 +89,18 @@
             </form>
         </th>
         <th th:style="|color: ${transaction.pibColor}|" th:text="${transaction.client.pib}" th:onclick="|changeColor(pib_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|pib_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:text="${transaction.comment}" th:onclick="|changeColor(comment_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|comment_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}" th:onclick="|changeColor(date_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|date_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:text="${transaction.currency.name}" th:onclick="|changeColor(currency_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|currency_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:style="|color: ${transaction.balanceColor}|" th:text="${#numbers.formatDecimal(transaction.balance, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(balance_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|balance_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:text="${#numbers.formatDecimal(transaction.rate, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(rate_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|rate_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:text="${#numbers.formatDecimal(transaction.commission, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(commission_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|commission_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:style="|color: ${transaction.amountColor}|" th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(amount_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|amount_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
-        <th th:text="${#numbers.formatDecimal(transaction.transportation, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(transportation_${transaction.id}_${session.client.id})|" th:id="|transportation_${transaction.id}_${session.client.id}|"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.transportation, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(transportation_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|transportation_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
     </tr>
     </tbody>
 </table>
+<th:block th:insert="addTransaction.html :: add_transaction"></th:block>
 
-<form>
-    <input type="button" onclick="add_form()" value="Добавить строку" />
-</form>
-<form method="post" action="transaction" id="form_id">
-    <div id="divOut">
-        <div style="min-width: 1550px;" id="divIn0">
-            <div class="inline">
-                <label for="client_name">Клиент</label>
-                <input type="text" list="client_datalist" id="client_name" name="client_name" th:value="${session.client != null ? session.client.pib : ''}" required>
-                <datalist id="client_datalist">
-                    <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
-                </datalist>
-            </div>
-            <div class="inline">
-                <label for="currency_id">Валюта</label>
-                <input type="text" id="currency_id" name="currency_name" list="currency_datalist" required>
-                <datalist id="currency_datalist">
-                    <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
-                </datalist>
-            </div>
-            <div class="inline">
-                <label for="rate">Курс валюты</label>
-                <input type="text" id="rate" name="rate" onkeyup="sumInputs()" required>
-            </div>
-            <div class="inline">
-                <label for="commission">Процент комиссии</label>
-                <input type="text" id="commission" name="commission" value="0" required>
-            </div>
-            <div class="inline">
-                <label for="transportation">Инкасация в гривнах</label>
-                <input type="text" id="transportation" name="transportation" value="0" required>
-            </div>
-            <div class="inline">
-                <label for="amount">Объем</label>
-                <input type="text" id="amount" name="amount" onkeyup="sumInputs()" required>
-            </div>
-            <div class="inline">
-                <p>Величина в гривне: <span id="value"></span></p>
-            </div>
-        </div>
-    </div>
-    <input type="submit" value="Сохранить">
-    <p>Общая сумма: <span id="out"></span></p>
-</form>
 </body>
 </html>

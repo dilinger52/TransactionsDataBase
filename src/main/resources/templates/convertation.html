@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Обмен валют</title>
+    <link href="main.css" rel="stylesheet">
+    <script src="main.js"></script>
+</head>
+<body>
+<h2>Обмен валют</h2>
+<form method="post" action="/transaction">
+    <input type="hidden" name="client_name" th:value="${session.client.pib}">
+    <input type="hidden" name="client_name" th:value="${session.client.pib}">
+    <input type="hidden" name="comment" value="Обмен валют">
+    <input type="hidden" name="comment" value="Обмен валют">
+    <label for="currency1">Продажа</label>
+    <input type="text" name="currency_name" id="currency1">
+    <label for="currency2">Покупка</label>
+    <input type="text" name="currency_name" id="currency2">
+    <label for="amount">Колличество</label>
+    <input type="text" name="amount" id="amount">
+    <label for="rate">Обменный курс</label>
+    <input type="text" name="rate" id="rate">
+    <label for="commission">Комиссия в процентах</label>
+    <input type="text" name="commission" id="commission">
+    <label for="transportation">Инкасация</label>
+    <input type="text" name="transportation" id="transportation">
+    <input type="">
+    <input type="submit">
+
+</form>
+</body>
+</html>

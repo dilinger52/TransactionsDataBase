@@ -22,10 +22,18 @@ function sumInputs() {
    for (var i = 0; i < numList.length; i++) {
         var div = document.getElementById("divIn" + i);
         var value = Number(numList[i].value) * Number(rateList[i].value);
-        div.querySelector('span[id="value"]').innerHTML = value;
         sum = sum + value;
    }
-   document.getElementById("out").innerHTML = sum;
+   for (var j = 0; j < numList.length; j++) {
+        var d = document.getElementById("divIn" + j);
+        var v  =  - (sum - Number(numList[j].value) * Number(rateList[j].value)) / Number(rateList[j].value);
+        //console.log(j + ',' + v);
+        //console.log(v.toFixed(2));
+        d.querySelector('p[id="value"]').innerHTML = v.toFixed(2);
+        //d.querySelector('input[id="amount"]').value = v.toFixed(2);
+   }
+
+   document.getElementById("out").innerHTML = sum.toFixed(2);
 
 }
 
@@ -36,6 +44,12 @@ function add_form(){
             var divOut = document.getElementById("divOut");
             $(divOut).append($divIn.eq(0).clone().prop('id', 'divIn'+num ));
             sumInputs();
+}
+
+function delete_form(){
+    var $divIn = $('div[id^="divIn"]:last');
+    var num = parseInt( $divIn.prop("id").match(/\d+/g), 10 ) +1;
+    if (num > 1) $divIn.remove();
 }
 
 function confirmDel(id) {
@@ -63,7 +77,7 @@ $.ajax({
 }
 
 function changeColor(id) {
-console.log(id);
+//console.log(id);
     var color = document.querySelector('input[name="color"]:checked').value;
     id.style.color = color;
 }
@@ -76,9 +90,9 @@ function saveColors() {
             colors.set(elements[i].id, elements[i].style.color);
         }
     }
-    console.log(colors);
+    //console.log(colors);
     const colorsTemp = JSON.stringify(colors, mapAwareReplacer);
-    console.log(colorsTemp);
+    //console.log(colorsTemp);
     $.ajax({
         type : "POST",
         url : "/save_colors",

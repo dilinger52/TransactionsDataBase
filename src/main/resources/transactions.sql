@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS `transactions`.`transaction` (
   `pib_color` VARCHAR(45) NULL,
   `amount_color` VARCHAR(45) NULL,
   `balance_color` VARCHAR(45) NULL,
+  `comment` VARCHAR(45) NULL,
   PRIMARY KEY (`id`, `client_id`, `currency_id`),
   INDEX `fk_client_has_currency_has_client_has_currency_client_has_c_idx1` (`client_id` ASC, `currency_id` ASC) VISIBLE,
   CONSTRAINT `fk_client_has_currency_has_client_has_currency_client_has_cur1`

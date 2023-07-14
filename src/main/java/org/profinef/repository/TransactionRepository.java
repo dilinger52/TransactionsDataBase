@@ -1,6 +1,7 @@
 package org.profinef.repository;
 
 import org.profinef.dto.TransactionDto;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import java.sql.Timestamp;
@@ -26,7 +27,7 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
 
     TransactionDto findByIdAndClientIdAndCurrencyIdOrderByDate(int id, int clientId, int currencyId);
 
-    List<TransactionDto> findByClientIdOrderByDate(int id);
-
     List<TransactionDto> findAllByClientIdAndCurrencyIdOrderByCurrencyIdAscDateAsc(Integer id, Integer id1);
+    @Query(nativeQuery = true, value = "SELECT comment FROM transaction")
+    List<String> findAllComments();
 }

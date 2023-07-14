@@ -10,6 +10,7 @@ public class Transaction implements Serializable {
     Timestamp date;
     Client client;
     Currency currency;
+    String comment;
     Double rate;
     Double commission;
     Double amount;
@@ -53,6 +54,14 @@ public class Transaction implements Serializable {
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public Double getRate() {
@@ -126,6 +135,7 @@ public class Transaction implements Serializable {
                 ", date=" + date +
                 ", client=" + client +
                 ", currency=" + currency +
+                ", comment=" + comment +
                 ", rate=" + rate +
                 ", commission=" + commission +
                 ", amount=" + amount +

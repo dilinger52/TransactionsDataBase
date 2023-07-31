@@ -32,7 +32,7 @@ public class CurrencyManager {
     }
 
     public Currency getCurrency(String currencyName) {
-        logger.debug("Getting currency by name");
+        logger.debug("Getting currency by names");
         if (currencyName == null) return null;
         CurrencyDto currencyDto = currencyRepository.findByName(currencyName);
         if (currencyDto == null) throw new RuntimeException("Валюта не найдена");
@@ -44,6 +44,7 @@ public class CurrencyManager {
         Currency currency = new Currency();
         currency.setId(currencyDto.getId());
         currency.setName(currencyDto.getName());
+        currency.setAverageExchange(currencyDto.getAverageExchange());
         logger.trace("Currency: " + currency);
         return currency;
     }
@@ -58,14 +59,20 @@ public class CurrencyManager {
         return currencies;
     }
 
-    public void addCurrency(Currency newCurrency) throws Exception {
+    public void addCurrency(Currency newCurrency) {
         logger.debug("Adding currency");
         if (currencyRepository.findById(newCurrency.getId()).isPresent()
         || currencyRepository.findByName(newCurrency.getName()) != null) {
-            throw new Exception("Данная валюта уже присутствует");
+            throw new RuntimeException("Данная валюта уже присутствует");
         }
         currencyRepository.save(formatToDto(newCurrency));
         logger.debug("Currency saved");
+    }
+
+    public void updateCurrency(Currency newCurrency) throws Exception {
+        logger.debug("Updating currency");
+        currencyRepository.save(formatToDto(newCurrency));
+        logger.debug("Currency updated");
     }
 
     private CurrencyDto formatToDto(Currency newCurrency) {
@@ -73,7 +80,14 @@ public class CurrencyManager {
         CurrencyDto currencyDto = new CurrencyDto();
         currencyDto.setName(newCurrency.getName());
         currencyDto.setId(newCurrency.getId());
+        currencyDto.setAverageExchange(newCurrency.getAverageExchange());
         logger.trace("CurrencyDTO: " + currencyDto);
         return currencyDto;
+    }
+
+    public void saveAll(List<Currency> newCurrencys) throws Exception {
+        for (Currency newCurrency : newCurrencys) {
+            updateCurrency(newCurrency);
+        }
     }
 }

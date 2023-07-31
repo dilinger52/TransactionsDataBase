@@ -8,7 +8,8 @@
     <title>Ошибка</title>
 </head>
 <body>
-<h2>Ошибка</h2>
+<h2 class="inline">Ошибка</h2>
+<th:block th:insert="userBlock.html :: user_block"></th:block>
 <h3 th:text="${session.error}">Непредвиденная ошибка. Попробуйте повторить позже</h3>
 <form method="get" th:action="${session.path}">
   <input type="submit" value="<- Назад">

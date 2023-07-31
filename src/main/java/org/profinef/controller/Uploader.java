@@ -1,14 +1,22 @@
 package org.profinef.controller;
 
+import com.monitorjbl.xlsx.StreamingReader;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.util.IOUtils;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
+import org.profinef.service.AccountManager;
 import org.profinef.service.ClientManager;
 import org.profinef.service.CurrencyManager;
 import org.profinef.service.TransManager;
@@ -20,10 +28,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 
 /**
@@ -39,6 +47,8 @@ public class Uploader {
     private final TransManager transManager;
     @Autowired
     private final CurrencyManager currencyManager;
+    @Autowired
+    private final AccountManager accountManager;
 
     private Client client;
     private Date date = null;
@@ -49,152 +59,245 @@ public class Uploader {
     private double rate = 1;
     private double transportation = 0;
     private boolean isTransaction = false;
-    private final  int columnPerCurrency = 8;
+    private String comment = "";
+    private final int columnPerCurrency = 8;
 
     private static Logger logger = LoggerFactory.getLogger(Uploader.class);
 
-    public Uploader(ClientManager clientManager, TransManager transManager, CurrencyManager currencyManager) {
+    public Uploader(ClientManager clientManager, TransManager transManager, CurrencyManager currencyManager, AccountManager accountManager) {
         this.clientManager = clientManager;
         this.transManager = transManager;
         this.currencyManager = currencyManager;
+        this.accountManager = accountManager;
     }
 
     /**
      * Method for getting file from user and updating the database
+     *
      * @param file file with information to update
      */
-    @Transactional
     @RequestMapping("/full")
-    public String uploadDataFromExcel(@RequestParam("file") MultipartFile file) {
+    public String uploadDataFromExcel(@RequestParam("file") MultipartFile file,
+                                      @RequestParam(name = "date", required = false, defaultValue = "0") java.sql.Date dateAfter,
+                                      HttpSession session) throws Exception {
         logger.info("Getting file...");
-        try {
-            //clean database before inserting new data. it needed to avoid doubles. method marked transactional, so
-            //old information will be restored in case of exception, I hope
+        System.out.println(dateAfter);
+        //clean database before inserting new data. it needed to avoid doubles. method marked transactional, so
+        //old information will be restored in case of exception, I hope
+        if (dateAfter == null) {
+            session.setAttribute("error", "date is null");
             clientManager.deleteAll();
-            logger.info("Data base cleared");
-            //creating workbook from file
-            XSSFWorkbook myExcelBook = new XSSFWorkbook(file.getInputStream());
-            logger.debug("Created workbook");
-            //for each sheet except last creating user
-            for (int sheetNum = 0; sheetNum < myExcelBook.getNumberOfSheets() - 1; sheetNum++) {
-                XSSFSheet myExcelSheet = myExcelBook.getSheetAt(sheetNum);
-                logger.debug("Created sheet" + sheetNum);
-                client = new Client(myExcelSheet.getSheetName());
-                clientManager.addClient(client);
-                //first row contains information about currencies
-                Row firstRow = myExcelSheet.getRow(0);
-                logger.debug("Created first row");
-                for (int cellNum = 2; cellNum < firstRow.getLastCellNum(); cellNum++) {
-                    if (firstRow.getCell(cellNum) == null) continue;
-                    if (firstRow.getCell(cellNum).getCellType() == CellType.STRING) {
-                        currencies.add(currencyFormatter(firstRow.getCell(cellNum).getStringCellValue()));
-                    }
-                }
-                logger.debug("Found currencies: " + currencies);
-                //second row doesn't contain usefully cells
-                //next rows contains info about transactions
-                for (int rowNum = 2; rowNum <= myExcelSheet.getLastRowNum(); rowNum++) {
-                    XSSFRow row = myExcelSheet.getRow(rowNum);
-                    logger.debug("Created row" + rowNum);
-                    for (int cellNum = 0; cellNum <= row.getLastCellNum(); cellNum++) {
-                        if (row.getCell(cellNum) == null) continue;
-                        if (row.getCell(cellNum).getCellType() == CellType.NUMERIC) {
-                            //getting date
-                            if (cellNum == 0) {
-                                date = row.getCell(cellNum).getDateCellValue();
-                                logger.trace("Found date: " + date);
-                                continue;
+            return "error";
+        } else {
+            transManager.deleteAfter(new Timestamp(dateAfter.getTime()));
+        }
+
+        logger.info("Data base cleared");
+        //creating workbook from file
+        //XSSFWorkbook myExcelBook = new XSSFWorkbook(file.getInputStream());
+        InputStream stream = file.getInputStream();
+        //org.apache.poi.util.IOUtils.setByteArrayMaxOverride(1000000000);
+
+        Workbook myExcelBook = StreamingReader.builder()
+                .rowCacheSize(1000000000)
+                .bufferSize(1000000000)
+                .open(stream);
+        logger.info("Created workbook");
+        for (Sheet sheet : myExcelBook) {
+            if (sheet.getSheetName().equals("Итоговый лист")) {
+                break;
+            }
+            if (sheet.getSheetName().equals("Итоговый")) {
+                break;
+            }
+            logger.info("Created sheet: " + sheet.getSheetName());
+
+            client = new Client(sheet.getSheetName());
+            try {
+                accountManager.addClient(client);
+            } catch (RuntimeException ignored) {}
+
+            //first row contains information about currencies
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) {
+                    logger.debug("Created first row");
+                    for (Cell cell : row) {
+                        if (cell.getColumnIndex() < 2) {
+                            continue;
+                        }
+                        if (cell.getCellType() == CellType.STRING) {
+                            int curId = currencyFormatter(cell.getStringCellValue());
+                            if (curId > 0) {
+                                currencies.add(currencyFormatter(cell.getStringCellValue()));
+                                logger.debug("Found currencies: " + currencies);
                             }
-                            //cell can contain sum of other cells that is not usefully
-                            if (cellNum == 1) break;
-                            double value = row.getCell(cellNum).getNumericCellValue();
-                            //getting amount
-                            if (cellNum % columnPerCurrency == 2 || cellNum % columnPerCurrency == 3) {
-                                amount = value;
-                                logger.trace("Found amount: " + amount);
-                                XSSFColor c = row.getCell(cellNum).getCellStyle().getFont().getXSSFColor();
+                        }
+                    }
+                    continue;
+                }
+                if (row.getRowNum() == 1) continue;
+                logger.debug("Created row" + row.getRowNum());
+
+                amount = 0;
+                commission = 0;
+                rate = 1;
+                transportation = 0;
+                isTransaction = false;
+                comment = "";
+
+                for (Cell cell : row) {
+                    if (cell == null) continue;
+                    double value = 0.0;
+                    if (cell.getCellType() == CellType.STRING) {
+                        if (cell.getColumnIndex() % columnPerCurrency == 1) {
+                            comment = cell
+                                    .getStringCellValue();
+                            logger.trace("Found comment: " + comment);
+                            continue;
+                        } else {
+                            String valueS = cell.getStringCellValue().replace("'", "");
+                            try {
+                                value = Double.parseDouble(valueS);
+                            } catch (NumberFormatException e) {
+                                logger.debug("Неверный формат ячейки. Лист: " + sheet.getSheetName() + ",   Ряд: " + row.getRowNum());
+                            }
+                        }
+                    }
+                    if (cell.getCellType() == CellType.FORMULA) {
+                        if (Objects.requireNonNull(cell.getCachedFormulaResultType()) == CellType.NUMERIC) {
+                            value = cell.getNumericCellValue();
+                        }
+                    }
+                    if (cell.getCellType() == CellType.NUMERIC) {
+                        //getting date
+                        if (cell.getColumnIndex() == 0) {
+                            date = cell.getDateCellValue();
+                            logger.trace("Found date: " + date);
+                            continue;
+                        }
+
+                        //cell can contain sum of other cells that is not usefully
+                        if (cell.getColumnIndex() % columnPerCurrency == 1) {
+                            comment = String.valueOf(cell
+                                    .getNumericCellValue());
+                            logger.trace("Found comment: " + comment);
+                            continue;
+                        }
+
+                        value = cell.getNumericCellValue();
+                    }
+                    if (date.before(dateAfter)) break;
+                    if (value != 0) {
+                        if (cell.getColumnIndex() % columnPerCurrency == 2 || cell.getColumnIndex() % columnPerCurrency == 3) {
+                            amount = value;
+                            logger.trace("Found amount: " + amount);
+                                /*XSSFColor c = cell
+                                .getCellStyle().getFont().getXSSFColor();
                                 if (c != null) {
                                     amountColor = "rgb(" + Byte.toUnsignedInt(c.getRGB()[0]) + "," +
                                             Byte.toUnsignedInt(c.getRGB()[1]) + ","  +
                                             Byte.toUnsignedInt(c.getRGB()[2]) + ")";
                                 }
-                                logger.trace("Found amountColor: " + amountColor);
-                                isTransaction = true;
-                                continue;
-                            }
-                            //getting commission
-                            if (cellNum % columnPerCurrency == 4) {
-                                commission = value;
-                                logger.trace("Found commission: " + commission);
-                                continue;
-                            }
-                            //getting rate
-                            if (cellNum % columnPerCurrency == 6) {
-                                rate = value;
-                                logger.trace("Found rate: " + rate);
-                                continue;
-                            }
-                            //getting transportation
-                            if (cellNum % columnPerCurrency == 7) {
-                                transportation = value;
-                                logger.trace("Found transportation: " + transportation);
-                                continue;
-                            }
+                            logger.trace("Found amountColor: " + amountColor);*/
+                            isTransaction = true;
+                            //if (date.after(new Date(123, Calendar.JULY, 19))) isTransaction = true; //TODO change date to variable
+                            continue;
                         }
-                        //last cell for transaction. Insert transaction with previous info
-                        if ((cellNum % columnPerCurrency == 0 ) && isTransaction) {
-                            insertTransaction(row, cellNum, currencies.get((cellNum / columnPerCurrency) - 1));
+                        //getting commission
+                        if (cell.getColumnIndex() % columnPerCurrency == 4) {
+
+                            commission = value;
+                            logger.trace("Found commission: " + commission);
+                            continue;
+
+                        }
+                        //getting rate
+                        if (cell.getColumnIndex() % columnPerCurrency == 6) {
+                            rate = value;
+                            logger.trace("Found rate: " + rate);
+                            continue;
+                        }
+                        //getting transportation
+                        if (cell.getColumnIndex() % columnPerCurrency == 7) {
+                            transportation = value;
+                            logger.trace("Found transportation: " + transportation);
+                            continue;
                         }
                     }
+                    //last cell for transaction. Insert transaction with previous info
+                    if ((cell.getColumnIndex() % columnPerCurrency == 0) && isTransaction) {
+                        System.out.println("currencyId=" + (currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1)));
+                        logger.info("Inserting transaction on sheet: " + sheet.getSheetName());
+                        insertTransaction(row, cell.getColumnIndex(), currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1));
+                        amount = 0;
+                        commission = 0;
+                        rate = 1;
+                        transportation = 0;
+                        isTransaction = false;
+                        comment = "";
+                    }
                 }
+
+
+                //second row doesn't contain usefully cells
+                //next rows contains info about transactions
             }
-            myExcelBook.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            currencies = new ArrayList<>();
         }
-        logger.info("File decoded and uploaded");
-        return "redirect:/client";
+            //for each sheet except last creating user
+            myExcelBook.close();
+            logger.info("File decoded and uploaded");
+            return "redirect:/client";
     }
+
 
     /**
      * Insert transaction to database. Uses information from class fields and some additional params
-     * @param row contain information about color of balance cell
-     * @param cellNum number of cell that contains balance value
+     *
+     * @param row        contain information about color of balance cell
+     * @param cellNum    number of cell that contains balance value
      * @param currencyId id of currency for which transaction will be created
      * @throws Exception potentially can be sent but actually it not possible
      */
-    private void insertTransaction(XSSFRow row, int cellNum, int currencyId) throws Exception {
-        logger.info("Inserting transaction");
+    private void insertTransaction(Row row, int cellNum, int currencyId) throws Exception {
+
         //Getting balance color if it exists
-        XSSFColor c = row.getCell(cellNum).getCellStyle().getFont().getXSSFColor();
+        /*XSSFColor c = cell
+        .getCellStyle().getFont().getXSSFColor();
         String balanceColor = null;
         if (c != null) {
             balanceColor = "rgb(" + Byte.toUnsignedInt(c.getRGB()[0]) + "," + Byte.toUnsignedInt(c.getRGB()[1]) +
                     ","  + Byte.toUnsignedInt(c.getRGB()[2]) + ")";
             logger.trace("Found balance color: " + balanceColor);
-        }
+        }*/
         //Getting transaction id based on max id of transaction in database
         int transactionId;
         try {
-            transactionId = transManager.getAllTransactions()
+            transactionId = transManager.getMaxId() + 1;
+            /*transactionId = transManager.getAllTransactions()
                     .stream()
                     .flatMapToInt(t -> IntStream.of(t.getId()))
                     .max()
-                    .orElse(0) + 1;
+                    .orElse(0) + 1;*/
         } catch (RuntimeException e) {
             //if zero transactions exist in base set id to 1
             transactionId = 1;
         }
-        try{
+        try {
             //writing transaction to database
-            transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), null,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, balanceColor);
+            transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
+                    currencyId, rate, commission, amount, transportation, null, amountColor, null);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             //if currency did not exist create it and try again
             Currency currency = new Currency(currencyId, currencyBackFormatter(currencyId));
-            currencyManager.addCurrency(currency);
-            transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), null,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, balanceColor);
+            try {
+                currencyManager.addCurrency(currency);
+            } catch (RuntimeException ex) {
+                ex.printStackTrace();
+            }
+            transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
+                    currencyId, rate, commission, amount, transportation, null, amountColor, null);
         }
         //setting parameters to default
         amount = 0;
@@ -202,17 +305,19 @@ public class Uploader {
         rate = 1;
         transportation = 0;
         isTransaction = false;
+        comment = "";
 
     }
+
 
     /**
      * Formatter that contain information about currencies, their names and codes/ids. Can be updated by adding more
      * currencies
-     * @param name name of currency. Prefer short format of three uppercase letters
-     * @return code of currency that type is int. If there is no information about currency with such name return -1
+     * @param name names of currency. Prefer short format of three uppercase letters
+     * @return code of currency that type is int. If there is no information about currency with such names return -1
      */
     private int currencyFormatter(String name) {
-        logger.debug("Currency formatting from name to id");
+        logger.debug("Currency formatting from names to id");
         switch (name) {
             case "Гривна","UAH" -> {return 980;}
             case "Доллар","USD" -> {return 840;}
@@ -227,11 +332,11 @@ public class Uploader {
      * Formatter that contain information about currencies, their names and codes/ids. Can be updated by adding more
      * currencies
      * @param id code of currency. Must contain three digit
-     * @return name of currency in ISO format. If there is no information about currency with such id return empty
+     * @return names of currency in ISO format. If there is no information about currency with such id return empty
      * string
      */
     private String currencyBackFormatter(int id) {
-        logger.debug("Currency formatting from id to name");
+        logger.debug("Currency formatting from id to names");
         switch (id) {
             case 980 -> {return "UAH";}
             case 840 -> {return "USD";}

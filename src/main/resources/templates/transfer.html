@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Перевод</title>
+    <link href="main.css" rel="stylesheet">
+    <script src="main.js"></script>
+</head>
+<body>
+<h2 class="inline">Перевод валют</h2>
+<th:block th:insert="userBlock.html :: user_block"></th:block>
+<h3 th:text="|Клиент: ${session.client.pib}|"></h3>
+<form method="get" action="client_info">
+    <input type="submit" value="<- Назад">
+</form>
+<form method="post" action="transaction">
+    <input type="hidden" name="amount" id="amount2">
+    <input type="hidden" name="currency_name" id="currency2">
+    <input type="hidden" name="rate" value="1">
+    <input type="hidden" name="rate" value="1">
+    <input type="hidden" name="comment" value="Перевод">
+    <input type="hidden" name="comment" value="Перевод">
+    <div>
+    <div class="inline">
+    <label for="currency1">Валюта</label>
+    <input type="text" name="currency_name" id="currency1" onkeyup="transferCurrency()" list="currency_datalist" required>
+        <datalist id="currency_datalist">
+            <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
+        </datalist>
+    </div>
+    <div class="inline">
+    <label for="amount1">Количество</label>
+    <input type="text" name="amount" id="amount1" onkeyup="transfer()" required>
+    </div>
+    </div>
+    <div>
+    <div class="inline">
+    <label for="client1">Клиент отправляющий</label>
+    <input type="text" name="client_name" th:value="${session.client.pib}" id="client1" list="client_datalist" readonly>
+
+    </div>
+    <div class="inline">
+    <label for="commission1">Комиссия</label>
+    <input type="text" name="commission" id="commission1" value="0" required>
+    </div>
+    <div class="inline">
+    <label for="transportation1">Инкасация</label>
+    <input type="text" name="transportation" id="transportation1" value="0" required>
+    </div>
+    </div>
+    <div>
+    <div class="inline">
+    <label for="client2">Клиент получающий</label>
+    <input type="text" name="client_name" id="client2" list="client_datalist" required>
+        <datalist id="client_datalist">
+            <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
+        </datalist>
+    </div>
+    <div class="inline">
+    <label for="commission2">Комиссия</label>
+    <input type="text" name="commission" id="commission2" value="0" required>
+    </div>
+    <div class="inline">
+    <label for="transportation2">Инкасация</label>
+    <input type="text" name="transportation" id="transportation2" value="0" required>
+    </div>
+    </div>
+    <input type="submit">
+</form>
+</body>
+</html>

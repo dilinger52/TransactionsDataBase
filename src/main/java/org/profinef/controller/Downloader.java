@@ -1,6 +1,7 @@
 package org.profinef.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.*;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -53,14 +55,14 @@ public class Downloader {
         this.accountManager = accountManager;
     }
 
-    /*@RequestMapping(path = "/client_info")
+    @RequestMapping(path = "/client_info")
     public void downloadClientInfo(HttpServletResponse response, HttpSession session) throws IOException {
         List<Transaction> transactions = (List<Transaction>) session.getAttribute("transactions");
         StringBuilder content = new StringBuilder();
-        content.append("Остальные участники,Дата и время,Валюта,Баланс после транзакции,Курс валюты,Процент комиссии," +
-                "Количество,Инкасация в гривнах\n");
+        content.append("Комментарий,Дата и время,Валюта,Баланс после транзакции,Курс валюты,Процент комиссии," +
+                "Количество,Инкасация\n");
         for (Transaction transaction : transactions) {
-            content.append(transaction.getClient().getPib()).append(",");
+            content.append(transaction.getClient().getPib()).append(" ").append(transaction.getComment()).append(",");
             content.append(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(transaction.getDate())).append(",");
             content.append(transaction.getCurrency().getName()).append(",");
             content.append("\"").append(String.format("%1$,.2f", transaction.getBalance())).append("\",");
@@ -74,10 +76,10 @@ public class Downloader {
         fileWriter.write(String.valueOf(content));
         fileWriter.close();
 
-        sendFile(response);
+        sendFile(response, "src/main/resources/info.csv");
     }
 
-    @RequestMapping(path = "/client")
+    /*@RequestMapping(path = "/client")
     public void downloadMain(HttpServletResponse response, HttpSession session) throws IOException {
         List<Account> clients = (List<Account>) session.getAttribute("clients");
         List<Currency> currencies = (List<Currency>) session.getAttribute("currencies");
@@ -115,7 +117,7 @@ public class Downloader {
         try {
             //creating workbook
             Workbook book = new XSSFWorkbook();
-            logger.debug("Work book created");
+            logger.info("Work book created");
 
             //creating style for header rows
             CellStyle headerStyle = book.createCellStyle();
@@ -132,7 +134,7 @@ public class Downloader {
             DataFormat format = book.createDataFormat();
             dateStyle.setDataFormat(format.getFormat("dd.mm.yyyy"));
 
-            //creating style for name cell
+            //creating style for names cell
             CellStyle nameStyle = book.createCellStyle();
             Font font = book.createFont();
             font.setItalic(true);
@@ -155,19 +157,19 @@ public class Downloader {
 
             List<Client> clients = clientManager.findAll();
             for (Client client : clients) {
-                //for each client create a sheet. name of sheet is client's name
+                //for each client create a sheet. names of sheet is client's names
                 Sheet sheet = book.createSheet(client.getPib());
-                logger.debug("Created sheet: " + sheet.getSheetName());
+                logger.info("Created sheet: " + sheet.getSheetName());
                 Row fistRow = sheet.createRow(0);
                 fistRow.setRowStyle(headerStyle);
-                logger.debug("Created first row");
+                logger.info("Created first row");
                 Row secondRow = sheet.createRow(1);
                 secondRow.setRowStyle(headerStyle);
-                logger.debug("Created second row");
+                logger.info("Created second row");
                 Cell nameCell = fistRow.createCell(0);
                 nameCell.setCellValue(client.getPib());
                 nameCell.setCellStyle(nameStyle);
-                logger.trace("Created name cell");
+                logger.trace("Created names cell");
                 secondRow.createCell(0).setCellValue("Дата");
                 logger.trace("Created date cell");
                 List<Currency> currencies = currencyManager.getAllCurrencies();
@@ -178,7 +180,7 @@ public class Downloader {
                         fistRow.getCell(i).setCellStyle(headerStyle);
                     }
 
-                    secondRow.createCell(1 + columnPerCurrency * initial).setCellValue("Также в транзакции");
+                    secondRow.createCell(1 + columnPerCurrency * initial).setCellValue("Комментарий");
                     secondRow.createCell(2 + columnPerCurrency * initial).setCellValue("Прием");
                     secondRow.createCell(3 + columnPerCurrency * initial).setCellValue("Выдача");
                     secondRow.createCell(4 + columnPerCurrency * initial).setCellValue("Тариф");
@@ -190,14 +192,14 @@ public class Downloader {
                     for (int i = 0; i < secondRow.getLastCellNum() - 1; i++) {
                        secondRow.getCell(i).setCellStyle(headerStyle);
                     }
-                    logger.trace("Created cells for currency name: " + currency.getName());
+                    logger.trace("Created cells for currency names: " + currency.getName());
                     List<Transaction> transactions = transManager.findByClientAndCurrency(client, currency);
                     int rowNum = 1;
                     for (Transaction transaction : transactions) {
                         Row row = sheet.getRow(++rowNum);
                         if (row == null) {
                             row = sheet.createRow(rowNum);
-                            logger.debug("Created row" + rowNum);
+                            logger.info("Created row" + rowNum + " on sheet " + sheet.getSheetName());
                         }
 
                         if (row.getCell(0) != null) {
@@ -239,8 +241,10 @@ public class Downloader {
                                 anotherClients.append(t.getClient().getPib());
                             }
                         }
+                        anotherClients.append(" ").append(transaction.getComment());
                         Cell clientsCell = row.createCell(1 + columnPerCurrency * initial);
                         clientsCell.setCellValue(anotherClients.toString());
+                        sheet.autoSizeColumn(1 + columnPerCurrency * initial);
                         logger.trace("Created clients cell with value = " + anotherClients);
 
                         if (transaction.getPibColor() != null && transaction.getPibColor().length() > 0) {
@@ -311,7 +315,7 @@ public class Downloader {
                         }
                     }
                 }
-                sheet.shiftRows(0,0,0); //magick string that do nothing, but needed to program work
+                //sheet.shiftRows(0,0,0); //magick string that do nothing, but needed to program work
                 for (Row row : sheet) {
                     if (row.getRowNum() < 3) continue;
                     if (row.getCell(0).getDateCellValue().toInstant().atZone(ZoneId.of("Europe/Kyiv"))
@@ -332,7 +336,7 @@ public class Downloader {
 
             }
             Sheet total = book.createSheet("Итоговый");
-            logger.debug("Created total sheet");
+            logger.info("Created total sheet");
             CellStyle boldStyle = book.createCellStyle();
             Font bold = book.createFont();
             bold.setBold(true);
@@ -367,7 +371,7 @@ public class Downloader {
                 Cell headerCell = thirdRow.createCell(++headerCellNum);
                 headerCell.setCellStyle(boldStyle);
                 headerCell.setCellValue(currency.getName());
-                logger.trace("Created currency name cell with value = " + currency.getName());
+                logger.trace("Created currency names cell with value = " + currency.getName());
             }
             int rowNum = 2;
             for (Client client : clients) {
@@ -392,7 +396,7 @@ public class Downloader {
             Cell nameTotalCell = totalRow.createCell(0);
             nameTotalCell.setCellStyle(redBoldStyle);
             nameTotalCell.setCellValue("Итог");
-            logger.trace("Created cell total name");
+            logger.trace("Created cell total names");
 
             List<Map.Entry<Currency, Double>> currencyList = accountManager.getAllAccounts()
                     .stream()
@@ -420,7 +424,7 @@ public class Downloader {
             book.close();
             logger.info("File created");
 
-            sendFile(response);
+            sendFile(response, "src/main/resources/info.xlsx");
             logger.info("File sent");
         } catch (Exception e) {
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -432,8 +436,8 @@ public class Downloader {
      * @param response used to send a file
      * @throws IOException thrown in case if file to send does not exist
      */
-    private void sendFile(HttpServletResponse response) throws IOException {
-        File file = new File("src/main/resources/info.xlsx");
+    private void sendFile(HttpServletResponse response, String source) throws IOException {
+        File file = new File(source);
         if (file.exists()) {
             logger.debug("File exist");
             //get the mimetype

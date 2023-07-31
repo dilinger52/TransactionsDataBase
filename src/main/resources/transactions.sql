@@ -38,6 +38,7 @@ DROP TABLE IF EXISTS `transactions`.`currency` ;
 CREATE TABLE IF NOT EXISTS `transactions`.`currency` (
   `id` INT NOT NULL,
   `name` VARCHAR(45) NULL,
+  `average_exchange` DOUBLE NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -85,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `transactions`.`transaction` (
   `pib_color` VARCHAR(45) NULL,
   `amount_color` VARCHAR(45) NULL,
   `balance_color` VARCHAR(45) NULL,
-  `comment` VARCHAR(45) NULL,
+  `comment` VARCHAR(200) NULL,
   PRIMARY KEY (`id`, `client_id`, `currency_id`),
   INDEX `fk_client_has_currency_has_client_has_currency_client_has_c_idx1` (`client_id` ASC, `currency_id` ASC) VISIBLE,
   CONSTRAINT `fk_client_has_currency_has_client_has_currency_client_has_cur1`
@@ -93,6 +94,38 @@ CREATE TABLE IF NOT EXISTS `transactions`.`transaction` (
     REFERENCES `transactions`.`account` (`client_id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `transactions`.`role`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `transactions`.`role` ;
+
+CREATE TABLE IF NOT EXISTS `transactions`.`role` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `transactions`.`user`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `transactions`.`user` ;
+
+CREATE TABLE IF NOT EXISTS `transactions`.`user` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `role_id` INT NOT NULL,
+  `login` VARCHAR(45) NOT NULL,
+  `password` VARCHAR(256) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_user_role1_idx` (`role_id` ASC) VISIBLE,
+  CONSTRAINT `fk_user_role1`
+    FOREIGN KEY (`role_id`)
+    REFERENCES `transactions`.`role` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -120,10 +153,10 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `transactions`;
-INSERT INTO `transactions`.`currency` (`id`, `name`) VALUES (980, 'UAH');
-INSERT INTO `transactions`.`currency` (`id`, `name`) VALUES (840, 'USD');
-INSERT INTO `transactions`.`currency` (`id`, `name`) VALUES (978, 'EUR');
-INSERT INTO `transactions`.`currency` (`id`, `name`) VALUES (985, 'PLN');
+INSERT INTO `transactions`.`currency` (`id`, `name`, `average_exchange`) VALUES (980, 'UAH', 1);
+INSERT INTO `transactions`.`currency` (`id`, `name`, `average_exchange`) VALUES (840, 'USD', 36);
+INSERT INTO `transactions`.`currency` (`id`, `name`, `average_exchange`) VALUES (978, 'EUR', 40);
+INSERT INTO `transactions`.`currency` (`id`, `name`, `average_exchange`) VALUES (985, 'PLN', 9);
 
 COMMIT;
 
@@ -141,6 +174,27 @@ INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALU
 INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (4, 840, 732);
 INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (5, 980, 1000);
 INSERT INTO `transactions`.`account` (`client_id`, `currency_id`, `amount`) VALUES (6, 980, 5000);
+
+COMMIT;
+
+
+-- -----------------------------------------------------
+-- Data for table `transactions`.`role`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `transactions`;
+INSERT INTO `transactions`.`role` (`id`, `name`) VALUES (0, 'Admin');
+INSERT INTO `transactions`.`role` (`id`, `name`) VALUES (1, 'Manager');
+
+COMMIT;
+
+
+-- -----------------------------------------------------
+-- Data for table `transactions`.`user`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `transactions`;
+INSERT INTO `transactions`.`user` (`id`, `role_id`, `login`, `password`) VALUES (0, 0, 'dilinger', '872f90a79bcbcf47394aa9de7bffba20eb6a195ace758967132fe954c25111af');
 
 COMMIT;
 

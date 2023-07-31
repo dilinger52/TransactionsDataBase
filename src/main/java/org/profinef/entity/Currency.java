@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class Currency implements Comparable<Currency>, Serializable {
     Integer id;
     String name;
+    Double averageExchange;
 
     public Currency() {
     }
@@ -30,12 +31,20 @@ public class Currency implements Comparable<Currency>, Serializable {
         this.name = name;
     }
 
+    public Double getAverageExchange() {
+        return averageExchange;
+    }
+
+    public void setAverageExchange(Double averageExchange) {
+        this.averageExchange = averageExchange;
+    }
 
     @Override
     public String toString() {
         return "Currency{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+                ", names='" + name + '\'' +
+                ", averageExchange='" + averageExchange + '\'' +
                 '}';
     }
 

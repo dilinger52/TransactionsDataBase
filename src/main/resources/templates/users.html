@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователи</title>
+    <link href="main.css" rel="stylesheet">
+</head>
+<body>
+<h2 class="inline">Администрирование пользователей</h2>
+<th:block th:insert="userBlock.html :: user_block"></th:block>
+<form method="get" action="client">
+    <input type="submit" value="<- Назад">
+</form>
+<h3>Создать нового пользователя</h3>
+<form method="post" action="create_user">
+    <label for="login">Логин</label>
+    <input type="text" id="login" name="login" minlength="3" required>
+    <input type="submit" value="Новый пользователь">
+</form>
+<h3>Список пользователей</h3>
+<table>
+    <tr>
+        <th>Логин</th>
+        <th>Пароль</th>
+        <th>Сброс пароля</th>
+        <th>Удаление пользователя</th>
+    </tr>
+    <tr th:each="user : ${session.users}">
+        <th th:text="${user.login}"></th>
+        <th>
+            <span th:if="${user.password == 'd17f25ecfbcc7857f7bebea469308be0b2580943e96d13a3ad98a13675c4bfc2'}">
+                11111
+            </span>
+        </th>
+        <th>
+            <form method="post" action="restore_pass">
+                <input type="hidden" th:value="${user.id}" name="id">
+                <input type="submit" value="Сброс">
+            </form>
+        </th>
+        <th>
+            <form th:if="${user.role.name != 'Admin'}" method="post" action="delete_user">
+                <input type="hidden" th:value="${user.id}" name="id">
+                <input type="submit" value="Удалить">
+            </form>
+        </th>
+    </tr>
+</table>
+
+</body>
+</html>

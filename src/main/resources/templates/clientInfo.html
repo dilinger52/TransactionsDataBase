@@ -1,43 +1,48 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Страница клиента</title>
     <link href="main.css" rel="stylesheet">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="main.js"></script>
+    <script src="html2canvas.min.js"></script>
 </head>
 <body>
-<div class="header">
-<h2 th:text="${session.client.pib}"></h2>
-    <div th:each="currency : ${session.currencies}" class="inline">
+<div class="header" id="header">
+<h2 class="inline" th:text="|Клиент: ${session.client.pib}|"></h2>
+    <th:block th:insert="userBlock.html :: user_block"></th:block>
+    <div class="currencies">
+    <div th:each="currency : ${session.currencies}" th:if="${#lists.contains(session.currency_name, currency.name)}" class="inline">
         <h3 th:text="${currency.name}">HRN</h3>
-        <h3>Баланс в конце дня: <span th:text="${#numbers.formatDecimal(session.total['balance' + currency.id], 1, 'POINT', 2, 'COMMA')}"></span></h3>
-        <h3>Сальдо за день: <span th:text="${#numbers.formatDecimal(session.total['amount' + currency.id], 1, 'POINT', 2, 'COMMA')}"></span></h3>
+        <h3 th:text="|Баланс на начало ${#dates.format(session.startDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['amount' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
+        <h3 th:text="|Баланс в конце ${#dates.format(session.endDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['balance' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
     </div>
+</div>
     <div>
 <form method="get" action="client" class="inline">
     <input type="submit" value="<- Назад">
 </form>
-        <form method="post" action="download/all" class="inline">
+        <form method="get" action="convertation" class="inline">
+            <input type="submit" value="Обмен валют">
+        </form>
+        <form method="get" action="transfer" class="inline">
+            <input type="submit" value="Выполнить перевод">
+        </form>
+        <form method="post" action="download/client_info" class="inline">
             <input type="submit" value="Скачать таблицу">
         </form>
-        <!--<form method="get" action="convertation" class="inline">
-            <input type="submit" value="Обмен валют">
-        </form>-->
         <form method="get" action="edit_client" class="inline">
             <input type="hidden" name="client_id" th:value="${session.client.id}">
             <input type="submit" value="Изменить данные пользователя">
         </form>
-    <form method="post" action="delete_client" class="inline">
-        <input type="hidden" name="id" th:value="${session.client.id}">
-        <input type="submit" value="Удалить пользователя">
-    </form>
+
     <!--<button onclick="confirmDel(1)" class="inline">Удалить пользователя</button>-->
     </div>
 <div>
 <form method="get" action="client_info" class="inline">
-    <input type="date" name="date" th:value="${session.date}" class="inline">
+    <input type="date" name="startDate" th:value="${#dates.format(session.startDate, 'yyyy-MM-dd')}" class="inline">
+    <input type="date" name="endDate" th:value="${#dates.format(session.endDate1, 'yyyy-MM-dd')}" class="inline">
     <th:block th:each="currency : ${session.currencies}">
     <input type="checkbox" th:id="|currency_id${currency.id}|" name="currency_id" th:value="${currency.id}" th:checked="${#lists.contains(session.currency_name, currency.name)}" class="inline">
     <label th:for="|currency_id${currency.id}|" class="inline" th:text="${currency.name}"></label>
@@ -63,12 +68,13 @@
         <label for="black" class="inline sphere black label-for-check"></label>
     </form>
     <button onclick="saveColors()" class="inline">Сохранить расцветку</button>
+    <button onclick="capture()" class="inline">Скриншот</button>
 </div>
 </div>
-<table class="under-header">
-    <thead>
+<table class="under-header" id="capture">
+    <thead id="thead">
     <tr>
-        <th>Редактировать</th>
+        <th class="ignore">Редактировать</th>
         <th>Остальные участники</th>
         <th>Комментарий</th>
         <th>Дата и время</th>
@@ -82,7 +88,7 @@
     </thead>
     <tbody>
     <tr th:each="transaction : ${session.transactions}">
-        <th>
+        <th  class="ignore">
             <form method="get" action="edit">
                 <input type="hidden" name="transaction_id" th:value="${transaction.id}">
                 <input type="submit" value="ред.">
@@ -93,7 +99,7 @@
         <th th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}" th:onclick="|changeColor(date_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|date_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:text="${transaction.currency.name}" th:onclick="|changeColor(currency_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|currency_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:style="|color: ${transaction.balanceColor}|" th:text="${#numbers.formatDecimal(transaction.balance, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(balance_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|balance_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
-        <th th:text="${#numbers.formatDecimal(transaction.rate, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(rate_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|rate_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.rate, 1, 'POINT', 3, 'COMMA')}" th:onclick="|changeColor(rate_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|rate_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:text="${#numbers.formatDecimal(transaction.commission, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(commission_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|commission_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:style="|color: ${transaction.amountColor}|" th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(amount_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|amount_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:text="${#numbers.formatDecimal(transaction.transportation, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(transportation_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|transportation_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>

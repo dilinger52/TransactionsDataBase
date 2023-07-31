@@ -7,12 +7,13 @@
     <title>Главная</title>
 </head>
 <body>
-<div class="header">
+<div class="header" id="header">
     <div>
-<h2>Главная</h2>
+<h2 class="inline">Главная</h2><th:block th:insert="userBlock.html :: user_block"></th:block>
 
+<div>
 <form method="get" action="client" class="inline">
-    <input type="submit" value="<- Назад">
+    <input type="submit" value="Сбросить фильтры">
 </form>
 <form method="get" action="new_client" class="inline">
     <input type="submit" value="Добавить клиента">
@@ -30,6 +31,7 @@
             <input type="submit" value="Загрузить таблицу">
         </form>
 </div>
+    </div>
 <div>
 <form method="get" action="client" class="inline">
     <div class="inline">
@@ -57,8 +59,8 @@
 </form>
 </div>
 </div>
-    <table class="under-header-main">
-        <thead class="main">
+    <table class="under-header-main" id="capture">
+        <thead class="main" id="thead">
         <tr>
             <th>ФИО</th>
             <th>Номер телефона</th>
@@ -78,7 +80,6 @@
             <th th:if="${client.client.pib != 'Всего'}">
                 <form method="get" action="client_info">
                     <input type="hidden" name="client_id" th:value="${client.client.id}">
-                    <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
                     <input type="submit" value="посмотреть">
                 </form>
             </th>

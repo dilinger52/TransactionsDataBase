@@ -8,7 +8,8 @@
     <script src="main.js"></script>
 </head>
 <body>
-<h2 th:text="${session.path == '/add_transaction' ? 'Добавление транзакции' : session.path == '/edit' ? 'Редактирование транзакции' : ''}"></h2>
+<h2 class="inline" th:text="${session.path == '/add_transaction' ? 'Добавление транзакции' : session.path == '/edit' ? 'Редактирование транзакции' : ''}"></h2>
+<th:block th:insert="userBlock.html :: user_block"></th:block>
 <form method="get" th:action="${session.path == '/add_transaction' ? '/client' : session.path == '/edit' ? '/client_info' : ''}">
   <input type="submit" value="<- Назад">
 </form>
@@ -21,7 +22,7 @@
 </form>
 
 <form method="post" th:action="${session.path == '/add_transaction' ? 'transaction' : session.path == '/edit' ?
- 'edit' : session.path == '/client_info' ? 'transaction' : ''}" id="form_id">
+ 'edit_transaction' : session.path == '/client_info' ? 'transaction' : ''}" id="form_id">
   <div id="divOut">
   <div th:each="t,id : ${session.transaction}" style="min-width: 1550px;" th:id="|divIn${id.index}|">
     <div class="inline">
@@ -55,12 +56,12 @@
       <input type="text" id="commission" name="commission" th:value="${t.commission}" required>
     </div>
     <div class="inline">
-      <label for="transportation">Инкасация в гривнах</label>
+      <label for="transportation">Инкасация</label>
       <input type="text" id="transportation" name="transportation" th:value="${t.transportation}" required>
     </div>
     <div class="inline">
       <label for="amount">Объем</label>
-      <input type="text" id="amount" name="amount" th:value="${t.amount}" onchange="sumInputs()" required>
+      <input type="text" id="amount" name="amount" th:value="${t.amount}" onkeyup="sumInputs()" required>
     </div>
     <div class="inline">
       <label for="value">Рекомендуемое значение:</label>

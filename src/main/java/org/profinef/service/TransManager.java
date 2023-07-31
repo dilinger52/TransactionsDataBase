@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -50,11 +49,9 @@ public class TransManager {
                              double commission, double amount, double transportation, String pibColor,
                              String amountColor, String balanceColor) throws RuntimeException {
         logger.debug("Saving transaction");
-        if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
+        //if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
                 "Введите значение от -100 до 100 включительно");
-        if (transportation < 0) throw new RuntimeException("Неверная стоимость инкасации. " +
-                "Введите положительное значение");
         Client client = clientManager.getClient(clientName);
         if (date == null) date = new Timestamp(System.currentTimeMillis());
         double balance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
@@ -77,18 +74,18 @@ public class TransManager {
             accountDto = accountRepository.findByClientIdAndCurrencyId(clientId, currencyId);
         }
         logger.trace("Found account by clientId=" + clientId + " and currencyId=" + currencyId);
-        double balance = accountDto.getAmount() + amount * (1 - commission/100) - transportation;
+        double balance = accountDto.getAmount() + amount * (1 + commission/100) + transportation;
         accountDto.setAmount(balance);
         accountRepository.save(accountDto);
         logger.debug("Currency amount updated");
         return balance;
     }
 
-    private double undoTransaction(int transactionId, String clientName) {
+    public double undoTransaction(int transactionId, String clientName, int currencyId) {
         logger.debug("Undoing transaction");
         Client client = clientManager.getClient(clientName);
         TransactionDto transactionDto = transactionRepository
-                .findByIdAndClientIdOrderByDate(transactionId, client.getId());
+                .findByIdAndClientIdAndCurrencyIdOrderByDate(transactionId, client.getId(), currencyId);
         logger.trace("Found transaction by id=" + transactionId + " and clientId=" + client.getId());
         return updateCurrencyAmount(client.getId(), transactionDto.getCurrencyId(), transactionDto.getRate(),
                 transactionDto.getCommission(), -transactionDto.getAmount(), transactionDto.getTransportation());
@@ -111,7 +108,7 @@ public class TransManager {
         logger.trace("Old transaction balance: " + oldTransactionBalance);
         double oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
         logger.trace("Old balance: " + oldBalance);
-        undoTransaction(transactionId, clientName);
+        undoTransaction(transactionId, clientName, currencyId);
         double newBalance = remittance(transactionId, oldTransactionDto.getDate(), clientName, comment, currencyId, rate,
                 commission, amount, transportation, oldTransactionDto.getPibColor(), oldTransactionDto.getAmountColor(),
                 oldTransactionDto.getBalanceColor());
@@ -138,7 +135,7 @@ public class TransManager {
         Client client = clientManager.getClient(clientName);
         List<TransactionDto> transactionDtoList = transactionRepository
                 .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByCurrencyIdAscDateAsc(
-                        client.getId(), currencyId, date,
+                        client.getId(), currencyId, new Timestamp(date.getTime() + 1),
                         new Timestamp(System.currentTimeMillis()));
         logger.trace("Found transactions by clientId=" + client.getId() + " currencyId=" + currencyId +
                 " and date after: " + date);
@@ -157,7 +154,7 @@ public class TransManager {
             double oldBalance = accountRepository
                     .findByClientIdAndCurrencyId(t.getClient().getId(), t.getCurrency().getId()).getAmount();
             logger.trace("Old balance: " + oldBalance);
-            double newBalance = undoTransaction(t.getId(), t.getClient().getPib());
+            double newBalance = undoTransaction(t.getId(), t.getClient().getPib(), t.getCurrency().getId());
             logger.trace("New balance: " + newBalance);
             TransactionDto transactionDto = formatToDto(t.getId(), t.getDate(), t.getCurrency().getId(), t.getRate(),
                     t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getComment(), t.getBalance(), t.getPibColor(),
@@ -170,6 +167,8 @@ public class TransManager {
         transactionRepository.deleteAll(transactionDtoList);
         logger.debug("Transactions deleted");
     }
+
+
 
     public Account addTotal(List<Account> clients) {
         logger.debug("Adding account total");
@@ -261,6 +260,13 @@ public class TransManager {
         return transactions;
     }
 
+    public int getMaxId(){
+        if (transactionRepository.getMaxId() == null) {
+            return 0;
+        }
+        return transactionRepository.getMaxId();
+    }
+
     public List<Transaction> getTransaction(int transactionId) {
         logger.debug("Getting transactions by id");
         List<TransactionDto> transactionDtoList = transactionRepository.findAllByIdOrderByDate(transactionId);
@@ -272,11 +278,11 @@ public class TransManager {
     }
 
 
-    public List<Transaction> findByClientForDate(int clientId, List<Integer> currencyId, Timestamp date) {
+    public List<Transaction> findByClientForDate(int clientId, List<Integer> currencyId, Timestamp startDate, Timestamp endDate) {
         logger.debug("getting transactions by clientId for date");
         List<TransactionDto> transactionDtoList = transactionRepository
                 .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByCurrencyIdAscDateAsc(
-                        clientId, currencyId, date, new Timestamp(date.getTime() + 86400000));
+                        clientId, currencyId, startDate, endDate);
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto : transactionDtoList) {
             transactions.add(formatFromDto(transactionDto));
@@ -315,5 +321,30 @@ public class TransManager {
 
     public Set<String> getAllComments() {
         return new HashSet<>(transactionRepository.findAllComments());
+    }
+
+    public Transaction findByIdAndClientIdOrderByDate(Integer transactionId, int id) {
+        return formatFromDto(transactionRepository.findByIdAndClientIdOrderByDate(transactionId, id));
+    }
+    @Transactional
+    public void deleteAfter(Timestamp afterDate) {
+        for (AccountDto accountDto : accountRepository.findAll()) {
+            TransactionDto tr = transactionRepository
+                    .findAllByClientIdAndCurrencyIdAndDateBetweenLimit1(
+                            accountDto.getClientId(), accountDto.getCurrencyId(), afterDate);
+            if (tr != null) {
+                accountDto.setAmount(tr.getBalance());
+            } else {
+                accountDto.setAmount(0.0);
+            }
+            accountRepository.save(accountDto);
+        }
+        transactionRepository.deleteByDateBetween(afterDate, new Timestamp(System.currentTimeMillis()));
+    }
+
+    public TransactionDto findPrevious(int clientId, int currencyId, Timestamp afterDate) {
+        return transactionRepository
+                .findAllByClientIdAndCurrencyIdAndDateBetweenLimit1(
+                        clientId, currencyId, afterDate);
     }
 }

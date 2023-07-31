@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Добавление валюты</title>
@@ -8,7 +8,7 @@
   <script src="main.js"></script>
 </head>
 <body>
-<h2>Добавление валюты</h2>
+<h2 class="inline">Добавление валюты</h2><th:block th:insert="userBlock.html :: user_block"></th:block>
 <form method="get" action="client">
   <input type="submit" value="<- Назад">
 </form>

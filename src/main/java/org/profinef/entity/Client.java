@@ -3,7 +3,7 @@ package org.profinef.entity;
 
 import java.io.Serializable;
 
-public class Client implements Serializable{
+public class Client implements Serializable, Comparable<Client>{
 
     Integer id;
     String pib;
@@ -54,5 +54,10 @@ public class Client implements Serializable{
                 ", phone='" + phone + '\'' +
                 ", telegram='" + telegram + '\'' +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Client o) {
+        return this.getId().compareTo(o.getId());
     }
 }

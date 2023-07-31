@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,6 @@ public class ClientManager {
         logger.trace("Client: " + client);
         return client;
     }
-
     public Client getClient(Integer id) {
         logger.debug("Getting client by id");
         if (id == null) return null;
@@ -43,7 +43,7 @@ public class ClientManager {
         return formatFromDbo(clientDto);
     }
     public Client getClient(String name) {
-        logger.debug("Getting client by name");
+        logger.debug("Getting client by names");
         if (name == null) return null;
         ClientDto clientDto = clientRepository.findByPibIgnoreCaseOrderByPib(name);
         if (clientDto == null) throw new RuntimeException("Клиент не найден");
@@ -109,4 +109,5 @@ public class ClientManager {
         clientRepository.save(clientDto);
         logger.debug("Client updated");
     }
+
 }

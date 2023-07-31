@@ -8,9 +8,14 @@
   <script src="main.js"></script>
 </head>
 <body>
-<h2>Добавление клиента</h2>
-<form method="get" action="client">
+<h2 class="inline">Добавление клиента</h2><th:block th:insert="userBlock.html :: user_block"></th:block>
+<form method="get" action="client" th:action="${session.path == '/new_client' ? 'client' : session.path == '/edit_client' ?
+ 'client_info' : ''}">
   <input type="submit" value="<- Назад">
+</form>
+<form th:if="${session.path == '/edit_client'}" method="post" action="delete_client" class="inline">
+    <input type="hidden" name="id" th:value="${session.client.id}">
+    <input type="submit" value="Удалить пользователя">
 </form>
 <form method="post" action="new_client">
     <input type="hidden" name="client_id" th:value="${session.client != null ? session.client.id : '0'}">

@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
   <link href="main.css" rel="stylesheet">
     <title>Загрузка эксель таблицы</title>
 </head>
 <body>
-  <h3>
+  <h3 class="inline">
     Страница загрузки эксель таблицы
   </h3>
-  <p>Данная страница позволяет загрузить данные из эксель таблицы. Обратите внимание, что перед добавлением добавлением
-  данных из таблицы ранее имеющиеся <span style="font-color: red;">данные в базе уничтожаются</span> для предотвращения их задвоения.</p>
+  <th:block th:insert="userBlock.html :: user_block"></th:block>
+  <form method="get" action="client">
+    <input type="submit" value="<- Назад">
+  </form>
+  <p>Данная страница позволяет загрузить данные из эксель таблицы. Обратите внимание, что перед добавлением данных из
+    таблицы ранее имеющиеся после указанной даты <span style="color: red;">данные в базе уничтожаются</span> для предотвращения их задвоения.</p>
 <form method="post" action="upload/full" enctype="multipart/form-data">
-  <input type="file" name="file">
+  <label for="date">Дата начиная с которой данные будут обновлены</label>
+  <input type="date" name="date" id="date" th:value="${#dates.format(session.date, 'yyyy-MM-dd')}">
+  <label for="file">Эксель файл для обновления данных</label>
+  <input type="file" name="file" id="file">
   <input type="submit" value="Подтвердить">
 </form>
 </body>

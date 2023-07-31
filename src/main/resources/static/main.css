@@ -2,7 +2,9 @@
 margin: 7px;
 padding: 3px;
 }
-
+input {
+margin: 0px;
+}
 body, label{
 margin: 0px;
 padding: 0px;
@@ -10,6 +12,7 @@ padding: 0px;
 
 td, th, thead, tbody {
 border: 1px solid;
+padding: 10px;
 }
 
 table {
@@ -17,6 +20,7 @@ table {
 }
 
 input, label {
+
 display: block;
 }
 .inline {
@@ -29,7 +33,6 @@ width: 100%;
 margin: 0px;
 padding: 10px;
 z-index: 10000;
-min-width: 1600px;
 top: 0px;
 left: 0px;
 }
@@ -38,19 +41,19 @@ thead {
 position: sticky;
 background: white;
 width: 100%;
-top: 353px;
+top: 320px;
 }
 
 thead.main {
-top: 257px;
+top: 246px;
 }
 
 .under-header {
-margin-top: 343px;
+margin-top: 305px;
 }
 
 .under-header-main {
-margin-top: 243px;
+margin-top: 232px;
 }
 
 .white {
@@ -114,4 +117,8 @@ margin-left: 14px;
 
 .check-with-label:checked + .label-for-check {
   border: 2px solid black;
+}
+
+.currencies {
+padding-top: 11px;
 }

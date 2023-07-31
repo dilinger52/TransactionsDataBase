@@ -1,3 +1,21 @@
+ document.addEventListener('DOMContentLoaded', setTopPosition);
+ window.onresize = setTopPosition;
+
+ // Function to set the top position based on the height of the reference element
+     function setTopPosition() {
+       const referenceElement = document.getElementById('header');
+       const targetElement = document.getElementById('capture');
+       const targetElement2 = document.getElementById('thead');
+       const offset = -13; // Adjust this value as needed
+       const offset2 = 0; // Adjust this value as needed
+       const topPosition = referenceElement.offsetHeight + offset;
+       const topPosition2 = referenceElement.offsetHeight + offset2;
+       targetElement.style.marginTop = `${topPosition}px`;
+       targetElement2.style.top = `${topPosition2}px`;
+     }
+
+
+
 function filterFunction() {
   var input, filter, ul, li, a, i;
   input = document.getElementById("client_name");
@@ -35,6 +53,65 @@ function sumInputs() {
 
    document.getElementById("out").innerHTML = sum.toFixed(2);
 
+}
+
+function convert() {
+    var amount = document.getElementById("amount");
+    var rate = document.getElementById("rate1");
+    var currency1 = document.getElementById("currency1");
+    var currency2 = document.getElementById("currency2");
+    var exchangeRates = document.getElementsByClassName("exchange");
+    console.log(exchangeRates);
+    var currency1rate = 0;
+    var currency2rate = 0;
+    var result = 0;
+    for (var i = 0; i < exchangeRates.length; i++) {
+        if (currency1.value == exchangeRates[i].name) {
+            currency1rate = Number(exchangeRates[i].value);
+        }
+        if (currency2.value == exchangeRates[i].name) {
+            currency2rate = Number(exchangeRates[i].value);
+        }
+    }
+    console.log(currency1rate);
+    console.log(currency2rate);
+    if (currency1rate > currency2rate) {
+        result = Number(amount.value) * Number(rate.value);
+    }
+
+    if (currency1rate <= currency2rate) {
+        result = Number(amount.value) / Number(rate.value);
+    }
+    console.log(result);
+    document.getElementById("changeDiv").value = result.toFixed(2);
+    document.getElementById("changeInput").value = result.toFixed(2);
+    document.getElementById("rate2").value = (Number(rate.value)).toFixed(3);
+}
+
+function convertDescription() {
+    var currency = document.getElementsByName("currency_name");
+    var comment = document.getElementsByName("comment");
+
+    comment[0].value = "Обмен на " + currency[1].value;
+    comment[1].value = "Обмен с " + currency[0].value;
+    convert();
+}
+
+function convertRate() {
+    var rate = document.getElementById("rate1");
+    var result = 1 / Number(rate.value);
+    rate.value = result;
+    convert();
+}
+
+function transferCurrency() {
+    var currency1 = document.getElementById("currency1");
+    document.getElementById("currency2").value = currency1.value;
+}
+
+function transfer() {
+    var amount = document.getElementById("amount1");
+    document.getElementById("amount2").value = Number(amount.value);
 }
 
 function add_form(){
@@ -119,3 +196,42 @@ function mapAwareReplacer(key, value) {
     }
     return value
 }
+
+function capture() {
+window.scrollTo(0,0);
+console.log(document.querySelector(".ignore"));
+html2canvas(document.querySelector("#capture")/*, {
+ignoreElements: document.querySelector(".ignore")
+}*/).then(canvas => {
+ canvas.toBlob((blob) => {
+          let data = [new ClipboardItem({ [blob.type]: blob })];
+
+          navigator.clipboard.write(data).then(
+            () => {
+                alert("Скопировано");
+            },
+            (err) => {
+                        alert("Ошибка");
+                        }
+          );
+        });
+});
+
+}
+
+/*document.addEventListener('mouseup', () => {
+
+  console.clear();
+
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+
+  const range = selection.getRangeAt(0);
+
+  console.log('Selected elements:');
+  range.cloneContents().querySelectorAll('*').forEach(e => console.log(e));
+
+  console.log('Selected text/elements parent:');
+  console.log(range.commonAncestorContainer.parentNode);
+
+});*/

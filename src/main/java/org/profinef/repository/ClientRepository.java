@@ -3,6 +3,7 @@ package org.profinef.repository;
 import org.profinef.dto.ClientDto;
 import org.springframework.data.repository.CrudRepository;
 
+import java.sql.Date;
 import java.util.Optional;
 
 public interface ClientRepository extends CrudRepository<ClientDto, Integer> {
@@ -19,4 +20,5 @@ public interface ClientRepository extends CrudRepository<ClientDto, Integer> {
     ClientDto findByPhoneOrderByPib(String phone);
 
     ClientDto findByTelegramOrderByPib(String telegram);
+
 }

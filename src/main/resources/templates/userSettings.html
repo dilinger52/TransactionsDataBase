@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Настройки</title>
+  <link href="main.css" rel="stylesheet">
+</head>
+<body>
+<h2 class="inline">Изменение параметров пользователя</h2>
+<th:block th:insert="userBlock.html :: user_block"></th:block>
+<form method="get" action="client">
+  <input type="submit" value="<- Назад">
+</form>
+<h3>Изменить логин</h3>
+<form method="post" action="change_login">
+  <label for="login">Новый логин</label>
+  <input type="text" id="login" name="login" minlength="3" required>
+  <input type="submit" value="Применить">
+</form>
+
+<h3>Изменить пароль</h3>
+<form method="post" action="change_password">
+  <label for="old_password">Старый пароль</label>
+  <input type="password" id="old_password" name="old_password" minlength="4" required>
+  <label for="new_password">Новый пароль</label>
+  <input type="password" id="new_password" name="new_password" minlength="4" required>
+  <label for="check_password">Подтверждение пароля</label>
+  <input type="password" id="check_password" name="check_password" minlength="4" required>
+  <input type="submit" value="Применить">
+</form>
+</body>
+</html>

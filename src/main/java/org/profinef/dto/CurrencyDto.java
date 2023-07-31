@@ -9,6 +9,8 @@ public class CurrencyDto {
     int id;
     @Column
     String name;
+    @Column(name = "average_exchange")
+    Double averageExchange;
 
     public CurrencyDto() {
     }
@@ -29,11 +31,20 @@ public class CurrencyDto {
         this.name = name;
     }
 
+    public Double getAverageExchange() {
+        return averageExchange;
+    }
+
+    public void setAverageExchange(Double averageExchange) {
+        this.averageExchange = averageExchange;
+    }
+
     @Override
     public String toString() {
         return "CurrencyDto{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+                ", names='" + name + '\'' +
+                ", averageExchange='" + averageExchange + '\'' +
                 '}';
     }
 }

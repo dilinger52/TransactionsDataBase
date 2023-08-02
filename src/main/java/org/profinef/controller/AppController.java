@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
 
@@ -180,7 +181,7 @@ public class AppController {
         session.setAttribute("currencies", currencies);
         session.setAttribute("total", total);
         session.setAttribute("startDate", new Timestamp(startDate.getTime()));
-        session.setAttribute("endDate", new Timestamp(endDate.getTime() - 1));
+        session.setAttribute("endDate", new Timestamp(endDate.getTime()));
         session.setAttribute("endDate1", new Timestamp(endDate.getTime()));
         session.setAttribute("client", client);
         session.setAttribute("transactions", transactions);
@@ -481,6 +482,7 @@ public class AppController {
                                 @RequestParam(name = "commission") List<Double> commission,
                                 @RequestParam(name = "amount") List<Double> amount,
                                 @RequestParam(name = "transportation") List<Double> transportation,
+                                @RequestParam(name = "date", required = false) Date date,
                                 HttpSession session) {
         User user = (User) session.getAttribute("user");
         logger.info("Creating new transaction...");
@@ -529,15 +531,25 @@ public class AppController {
                     .max()
                     .orElse(0) + 1;
             logger.trace("transactionId = " + transactionId);*/
+            List<Integer> currencyId = new ArrayList<>();
+            for (String name : currencyName) {
+                currencyId.add(currencyManager.getCurrency(name).getId());
+            }
             for (int i = 0; i < clientName.size(); i++) {
                 try {
-                    List<Integer> currencyId = new ArrayList<>();
-                    for (String name : currencyName) {
-                        currencyId.add(currencyManager.getCurrency(name).getId());
+                    if (date != null && date.before(new java.util.Date(LocalDate.now().atStartOfDay(ZoneId.of("Kyiv")).toEpochSecond()))) {
+                        Double oldBalance = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));
+                        Double newBalance = transManager.remittance(transactionId, new Timestamp(date.getTime()), clientName.get(i), comment.get(i),
+                                currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
+                                null, null, null, user.getId());
+                        List<Integer> list = new ArrayList<>();
+                        list.add(currencyId.get(i));
+                        transManager.updateNext(clientName.get(i), list, newBalance - oldBalance, new Timestamp(date.getTime()));
+                    } else {
+                        transManager.remittance(transactionId, null, clientName.get(i), comment.get(i),
+                                currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
+                                null, null, null, user.getId());
                     }
-                    transManager.remittance(transactionId, null, clientName.get(i), comment.get(i),
-                            currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
-                            null, null, null, user.getId());
                 } catch (Exception e) {
                     logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));
                     session.setAttribute("error", e.getMessage());
@@ -930,6 +942,41 @@ public class AppController {
         session.setAttribute("user", user);
         logger.info("Password changed");
         return "redirect:/user_settings";
+    }
+
+    @GetMapping("/manager_history")
+    public String managerHistory(@RequestParam(name = "manager_id", required = false) Integer managerId,
+                                 @RequestParam(name = "startDate", required = false) Date startDate,
+                                 @RequestParam(name = "endDate", required = false) Date endDate,
+                                 @RequestParam(name = "client_name", required = false) String clientName,
+                                 @RequestParam(name = "currencyId", required = false) List<Integer> currencyId,
+                                 HttpSession session) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser.getRole() != Role.Admin) {
+            logger.info("Redirecting to error page with error: Отказано в доступе");
+            session.setAttribute("error", "Отказано в доступе");
+            return "error";
+        }
+        if (managerId == null) {
+            managerId = (Integer) session.getAttribute("managerId");
+        }
+        if (startDate == null) startDate = Date.valueOf(LocalDate.now());
+        if (endDate == null) endDate = new Date(startDate.getTime() + 86400000 - 1);
+        if (currencyId == null) {
+            logger.debug("currencyId = null");
+            currencyId = new ArrayList<>();
+            List<Currency> currencies = currencyManager.getAllCurrencies();
+            for (Currency currency : currencies) {
+                currencyId.add(currency.getId());
+            }
+            logger.trace("currencyId = " + currencyId);
+        }
+        List<Transaction> transactions = transManager.findByUser(managerId, new Timestamp(startDate.getTime()), new Timestamp(endDate.getTime() - 1), clientName, currencyId);
+        session.setAttribute("startDate", startDate);
+        session.setAttribute("endDate", endDate);
+        session.setAttribute("managerId", managerId);
+        session.setAttribute("transactions", transactions);
+        return "managerHistory";
     }
 
 }

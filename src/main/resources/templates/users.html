@@ -22,6 +22,7 @@
     <tr>
         <th>Логин</th>
         <th>Пароль</th>
+        <th>История</th>
         <th>Сброс пароля</th>
         <th>Удаление пользователя</th>
     </tr>
@@ -31,6 +32,12 @@
             <span th:if="${user.password == 'd17f25ecfbcc7857f7bebea469308be0b2580943e96d13a3ad98a13675c4bfc2'}">
                 11111
             </span>
+        </th>
+        <th>
+            <form method="get" action="manager_history">
+                <input type="hidden" th:value="${user.id}" name="manager_id">
+                <input type="submit" value="Посмотреть">
+            </form>
         </th>
         <th>
             <form method="post" action="restore_pass">

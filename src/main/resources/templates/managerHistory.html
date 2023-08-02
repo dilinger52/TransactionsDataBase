@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>История менеджера</title>
+    <link href="main.css" rel="stylesheet">
+    <script src="main.js"></script>
+</head>
+<body>
+<div class="header" id="header">
+    <h2 class="inline" th:text="|Клиент: ${session.client.pib}|"></h2>
+    <th:block th:insert="userBlock.html :: user_block"></th:block>
+    <div>
+        <form method="get" action="users" class="inline">
+            <input type="submit" value="<- Назад">
+        </form>
+    </div>
+    <div>
+        <form method="get" action="manager_history" class="inline">
+            <div class="inline">
+                <label for="client_name">Поиск по ФИО</label>
+                <input type="text" list="client_name_datalist" id="client_name" name="client_name" placeholder="Поиск.." onkeyup="filterFunction()">
+                <datalist id="client_name_datalist">
+                    <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
+                </datalist>
+            </div>
+            <input type="date" name="startDate" th:value="${#dates.format(session.startDate, 'yyyy-MM-dd')}" class="inline">
+            <input type="date" name="endDate" th:value="${#dates.format(session.endDate1, 'yyyy-MM-dd')}" class="inline">
+            <th:block th:each="currency : ${session.currencies}">
+                <input type="checkbox" th:id="|currency_id${currency.id}|" name="currency_id" th:value="${currency.id}" th:checked="${#lists.contains(session.currency_name, currency.name)}" class="inline">
+                <label th:for="|currency_id${currency.id}|" class="inline" th:text="${currency.name}"></label>
+            </th:block>
+            <input type="submit" value="Найти" class="inline">
+        </form>
+    </div>
+</div>
+<table class="under-header" id="capture">
+    <thead id="thead">
+    <tr>
+        <th th:if="${session.user.role.name == 'Admin'}">Менеджер</th>
+        <th>Участники</th>
+        <th>Комментарий</th>
+        <th>Дата и время</th>
+        <th>Валюты</th>
+        <th>Количество</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="transaction : ${session.transactions}">
+        <th th:if="${session.user.role.name == 'Admin'}" th:text="${transaction.user.login}"></th>
+        <th th:text="${transaction.client.pib}"></th>
+        <th th:text="${transaction.comment}"></th>
+        <th th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}"></th>
+        <th th:text="${transaction.currency.name}"></th>
+        <th th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')}"></th>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

@@ -23,6 +23,7 @@
 
 <form method="post" th:action="${session.path == '/add_transaction' ? 'transaction' : session.path == '/edit' ?
  'edit_transaction' : session.path == '/client_info' ? 'transaction' : ''}" id="form_id">
+  <input type="date" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
   <div id="divOut">
   <div th:each="t,id : ${session.transaction}" style="min-width: 1550px;" th:id="|divIn${id.index}|">
     <div class="inline">

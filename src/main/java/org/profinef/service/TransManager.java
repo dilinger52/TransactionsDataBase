@@ -364,4 +364,14 @@ public class TransManager {
                 .findAllByClientIdAndCurrencyIdAndDateBetweenLimit1(
                         clientId, currencyId, afterDate);
     }
+
+    public List<Transaction> findByUser(Integer managerId, Timestamp startDate, Timestamp endDate, String clientName, List<Integer> currencyId) {
+        Client client = clientManager.getClient(clientName);
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllByUserIdAndClientIdAndCurrencyIdInAndDateBetween(managerId, client.getId(), currencyId, startDate, endDate);
+        List<Transaction> transactions = new ArrayList<>();
+        for (TransactionDto transactionDto : transactionDtoList) {
+            transactions.add(formatFromDto(transactionDto));
+        }
+        return transactions;
+    }
 }

@@ -428,7 +428,7 @@ public class AppController {
                     Double v = e.getValue();
                     List<Integer> o = new ArrayList<>();
                     o.add(k.getId());
-                    System.out.println(newBalances.get(key));
+                    System.out.println(v);
                     System.out.println(newBalances.get(key).get(k));
                     transManager.updateNext(key.getPib(), o, newBalances.get(key).get(k) - v, tr.getDate());
                 }
@@ -778,9 +778,6 @@ public class AppController {
         String sha256hex = Hashing.sha256()
                 .hashString(password, StandardCharsets.UTF_8)
                 .toString();
-        System.out.println(password);
-        System.out.println(sha256hex);
-        System.out.println(user.getPassword());
         if (!sha256hex.equals(user.getPassword())) {
             session.setAttribute("error", "Пароль не верный");
             logger.info("Redirecting to error page with error: Пароль не верный");

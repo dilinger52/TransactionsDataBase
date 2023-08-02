@@ -22,7 +22,6 @@ public class UserManager {
 
     public User getUser(String login) {
         UserDto userDto = userRepository.findByLogin(login);
-        System.out.println(userDto);
         if (userDto == null) throw new RuntimeException("Пользователя с таким логином не существует");
         return formatFromDto(userDto);
     }

@@ -143,6 +143,8 @@ public class TransManager {
         logger.trace("Found transactions by clientId=" + client.getId() + " currencyId=" + currencyId +
                 " and date after: " + date);
         for (TransactionDto transactionDto : transactionDtoList) {
+            System.out.println(transactionDto.getBalance());
+            System.out.println(balanceDif);
             transactionDto.setBalance(transactionDto.getBalance() + balanceDif);
             transactionRepository.save(transactionDto);
         }

@@ -172,7 +172,7 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `transactions`;
-INSERT INTO `transactions`.`user` (`id`, `login`, `password`, `role_id`) VALUES (1, 'admin', '3329cb839124549c72911a7bbf3a2612432b2fe41d37fef2bc1033c4c88f612f', 1);
+INSERT INTO `transactions`.`user` (`id`, `login`, `password`, `role_id`) VALUES (1, 'admin', '872f90a79bcbcf47394aa9de7bffba20eb6a195ace758967132fe954c25111af', 1);
 
 COMMIT;
 

@@ -65,6 +65,24 @@ public class TransManager {
         return balance;
     }
 
+    @Transactional
+    public double update(int transactionId, Timestamp date, String clientName, String comment, int currencyId, double rate,
+                             double commission, double amount, double transportation, String pibColor,
+                             String amountColor, String balanceColor, int userId, Double trBalance) throws RuntimeException {
+        logger.debug("Saving transaction");
+        //if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
+        if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
+                "Введите значение от -100 до 100 включительно");
+        Client client = clientManager.getClient(clientName);
+        double oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
+        double newBalance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
+        TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
+                transportation, client, comment, trBalance + newBalance - oldBalance, pibColor, amountColor, balanceColor, userId);
+        transactionRepository.save(transactionDto);
+        logger.debug("Transaction saved");
+        return newBalance;
+    }
+
     private double updateCurrencyAmount(int clientId, int currencyId, double rate, double commission, double amount,
                                         double transportation) {
         logger.debug("Updating currency amount");
@@ -87,12 +105,16 @@ public class TransManager {
     public double undoTransaction(int transactionId, String clientName, int currencyId) {
         logger.debug("Undoing transaction");
         Client client = clientManager.getClient(clientName);
+        System.out.println(transactionId);
+        System.out.println(client.getId());
+        System.out.println(currencyId);
         TransactionDto transactionDto = transactionRepository
                 .findByIdAndClientIdAndCurrencyIdOrderByDate(transactionId, client.getId(), currencyId);
         logger.trace("Found transaction by id=" + transactionId + " and clientId=" + client.getId());
         return updateCurrencyAmount(client.getId(), transactionDto.getCurrencyId(), transactionDto.getRate(),
                 transactionDto.getCommission(), -transactionDto.getAmount(), transactionDto.getTransportation());
     }
+    /*
     @Transactional
     public void update(int transactionId, String clientName, String comment, int currencyId, double rate, double commission,
                        double amount, double transportation, int userId) {
@@ -131,7 +153,7 @@ public class TransManager {
         } else {
             logger.debug("Transaction do not need to be updated");
         }
-    }
+    }*/
 
     public void updateNext(String clientName, List<Integer> currencyId, Double balanceDif, Timestamp date) {
         logger.debug("Updating amount of next transactions");

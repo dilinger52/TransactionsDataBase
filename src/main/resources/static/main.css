@@ -110,6 +110,11 @@ input[type="radio"] {
 display: none;
 }
 
+label {
+margin: 0;
+padding: 0;
+}
+
 input[type="checkbox"] {
 margin-right: 0px;
 margin-left: 14px;

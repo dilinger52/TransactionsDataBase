@@ -28,6 +28,8 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
 
+import static java.time.ZoneId.systemDefault;
+
 
 /**
 *This is the main class that work with visuals
@@ -355,12 +357,15 @@ public class AppController {
             Map<Client, Map<Currency, Double>> oldBalances = new TreeMap<>();
             Map<Client, Map<Currency, Double>> newBalances = new TreeMap<>();
             Transaction tr = transactionList.get(0);
+
+            transManager.deleteTransaction(transactionList);
             for (Transaction transaction : transactionList) {
                 Map<Currency, Double> oldBalance = new TreeMap<>();
                 if (oldBalances.containsKey(transaction.getClient())) {
                     oldBalance = oldBalances.get(transaction.getClient());
                 }
                 Double b = accountManager.getAccount(transaction.getClient().getPib()).getCurrencies().get(transaction.getCurrency());
+                System.out.println("oldbalance" + transaction.getClient().getPib() + " " + transaction.getCurrency().getName() + " " +  b);
                 oldBalance.put(transaction.getCurrency(), b);
                 oldBalances.put(transaction.getClient(), oldBalance);
             }
@@ -373,12 +378,11 @@ public class AppController {
                 oldBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
                 oldBalances.put(clientManager.getClient(clientName.get(i)), oldBalance);
             }
-            transManager.safeDeleteTransaction(transactionList);
             for (int i = 0; i < clientName.size(); i++) {
-
-                transManager.remittance(tr.getId(), tr.getDate(), clientName.get(i), comment.get(i),
+                Double balance = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate()).getBalance();
+                transManager.update(tr.getId(), tr.getDate(), clientName.get(i), comment.get(i),
                         currencyId.get(i), rate.get(i), commission.get(i), amount.get(i),
-                        transportation.get(i), null, null, null, tr.getUser().getId());
+                        transportation.get(i), null, null, null, tr.getUser().getId(), balance);
             }
             for (int i = 0; i < clientName.size(); i++) {
                 Map<Currency, Double> newBalance = new TreeMap<>();
@@ -386,6 +390,7 @@ public class AppController {
                     newBalance = newBalances.get(clientManager.getClient(clientName.get(i)));
                 }
                 Double b = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));
+                System.out.println("newbalance" + clientName.get(i) + " " + currencyName.get(i) + " " +  b);
                 newBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
                 newBalances.put(clientManager.getClient(clientName.get(i)), newBalance);
                 /*if (transManager.getTransactionByClientAndByIdAndByCurrencyId(transactionId.get(i), clientId.get(i),
@@ -416,8 +421,8 @@ public class AppController {
                 newBalances.put(transaction.getClient(), newBalance);
 
             }
-            System.out.println(oldBalances);
-            System.out.println(newBalances);
+            System.out.println("oldBalances" + oldBalances);
+            System.out.println("newBalances" + newBalances);
                 Set<Map.Entry<Client, Map<Currency, Double>>> set = oldBalances.entrySet();
             for (Map.Entry<Client, Map<Currency, Double>> entry : set) {
                 Client key = entry.getKey();
@@ -428,8 +433,8 @@ public class AppController {
                     Double v = e.getValue();
                     List<Integer> o = new ArrayList<>();
                     o.add(k.getId());
-                    System.out.println(v);
-                    System.out.println(newBalances.get(key).get(k));
+                    System.out.println("old balance" + v);
+                    System.out.println("new balance" + newBalances.get(key).get(k));
                     transManager.updateNext(key.getPib(), o, newBalances.get(key).get(k) - v, tr.getDate());
                 }
             }
@@ -535,9 +540,12 @@ public class AppController {
             for (String name : currencyName) {
                 currencyId.add(currencyManager.getCurrency(name).getId());
             }
+            System.out.println("date" + date);
+            System.out.println(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()));
+            System.out.println(date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli())));
             for (int i = 0; i < clientName.size(); i++) {
                 try {
-                    if (date != null && date.before(new java.util.Date(LocalDate.now().atStartOfDay(ZoneId.of("Kyiv")).toEpochSecond()))) {
+                    if (date != null && date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()))) {
                         Double oldBalance = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));
                         Double newBalance = transManager.remittance(transactionId, new Timestamp(date.getTime()), clientName.get(i), comment.get(i),
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),

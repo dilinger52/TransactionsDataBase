@@ -24,7 +24,7 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
     TransactionDto findByIdAndClientIdOrderByDate(int id, int clientId);
 
     List<TransactionDto> findAllByOrderByDateDesc();
-
+    @Query(nativeQuery = true, value = "SELECT * FROM transactions.transaction WHERE id=?1 AND client_id=?2 AND currency_id=?3")
     TransactionDto findByIdAndClientIdAndCurrencyIdOrderByDate(int id, int clientId, int currencyId);
 
     List<TransactionDto> findAllByClientIdAndCurrencyIdOrderByCurrencyIdAscDateAsc(Integer id, Integer id1);

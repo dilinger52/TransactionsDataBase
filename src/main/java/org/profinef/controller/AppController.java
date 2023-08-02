@@ -368,24 +368,24 @@ public class AppController {
                 if (oldBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
                     oldBalance = oldBalances.get(clientManager.getClient(clientName.get(i)));
                 }
-                Double b = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(0)));
-                oldBalance.put(currencyManager.getCurrency(currencyId.get(0)), b);
+                Double b = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));
+                oldBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
                 oldBalances.put(clientManager.getClient(clientName.get(i)), oldBalance);
             }
-            transManager.deleteTransaction(transactionList);
+            transManager.safeDeleteTransaction(transactionList);
             for (int i = 0; i < clientName.size(); i++) {
 
                 transManager.remittance(tr.getId(), tr.getDate(), clientName.get(i), comment.get(i),
                         currencyId.get(i), rate.get(i), commission.get(i), amount.get(i),
-                        transportation.get(i), null, null, null);
+                        transportation.get(i), null, null, null, tr.getUser().getId());
             }
             for (int i = 0; i < clientName.size(); i++) {
                 Map<Currency, Double> newBalance = new TreeMap<>();
                 if (newBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
                     newBalance = newBalances.get(clientManager.getClient(clientName.get(i)));
                 }
-                Double b = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(0)));
-                newBalance.put(currencyManager.getCurrency(currencyId.get(0)), b);
+                Double b = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));
+                newBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
                 newBalances.put(clientManager.getClient(clientName.get(i)), newBalance);
                 /*if (transManager.getTransactionByClientAndByIdAndByCurrencyId(transactionId.get(i), clientId.get(i),
                         currencyId.get(i)) == null) {
@@ -482,6 +482,7 @@ public class AppController {
                                 @RequestParam(name = "amount") List<Double> amount,
                                 @RequestParam(name = "transportation") List<Double> transportation,
                                 HttpSession session) {
+        User user = (User) session.getAttribute("user");
         logger.info("Creating new transaction...");
         if (session.getAttribute("path") == "/convertation" ||
                 session.getAttribute("path") == "/transfer") {
@@ -536,7 +537,7 @@ public class AppController {
                     }
                     transManager.remittance(transactionId, null, clientName.get(i), comment.get(i),
                             currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
-                            null, null, null);
+                            null, null, null, user.getId());
                 } catch (Exception e) {
                     logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));
                     session.setAttribute("error", e.getMessage());
@@ -765,6 +766,9 @@ public class AppController {
         String sha256hex = Hashing.sha256()
                 .hashString(password, StandardCharsets.UTF_8)
                 .toString();
+        System.out.println(password);
+        System.out.println(sha256hex);
+        System.out.println(user.getPassword());
         if (!sha256hex.equals(user.getPassword())) {
             session.setAttribute("error", "Пароль не верный");
             logger.info("Redirecting to error page with error: Пароль не верный");

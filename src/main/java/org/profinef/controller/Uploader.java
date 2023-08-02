@@ -16,6 +16,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
+import org.profinef.entity.User;
 import org.profinef.service.AccountManager;
 import org.profinef.service.ClientManager;
 import org.profinef.service.CurrencyManager;
@@ -81,6 +82,7 @@ public class Uploader {
                                       @RequestParam(name = "date", required = false, defaultValue = "0") java.sql.Date dateAfter,
                                       HttpSession session) throws Exception {
         logger.info("Getting file...");
+        User user = (User) session.getAttribute("user");
         System.out.println(dateAfter);
         //clean database before inserting new data. it needed to avoid doubles. method marked transactional, so
         //old information will be restored in case of exception, I hope
@@ -228,7 +230,7 @@ public class Uploader {
                     if ((cell.getColumnIndex() % columnPerCurrency == 0) && isTransaction) {
                         System.out.println("currencyId=" + (currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1)));
                         logger.info("Inserting transaction on sheet: " + sheet.getSheetName());
-                        insertTransaction(row, cell.getColumnIndex(), currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1));
+                        insertTransaction(row, cell.getColumnIndex(), currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1), user);
                         amount = 0;
                         commission = 0;
                         rate = 1;
@@ -259,7 +261,7 @@ public class Uploader {
      * @param currencyId id of currency for which transaction will be created
      * @throws Exception potentially can be sent but actually it not possible
      */
-    private void insertTransaction(Row row, int cellNum, int currencyId) throws Exception {
+    private void insertTransaction(Row row, int cellNum, int currencyId, User user) throws Exception {
 
         //Getting balance color if it exists
         /*XSSFColor c = cell
@@ -286,7 +288,7 @@ public class Uploader {
         try {
             //writing transaction to database
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, null);
+                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId());
         } catch (RuntimeException e) {
             e.printStackTrace();
             //if currency did not exist create it and try again
@@ -297,7 +299,7 @@ public class Uploader {
                 ex.printStackTrace();
             }
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, null);
+                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId());
         }
         //setting parameters to default
         amount = 0;

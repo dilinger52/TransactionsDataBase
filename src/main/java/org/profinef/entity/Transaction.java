@@ -19,6 +19,7 @@ public class Transaction implements Serializable {
     String pibColor;
     String amountColor;
     String balanceColor;
+    User user;
 
 
     public Transaction() {
@@ -128,6 +129,14 @@ public class Transaction implements Serializable {
         this.balanceColor = balanceColor;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
         return "Transaction{" +
@@ -144,6 +153,7 @@ public class Transaction implements Serializable {
                 ", pibColor='" + pibColor + '\'' +
                 ", amountColor='" + amountColor + '\'' +
                 ", balanceColor='" + balanceColor + '\'' +
+                ", user='" + user + '\'' +
                 '}';
     }
 }

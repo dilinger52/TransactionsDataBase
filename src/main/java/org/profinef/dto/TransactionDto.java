@@ -40,6 +40,10 @@ public class TransactionDto {
     @Column(name = "balance_color")
     String balanceColor;
 
+    @Column(name = "user_id")
+    int userId;
+
+
     public TransactionDto() {
     }
 
@@ -147,6 +151,14 @@ public class TransactionDto {
         this.balanceColor = balanceColor;
     }
 
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
     @Override
     public String toString() {
         return "TransactionDto{" +
@@ -163,6 +175,7 @@ public class TransactionDto {
                 ", pibColor='" + pibColor + '\'' +
                 ", amountColor='" + amountColor + '\'' +
                 ", balanceColor='" + balanceColor + '\'' +
+                ", userId='" + userId + '\'' +
                 '}';
     }
 }

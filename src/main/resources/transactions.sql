@@ -69,6 +69,20 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `transactions`.`user`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `transactions`.`user` ;
+
+CREATE TABLE IF NOT EXISTS `transactions`.`user` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `login` VARCHAR(45) NOT NULL,
+  `password` VARCHAR(256) NOT NULL,
+  `role_id` INT NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `transactions`.`transaction`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `transactions`.`transaction` ;
@@ -87,43 +101,18 @@ CREATE TABLE IF NOT EXISTS `transactions`.`transaction` (
   `amount_color` VARCHAR(45) NULL,
   `balance_color` VARCHAR(45) NULL,
   `comment` VARCHAR(200) NULL,
-  PRIMARY KEY (`id`, `client_id`, `currency_id`),
+  `user_id` INT NOT NULL,
+  PRIMARY KEY (`id`, `client_id`, `currency_id`, `user_id`),
   INDEX `fk_client_has_currency_has_client_has_currency_client_has_c_idx1` (`client_id` ASC, `currency_id` ASC) VISIBLE,
+  INDEX `fk_transaction_user1_idx` (`user_id` ASC) VISIBLE,
   CONSTRAINT `fk_client_has_currency_has_client_has_currency_client_has_cur1`
     FOREIGN KEY (`client_id`)
     REFERENCES `transactions`.`account` (`client_id`)
     ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `transactions`.`role`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `transactions`.`role` ;
-
-CREATE TABLE IF NOT EXISTS `transactions`.`role` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `transactions`.`user`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `transactions`.`user` ;
-
-CREATE TABLE IF NOT EXISTS `transactions`.`user` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `role_id` INT NOT NULL,
-  `login` VARCHAR(45) NOT NULL,
-  `password` VARCHAR(256) NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_user_role1_idx` (`role_id` ASC) VISIBLE,
-  CONSTRAINT `fk_user_role1`
-    FOREIGN KEY (`role_id`)
-    REFERENCES `transactions`.`role` (`id`)
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_transaction_user1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `transactions`.`user` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -179,22 +168,11 @@ COMMIT;
 
 
 -- -----------------------------------------------------
--- Data for table `transactions`.`role`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `transactions`;
-INSERT INTO `transactions`.`role` (`id`, `name`) VALUES (0, 'Admin');
-INSERT INTO `transactions`.`role` (`id`, `name`) VALUES (1, 'Manager');
-
-COMMIT;
-
-
--- -----------------------------------------------------
 -- Data for table `transactions`.`user`
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `transactions`;
-INSERT INTO `transactions`.`user` (`id`, `role_id`, `login`, `password`) VALUES (0, 0, 'dilinger', '872f90a79bcbcf47394aa9de7bffba20eb6a195ace758967132fe954c25111af');
+INSERT INTO `transactions`.`user` (`id`, `login`, `password`, `role_id`) VALUES (1, 'admin', '3329cb839124549c72911a7bbf3a2612432b2fe41d37fef2bc1033c4c88f612f', 1);
 
 COMMIT;
 

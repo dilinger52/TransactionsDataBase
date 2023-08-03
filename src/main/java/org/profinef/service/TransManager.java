@@ -390,8 +390,18 @@ public class TransManager {
     }
 
     public List<Transaction> findByUser(Integer managerId, Timestamp startDate, Timestamp endDate, String clientName, List<Integer> currencyId) {
-        Client client = clientManager.getClient(clientName);
-        List<TransactionDto> transactionDtoList = transactionRepository.findAllByUserIdAndClientIdAndCurrencyIdInAndDateBetween(managerId, client.getId(), currencyId, startDate, endDate);
+        Client client;
+        try {
+            client = clientManager.getClient(clientName);
+        } catch (RuntimeException e) {
+            client = null;
+        }
+        List<TransactionDto> transactionDtoList;
+        if (client == null) {
+            transactionDtoList = transactionRepository.findAllByUserIdAndCurrencyIdInAndDateBetweenOrderByDateAsc(managerId, currencyId, startDate, endDate);
+        } else {
+            transactionDtoList = transactionRepository.findAllByUserIdAndClientIdAndCurrencyIdInAndDateBetweenOrderByDateAsc(managerId, client.getId(), currencyId, startDate, endDate);
+        }
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto : transactionDtoList) {
             transactions.add(formatFromDto(transactionDto));

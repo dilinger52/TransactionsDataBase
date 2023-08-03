@@ -37,5 +37,7 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
 
     void deleteByDateBetween(Timestamp startDate, Timestamp endDate);
 
-    List<TransactionDto> findAllByUserIdAndClientIdAndCurrencyIdInAndDateBetween(Integer managerId, Integer id, List<Integer> currencyId, Timestamp startDate, Timestamp endDate);
+    List<TransactionDto> findAllByUserIdAndClientIdAndCurrencyIdInAndDateBetweenOrderByDateAsc(Integer managerId, Integer id, List<Integer> currencyId, Timestamp startDate, Timestamp endDate);
+
+    List<TransactionDto> findAllByUserIdAndCurrencyIdInAndDateBetweenOrderByDateAsc(Integer managerId, List<Integer> currencyId, Timestamp startDate, Timestamp endDate);
 }

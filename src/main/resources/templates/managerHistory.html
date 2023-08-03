@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="header" id="header">
-    <h2 class="inline" th:text="|Клиент: ${session.client.pib}|"></h2>
+    <h2 class="inline" th:text="|Менеджер: ${session.manager.login}|"></h2>
     <th:block th:insert="userBlock.html :: user_block"></th:block>
     <div>
         <form method="get" action="users" class="inline">
@@ -25,7 +25,7 @@
                 </datalist>
             </div>
             <input type="date" name="startDate" th:value="${#dates.format(session.startDate, 'yyyy-MM-dd')}" class="inline">
-            <input type="date" name="endDate" th:value="${#dates.format(session.endDate1, 'yyyy-MM-dd')}" class="inline">
+            <input type="date" name="endDate" th:value="${#dates.format(session.endDate, 'yyyy-MM-dd')}" class="inline">
             <th:block th:each="currency : ${session.currencies}">
                 <input type="checkbox" th:id="|currency_id${currency.id}|" name="currency_id" th:value="${currency.id}" th:checked="${#lists.contains(session.currency_name, currency.name)}" class="inline">
                 <label th:for="|currency_id${currency.id}|" class="inline" th:text="${currency.name}"></label>

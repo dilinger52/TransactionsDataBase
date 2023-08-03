@@ -131,7 +131,7 @@ public class AppController {
             logger.trace("currencyName = " + currencyName);
         }
         if (startDate == null) startDate = Date.valueOf(LocalDate.now());
-        if (endDate == null) endDate = new Date(startDate.getTime() + 86400000 - 1);
+        if (endDate == null) endDate = new Date(startDate.getTime() + 86400000);
         logger.trace("startDate = " + startDate);
         logger.trace("endDate = " + endDate);
         Client client = clientManager.getClient(clientId);
@@ -183,7 +183,7 @@ public class AppController {
         session.setAttribute("currencies", currencies);
         session.setAttribute("total", total);
         session.setAttribute("startDate", new Timestamp(startDate.getTime()));
-        session.setAttribute("endDate", new Timestamp(endDate.getTime()));
+        session.setAttribute("endDate", new Timestamp(endDate.getTime() - 1));
         session.setAttribute("endDate1", new Timestamp(endDate.getTime()));
         session.setAttribute("client", client);
         session.setAttribute("transactions", transactions);
@@ -498,7 +498,7 @@ public class AppController {
         }
         System.out.println(amount);
         try {
-            if (amount.stream().filter(a -> a > 0).count() > 1) {
+            /*if (amount.stream().filter(a -> a > 0).count() > 1) {
                 logger.debug("Found several positive amounts");
                 if (amount.stream().filter(a -> a < 0).count() > 1) {
                     logger.debug("Found several negative amounts");
@@ -508,7 +508,7 @@ public class AppController {
                             " заменена на несколько более простых. Пожалуйста выполните их отдельно");
                     return "error";
                 }
-            }
+            }*/
             if (comment.size() == 0) {
                 comment = new ArrayList<>();
                 for (String name : clientName) {
@@ -963,24 +963,33 @@ public class AppController {
             return "error";
         }
         if (managerId == null) {
-            managerId = (Integer) session.getAttribute("managerId");
+            managerId = ((User) session.getAttribute("manager")).getId();
         }
         if (startDate == null) startDate = Date.valueOf(LocalDate.now());
-        if (endDate == null) endDate = new Date(startDate.getTime() + 86400000 - 1);
+        if (endDate == null) endDate = new Date(startDate.getTime() + 86400000);
+        List<Currency> currencies = currencyManager.getAllCurrencies();
         if (currencyId == null) {
             logger.debug("currencyId = null");
             currencyId = new ArrayList<>();
-            List<Currency> currencies = currencyManager.getAllCurrencies();
+
             for (Currency currency : currencies) {
                 currencyId.add(currency.getId());
             }
             logger.trace("currencyId = " + currencyId);
         }
+        List<String> currencyName = new ArrayList<>();
+        for (Integer curId :
+                currencyId) {
+            currencyName.add(currencyManager.getCurrency(curId).getName());
+        }
         List<Transaction> transactions = transManager.findByUser(managerId, new Timestamp(startDate.getTime()), new Timestamp(endDate.getTime() - 1), clientName, currencyId);
+        User manager = userManager.getUser(managerId);
         session.setAttribute("startDate", startDate);
-        session.setAttribute("endDate", endDate);
-        session.setAttribute("managerId", managerId);
+        session.setAttribute("endDate1", endDate);
+        session.setAttribute("manager", manager);
         session.setAttribute("transactions", transactions);
+        session.setAttribute("currencies", currencies);
+        session.setAttribute("currency_name", currencyName);
         return "managerHistory";
     }
 

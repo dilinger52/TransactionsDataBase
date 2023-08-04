@@ -189,7 +189,7 @@ public class AppController {
         session.setAttribute("transactions", transactions);
         session.setAttribute("currency_name", currencyName);
         logger.info("Client info page loaded");
-        return "clientInfo";
+        return "clientInfo2";
     }
 
     /**

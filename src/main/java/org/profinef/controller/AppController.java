@@ -177,6 +177,9 @@ public class AppController {
         tr.setTransportation(0.0);
         transaction.add(tr);
         logger.trace("total = " + total);
+
+        List<Account> clients = accountManager.getAllAccounts();
+        session.setAttribute("clients", clients);
         session.setAttribute("transaction", transaction);
         session.setAttribute("comments", comments);
         session.setAttribute("path", "/client_info");

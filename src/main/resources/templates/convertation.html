@@ -13,6 +13,7 @@
     <input type="submit" value="<- Назад">
 </form>
 <form method="post" action="/transaction">
+    <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
     <input type="hidden" name="client_name" th:value="${session.client.pib}">
     <input type="hidden" name="client_name" th:value="${session.client.pib}">
     <input type="hidden" name="comment" value="Обмен валют">

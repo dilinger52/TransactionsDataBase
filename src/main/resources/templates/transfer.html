@@ -14,6 +14,7 @@
     <input type="submit" value="<- Назад">
 </form>
 <form method="post" action="transaction">
+    <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
     <input type="hidden" name="amount" id="amount2">
     <input type="hidden" name="currency_name" id="currency2">
     <input type="hidden" name="rate" value="1">

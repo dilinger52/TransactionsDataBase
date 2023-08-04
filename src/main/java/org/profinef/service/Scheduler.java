@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -51,8 +52,8 @@ public class Scheduler {
 
 
     }
-/*
-    /*@Scheduled(cron = "0 0 22 * * *")
+
+    @Scheduled(cron = "0 0 22 * * *")
     public void restoreFromBackUp() throws Exception {
         File directory = new File("backupLocal\\");
         File[] files = directory.listFiles(File::isFile);
@@ -76,12 +77,12 @@ public class Scheduler {
         } else {
             logger.info("some errors with restoring from backupLocal");
         }
-    }*/
+    }
 
-    /*@Scheduled(cron = "0 30 22 * * *")
+    @Scheduled(cron = "0 30 22 * * *")
     public void makeExcel() throws Exception {
         excelManager.createFull();
-    }*/
+    }
 
 
 }

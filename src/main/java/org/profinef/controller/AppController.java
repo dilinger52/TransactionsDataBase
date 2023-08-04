@@ -1287,7 +1287,6 @@ public class AppController {
         }
 
         scheduler.makeBackUp();
-        /*}*/
         return "redirect:/users";
     }
 
@@ -1300,8 +1299,7 @@ public class AppController {
             return "error";
         }
 
-        //scheduler.restoreFromBackUp();
-        /*}*/
+        scheduler.restoreFromBackUp();
         return "redirect:/users";
     }
 

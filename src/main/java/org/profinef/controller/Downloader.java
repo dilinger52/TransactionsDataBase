@@ -174,7 +174,7 @@ public class Downloader {
                                 }
 
                             }
-                            if (row.getCell(0).getDateCellValue().toInstant()
+                            if (row.getCell(0) != null && row.getCell(0).getDateCellValue().toInstant()
                                     .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay()
                                     .isAfter(transaction.getDate().toInstant()
                                             .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay())) {
@@ -454,7 +454,6 @@ public class Downloader {
      * Create a file that represents database and send it to user for download
      * @param response used to send a file
      */
-    @Transactional
     @RequestMapping(path = "/all")
     public void writeIntoExcel(HttpServletResponse response) {
         logger.info("Downloading excel workbook...");

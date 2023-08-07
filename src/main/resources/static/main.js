@@ -283,6 +283,7 @@ function addRow(id) {
         const input3 = document.createElement('input');
             input3.type = "text";
             input3.name = "client_name";
+            input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", 'form');
         th3.appendChild(input3);
     tr.appendChild(th3);

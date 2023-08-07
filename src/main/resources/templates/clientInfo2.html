@@ -106,7 +106,7 @@
                     <th th:style="|color: ${transaction.pibColor}|"  th:id="|pib_${transaction.id}_${session.client.id}_${transaction.currency.id}|">
                         <input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Показать" th:onclick="|showAgents(${transaction.id}${currency.id})|" th:id="|${transaction.id}${currency.id}|">
                         <!--/*<input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${transaction.id}${currency.id}|" th:onclick="addRow(this.getAttribute('data-1'))">*/-->
-                        <input th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" type="text" th:value="${transaction.client.pib}" name="client_name">
+                        <input th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" type="text" th:value="${transaction.client.pib}" name="client_name" list="client_datalist">
                     </th>
                     <th th:id="|comment_${transaction.id}_${session.client.id}_${transaction.currency.id}|">
                         <input th:form="${id}" type="text" th:value="${transaction.comment}" name="comment">
@@ -139,6 +139,9 @@
             </tr>
             </th:block>
             <form method="post" action="transaction" id="form">
+                <datalist id="client_datalist">
+                    <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
+                </datalist>
                 <input type="hidden" name="currency_name" th:value="${currency.name}" form="form">
                 <input type="hidden" name="client_name" th:value="${session.client.pib}" form="form">
             <tr th:id="|${currency.name}tr0|">

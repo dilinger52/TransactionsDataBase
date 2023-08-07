@@ -159,7 +159,7 @@ public class TransManager {
         logger.debug("Updating amount of next transactions");
         Client client = clientManager.getClient(clientName);
         List<TransactionDto> transactionDtoList = transactionRepository
-                .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByCurrencyIdAscDateAsc(
+                .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAsc(
                         client.getId(), currencyId, new Timestamp(date.getTime() + 1),
                         new Timestamp(System.currentTimeMillis()));
         logger.trace("Found transactions by clientId=" + client.getId() + " currencyId=" + currencyId +
@@ -322,7 +322,7 @@ public class TransManager {
     public List<Transaction> findByClientForDate(int clientId, List<Integer> currencyId, Timestamp startDate, Timestamp endDate) {
         logger.debug("getting transactions by clientId for date");
         List<TransactionDto> transactionDtoList = transactionRepository
-                .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByCurrencyIdAscDateAsc(
+                .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAsc(
                         clientId, currencyId, startDate, endDate);
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto : transactionDtoList) {
@@ -404,6 +404,16 @@ public class TransManager {
         }
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto : transactionDtoList) {
+            transactions.add(formatFromDto(transactionDto));
+        }
+        return transactions;
+    }
+
+    public List<Transaction> findById(Integer id) {
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllById(id);
+        List<Transaction> transactions = new ArrayList<>();
+        for (TransactionDto transactionDto :
+                transactionDtoList) {
             transactions.add(formatFromDto(transactionDto));
         }
         return transactions;

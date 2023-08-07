@@ -3,6 +3,7 @@ package org.profinef.entity;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 public class Transaction implements Serializable {
 
@@ -155,5 +156,17 @@ public class Transaction implements Serializable {
                 ", balanceColor='" + balanceColor + '\'' +
                 ", user='" + user + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Transaction that)) return false;
+        return Objects.equals(getId(), that.getId()) && Objects.equals(getClient(), that.getClient()) && Objects.equals(getCurrency(), that.getCurrency());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getClient(), getCurrency());
     }
 }

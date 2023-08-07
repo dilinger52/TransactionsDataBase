@@ -13,6 +13,7 @@
     <input type="submit" value="<- Назад">
 </form>
 <form method="post" action="/transaction">
+    <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
     <input type="hidden" name="client_name" th:value="${session.client.pib}">
     <input type="hidden" name="client_name" th:value="${session.client.pib}">
     <input type="hidden" name="comment" value="Обмен валют">
@@ -22,6 +23,7 @@
     <input type="hidden" name="commission" value="0">
     <input type="hidden" name="transportation" value="0">
     <input type="hidden" class="exchange" th:each="currency : ${session.currencies}" th:name="${currency.name}" th:value="${currency.averageExchange}">
+
     <div>
     <div class="inline">
         <label for="currency1">Валюта продаваемая</label>
@@ -32,7 +34,7 @@
     </div>
     <div class="inline">
         <label for="amount">Колличество</label>
-        <input type="text" name="amount" id="amount" onkeyup="convert()" required>
+        <input type="text" name="positiveAmount" id="amount" onkeyup="convert()" required>
     </div>
     <div class="inline">
         <label for="rate1">Обменный курс</label>
@@ -46,12 +48,14 @@
         <input type="text" name="currency_name" id="currency2" onkeyup="convertDescription()" list="currency_datalist" required>
     </div>
     <div class="inline">
-        <input type="hidden" name="amount" value="0" id="changeInput">
+        <input type="hidden" name="positiveAmount" value="0" id="changeInput">
         <label for="changeDiv">Колличество</label>
         <input type="text" id="changeDiv" readonly>
     </div>
     </div>
     <input type="hidden" name="rate" value="1" id="rate2">
+    <input type="hidden" name="negativeAmount" value="0">
+    <input type="hidden" name="negativeAmount" value="0">
     <input type="submit">
 </form>
 </body>

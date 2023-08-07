@@ -1,6 +1,7 @@
 package org.profinef.entity;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Currency implements Comparable<Currency>, Serializable {
     Integer id;
@@ -51,5 +52,17 @@ public class Currency implements Comparable<Currency>, Serializable {
     @Override
     public int compareTo(Currency o) {
         return this.getId().compareTo(o.getId());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Currency currency)) return false;
+        return Objects.equals(getId(), currency.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }

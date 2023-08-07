@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.time.ZoneId.systemDefault;
 
@@ -137,10 +138,15 @@ public class AppController {
         Client client = clientManager.getClient(clientId);
         List<Transaction> transactions = transManager.findByClientForDate(clientId, currencyId,
                 new Timestamp(startDate.getTime()), new Timestamp(endDate.getTime() - 1));
+        System.out.println(transactions);
         Set<String> comments = transManager.getAllComments();
         Map<String, Double> total = new HashMap<>();
         List<Currency> currencies = currencyManager.getAllCurrencies();
+        Map<Integer, List<Integer>> transactionIds = new HashMap<>();
         for (Currency currency : currencies) {
+            List<Integer> list = transactions.stream().filter(transaction -> transaction.getCurrency()
+                    .getId().equals(currency.getId())).map(Transaction::getId).sorted().collect(Collectors.toList());
+            transactionIds.put(currency.getId(), list);
             List<Transaction> transactionList = transactions.stream().filter(transaction -> transaction.getCurrency()
                     .getId().equals(currency.getId())).toList();
             TransactionDto transactionDto = transManager.findPrevious(clientId, currency.getId(), new Timestamp(startDate.getTime()));
@@ -154,30 +160,32 @@ public class AppController {
             } else {
                 total.put("balance" + currency.getId(), transactionList.get(transactionList.size() - 1).getBalance());
             }
-
-
-            for (Transaction transaction : transactionList) {
-                List<Transaction> tl = transManager.getTransaction(transaction.getId());
-                StringBuilder clients = new StringBuilder();
-                for (Transaction t : tl) {
-                    if (!t.getClient().getId().equals(transaction.getClient().getId())) {
-                        clients.append(" ");
-                        clients.append(t.getClient().getPib());
-                    }
-                }
-                transaction.setClient(new Client(clients.toString()));
-            }
         }
-        List<Transaction> transaction = new ArrayList<>();
-        Transaction tr = new Transaction();
-        tr.setClient(client);
-        tr.setCurrency(new Currency());
-        tr.setRate(1.0);
-        tr.setCommission(0.0);
-        tr.setTransportation(0.0);
-        transaction.add(tr);
+
+        System.out.println(transactionIds);
+        List<Transaction> list = new ArrayList<>();
+        for (Transaction tr : transactions) {
+
+            List<Transaction> l = transManager.findById(tr.getId());
+            for (Transaction t : l) {
+                if (!list.contains(t)) {
+                    list.add(t);
+                }
+            }
+
+        }
+        System.out.println(list);
+        list.sort((o1, o2) -> {
+            if (Objects.equals(o1.getId(), o2.getId())) {
+                if (Objects.equals(o1.getClient().getId(), client.getId())) return -1;
+                if (Objects.equals(o2.getClient().getId(), client.getId())) return 1;
+            }
+            return 0;
+        });
+        System.out.println(list);
+        transactions = list;
+
         logger.trace("total = " + total);
-        session.setAttribute("transaction", transaction);
         session.setAttribute("comments", comments);
         session.setAttribute("path", "/client_info");
         session.setAttribute("currencies", currencies);
@@ -187,6 +195,7 @@ public class AppController {
         session.setAttribute("endDate1", new Timestamp(endDate.getTime()));
         session.setAttribute("client", client);
         session.setAttribute("transactions", transactions);
+        session.setAttribute("transactionIds", transactionIds);
         session.setAttribute("currency_name", currencyName);
         logger.info("Client info page loaded");
         return "clientInfo2";
@@ -334,10 +343,15 @@ public class AppController {
                                   @RequestParam(name = "currency_name") List<String> currencyName,
                                   @RequestParam(name = "rate") List<Double> rate,
                                   @RequestParam(name = "commission") List<Double> commission,
-                                  @RequestParam(name = "amount") List<Double> amount,
+                                  @RequestParam(name = "positiveAmount") List<Double> positiveAmount,
+                                  @RequestParam(name = "negativeAmount") List<Double> negativeAmount,
                                   @RequestParam(name = "transportation") List<Double> transportation,
                                   HttpSession session) {
         logger.info("Saving transaction after editing...");
+        List<Double> amount = new ArrayList<>();
+        for (int i = 0; i < positiveAmount.size(); i++) {
+            amount.add(positiveAmount.get(i) + negativeAmount.get(i));
+        }
         if (comment.size() == 0) {
             comment = new ArrayList<>();
             for (String name : clientName) {
@@ -485,10 +499,15 @@ public class AppController {
                                 @RequestParam(name = "comment", required = false) List<String> comment,
                                 @RequestParam(name = "rate") List<Double> rate,
                                 @RequestParam(name = "commission") List<Double> commission,
-                                @RequestParam(name = "amount") List<Double> amount,
+                                @RequestParam(name = "positiveAmount") List<Double> positiveAmount,
+                                @RequestParam(name = "negativeAmount") List<Double> negativeAmount,
                                 @RequestParam(name = "transportation") List<Double> transportation,
                                 @RequestParam(name = "date", required = false) Date date,
                                 HttpSession session) {
+        List<Double> amount = new ArrayList<>();
+        for (int i = 0; i < positiveAmount.size(); i++) {
+            amount.add(positiveAmount.get(i) + negativeAmount.get(i));
+        }
         User user = (User) session.getAttribute("user");
         logger.info("Creating new transaction...");
         if (session.getAttribute("path") == "/convertation" ||
@@ -509,7 +528,7 @@ public class AppController {
                     return "error";
                 }
             }*/
-            if (comment.size() == 0) {
+            if (comment.isEmpty()) {
                 comment = new ArrayList<>();
                 for (String name : clientName) {
                     comment.add("");
@@ -544,6 +563,7 @@ public class AppController {
             System.out.println(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()));
             System.out.println(date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli())));
             for (int i = 0; i < clientName.size(); i++) {
+                if (amount.get(i) == 0) continue;
                 try {
                     if (date != null && date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()))) {
                         Double oldBalance = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));

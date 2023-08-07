@@ -14,7 +14,8 @@
     <input type="submit" value="<- Назад">
 </form>
 <form method="post" action="transaction">
-    <input type="hidden" name="amount" id="amount2">
+    <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
+    <input type="hidden" name="positiveAmount" id="amount2">
     <input type="hidden" name="currency_name" id="currency2">
     <input type="hidden" name="rate" value="1">
     <input type="hidden" name="rate" value="1">
@@ -30,7 +31,7 @@
     </div>
     <div class="inline">
     <label for="amount1">Количество</label>
-    <input type="text" name="amount" id="amount1" onkeyup="transfer()" required>
+    <input type="text" name="positiveAmount" id="amount1" onkeyup="transfer()" required>
     </div>
     </div>
     <div>
@@ -65,6 +66,8 @@
     <input type="text" name="transportation" id="transportation2" value="0" required>
     </div>
     </div>
+    <input type="hidden" name="negativeAmount" value="0">
+    <input type="hidden" name="negativeAmount" value="0">
     <input type="submit">
 </form>
 </body>

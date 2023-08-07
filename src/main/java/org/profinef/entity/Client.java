@@ -2,6 +2,7 @@ package org.profinef.entity;
 
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Client implements Serializable, Comparable<Client>{
 
@@ -59,5 +60,17 @@ public class Client implements Serializable, Comparable<Client>{
     @Override
     public int compareTo(Client o) {
         return this.getId().compareTo(o.getId());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Client client)) return false;
+        return Objects.equals(getId(), client.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }

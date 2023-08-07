@@ -4,6 +4,17 @@ padding: 3px;
 }
 input {
 margin: 0px;
+padding: 1px;
+}
+th input[type="text"] {
+font-size: 16px;
+max-width: 100px;
+border: none;
+padding: 0px;
+}
+
+th input[type="text"]:focus {
+  border: none;
 }
 body, label{
 margin: 0px;
@@ -12,7 +23,10 @@ padding: 0px;
 
 td, th, thead, tbody {
 border: 1px solid;
-padding: 10px;
+padding: 5px;
+}
+
+th {
 }
 
 table {
@@ -38,7 +52,6 @@ left: 0px;
 }
 
 thead {
-position: sticky;
 background: white;
 width: 100%;
 top: 320px;

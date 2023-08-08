@@ -372,5 +372,226 @@ function arithmetic(id) {
 
     document.getElementById(id + 'com').innerHTML = ((positiveAmount + negativeAmount) * commission / 100).toFixed(2);
     document.getElementById(id + 'total').innerHTML = ((positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(2)
+}
 
+function perevod(id) {
+    addRow(id);
+    var currentButton = document.getElementById("per" + id);
+    currentButton.value = "Отменить";
+    currentButton.setAttribute("onclick", "cleanPer('" + id + "')");
+    var row0 = document.getElementById(id + 'tr0').children;
+    var row1 = document.getElementById(id + 'tr1').children;
+    for (var i = 0; i < row0.length; i++) {
+            var row0child = row0[i].children;
+            for (var j = 0; j < row0child.length; j++) {
+                var el = row0child[j];
+                if (el.tagName == "INPUT") {
+                    if (el.type == "button") {
+                           el.style.display = "none";
+                    }
+                    if (el.name == "comment") {
+                        el.value = "Перевод";
+                        el.setAttribute("readonly", true);
+                    }
+                    if (el.name == "positiveAmount") {
+                        el.setAttribute("onkeyup", "perevodSum('" + id + "')");
+                    }
+                    if (el.name == "negativeAmount") {
+                        el.setAttribute("onkeyup", "perevodSum('" + id + "')");
+                    }
+                    if (el.name == "rate") {
+                        el.setAttribute("readonly", true);
+                    }
+                }
+            }
+        }
+        for (var i = 0; i < row1.length; i++) {
+                var row1child = row1[i].children;
+                for (var j = 0; j < row1child.length; j++) {
+                    var el = row1child[j];
+                    if (el.tagName == "INPUT") {
+                        if (el.type == "button") {
+                               el.style.display = "none";
+                        }
+                        if (el.name == "positiveAmount") {
+                            el.setAttribute("readonly", true);
+                        }
+                        if (el.name == "negativeAmount") {
+                            el.setAttribute("readonly", true);
+                        }
+                        if (el.name == "comment") {
+                            el.value = "Перевод";
+                            el.setAttribute("readonly", true);
+                        }
+                        if (el.name == "positiveAmount") {
+                            el.setAttribute("onkeyup", "perevodSum('" + id + "')");
+                        }
+                        if (el.name == "negativeAmount") {
+                            el.setAttribute("onkeyup", "perevodSum('" + id + "')");
+                        }
+                        if (el.name == "rate") {
+                            el.setAttribute("readonly", true);
+                        }
+                    }
+                }
+            }
+            }
+
+function perevodSum(id) {
+    var positiveAmount = Number(document.getElementById(id + 'tr0pAmount').value);
+    var negativeAmount = Number(document.getElementById(id + 'tr0nAmount').value);
+    var amount = - positiveAmount - negativeAmount;
+    if (amount >= 0) {
+        document.getElementById(id + 'tr1pAmount').value = amount;
+        document.getElementById(id + 'tr1nAmount').value = 0;
+    } else {
+        document.getElementById(id + 'tr1nAmount').value = amount;
+        document.getElementById(id + 'tr1pAmount').value = 0;
+
+    }
+    arithmetic(id + "tr0");
+    arithmetic(id + "tr1");
+}
+
+function cleanPer(id) {
+    deleteRow(id + "tr1");
+    var currentButton = document.getElementById("per" + id);
+        currentButton.value = "Перевод";
+        currentButton.setAttribute("onclick", "perevod('" + id + "')");
+    var row0 = document.getElementById(id + 'tr0').children;
+        for (var i = 0; i < row0.length; i++) {
+                var row0child = row0[i].children;
+                for (var j = 0; j < row0child.length; j++) {
+                    var el = row0child[j];
+                    if (el.tagName == "INPUT") {
+                        if (el.type == "button") {
+                               el.style.display = "inherit";
+                        }
+                        if (el.name == "comment") {
+                            el.value = "";
+                            el.setAttribute("readonly", false);
+                        }
+                        if (el.name == "positiveAmount") {
+                            el.setAttribute("onkeyup", "arithmetic('" + id + "tr0')");
+                        }
+                        if (el.name == "negativeAmount") {
+                            el.setAttribute("onkeyup", "arithmetic('" + id + "tr0')");
+                        }
+                        if (el.name == "rate") {
+                            el.setAttribute("readonly", false);
+                        }
+                    }
+                }
+            }
+}
+
+function obmen() {
+    var currentButton = document.getElementById("obm");
+    currentButton.value = "Отменить";
+    currentButton.setAttribute("onclick", "cleanObm()");
+    var trs = document.querySelectorAll(`[id$="tr0"]`);
+    console.log(trs);
+    for (var i = 0; i < trs.length; i++) {
+        var cur = trs[i].id.substring(0, 3);
+        var th = trs[i].children;
+        console.log(th);
+        if (i == 0) {
+            const checkbox = document.createElement('input');
+                checkbox.type = checkbox;
+                checkbox.name = cur;
+            th.appendChild(checkbox);
+        }
+                        for (var j = 0; j < th.length; j++) {
+                            var el = th[j];
+                            if (el.tagName == "INPUT") {
+                                if (el.type == "button") {
+                                       el.style.display = "none";
+                                }
+                                if (el.name == "positiveAmount") {
+                                    el.setAttribute("readonly", true);
+                                }
+                                if (el.name == "negativeAmount") {
+                                    el.setAttribute("readonly", true);
+                                }
+                                if (el.name == "comment") {
+                                    el.value = "Обмен";
+                                    el.setAttribute("readonly", true);
+                                }
+                                if (el.name == "positiveAmount") {
+                                    el.setAttribute("onkeyup", "obmenSum()");
+                                }
+                                if (el.name == "negativeAmount") {
+                                    el.setAttribute("onkeyup", "obmenSum()");
+                                }
+                                if (el.name == "commission") {
+                                    el.setAttribute("readonly", true);
+                                }
+                                if (el.name == "transportation") {
+                                    el.setAttribute("readonly", true);
+                                }
+                            }
+                        }
+                    }
+
+
+}
+
+function obmenSum() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+    // Define the pattern for matching three letters
+    const threeLetterPattern = /^[a-zA-Z]{3}$/;
+
+    // Array to store selected checkboxes
+    const selectedCheckboxes = [];
+
+    // Iterate through checkboxes and check their names
+    checkboxes.forEach(checkbox => {
+      if (checkbox.checked && threeLetterPattern.test(checkbox.name)) {
+        selectedCheckboxes.push(checkbox);
+      }
+    });
+    if (selectedCheckboxes.length != 2) {
+        return;
+    }
+       var name0 = selectedCheckboxes[0].name;
+       var name1 = selectedCheckboxes[1].name;
+    var positiveAmount = Number(document.getElementById(name0 + 'tr0pAmount').value);
+    var negativeAmount = Number(document.getElementById(name0 + 'tr0nAmount').value);
+    var rate0 = Number(document.getElementById(name0 + 'tr0rate').value);
+    var rate1 = Number(document.getElementById(name1 + 'tr0rate').value);
+    var rate = rate0 * rate1;
+        var exchangeRates = document.getElementsByClassName("exchange");
+        console.log(exchangeRates);
+        var currency1rate = 0;
+        var currency2rate = 0;
+        var result = 0;
+        for (var i = 0; i < exchangeRates.length; i++) {
+            if (name0 == exchangeRates[i].name) {
+                currency1rate = Number(exchangeRates[i].value);
+            }
+            if (name1 == exchangeRates[i].name) {
+                currency2rate = Number(exchangeRates[i].value);
+            }
+        }
+        console.log(currency1rate);
+        console.log(currency2rate);
+        var amount = positiveAmount + negativeAmount;
+        if (currency1rate > currency2rate) {
+            result = amount * rate;
+        }
+
+        if (currency1rate <= currency2rate) {
+            result = amount / rate;
+        }
+        if (amount >= 0) {
+            document.getElementById(name1 + 'tr0pAmount').value = result;
+            document.getElementById(name1 + 'tr0nAmount').value = 0;
+        } else {
+            document.getElementById(name1 + 'tr0nAmount').value = result;
+            document.getElementById(name1 + 'tr0pAmount').value = 0;
+
+        }
+    arithmetic(name0 + "tr0");
+    arithmetic(name1 + "tr0");
 }

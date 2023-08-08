@@ -63,6 +63,7 @@
     </form>
     <button onclick="saveColors()" class="inline">Сохранить расцветку</button>
     <button onclick="capture()" class="inline">Скриншот</button>
+    <input class="inline" id="obm" type="button" value="Обмен" onclick="obmen()">
 </div>
 </div>
 <div class="currencies">
@@ -70,12 +71,14 @@
         <h3 th:text="${currency.name}" class="inline">HRN</h3>
         <h3 class="inline" th:text="|Баланс на начало ${#dates.format(session.startDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['amount' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
         <h3 class="inline" th:text="|Баланс в конце ${#dates.format(session.endDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['balance' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
+        <input class="inline" th:id="|per${currency.name}|" type="button" value="Перевод" th:data-1="${currency.name}" th:onclick="perevod(this.getAttribute('data-1'))">
+        <input type="hidden" class="exchange" th:name="${currency.name}" th:value="${currency.averageExchange}">
         <table id="capture" th:style="${currency.name == 'RUB' ? 'background-color: mistyrose;' : currency.name == 'USD' ? 'background-color: honeydew;' : currency.name == 'EUR' ? 'background-color: lavender;' : currency.name == 'PLN' ? 'background-color: lightcyan;' : ''}">
             <thead id="thead" style="background-color: initial;">
             <tr>
                 <th class="ignore">Редактировать</th>
                 <th>Дата</th>
-                <th>Остальные участники</th>
+                <th>Контрагенты</th>
                 <th>Комментарий</th>
                 <th>Прием</th>
                 <th>Выдача</th>
@@ -94,7 +97,7 @@
                 <form method="post" action="delete_transaction" th:id="|del${id}|">
                     <input type="hidden" name="transaction_id" th:value="${id}">
                 </form>
-            <tr th:each="transaction : ${session.transactions}" th:if="${transaction.id == id && transaction.currency.id == currency.id}" th:style="${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? '' : 'display:none'}" th:name="|${transaction.id}${currency.id}|">
+            <tr th:each="transaction, iter : ${session.transactions}" th:if="${transaction.id == id && transaction.currency.id == currency.id}" th:style="${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? '' : 'display:none'}" th:id="|${currency.id}${iter.index}|" th:name="|${transaction.id}${currency.id}|">
 
                     <input th:form="${id}" th:if="${transaction.client.id == session.client.id}" type="hidden" name="client_name" th:value="${session.client.pib}">
                     <input th:form="${id}" type="hidden" name="currency_name" th:value="${currency.name}">
@@ -102,14 +105,14 @@
                         <input th:form="${id}" type="hidden" name="transaction_id" th:value="${transaction.id}">
                         <input th:form="${id}" type="submit" value="Сохранить" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}">
                         <input th:form="|del${id}|" type="submit" value="Удалить" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}">
-                        <!--/*<input th:form="${id}" type="submit" value="Удалить" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" onclick="deleteRow()">*/-->
+                        <input th:form="${id}" type="submit" value="Удалить строку" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:onclick="|deleteRow(${currency.id}${iter.index})|">
                     </th>
                 <th th:id="|date_${transaction.id}_${session.client.id}_${transaction.currency.id}|">
                     <input th:form="${id}" type="date" th:value="${#dates.format(transaction.date, 'yyyy-MM-dd')}" name="date">
                 </th>
                     <th th:style="|color: ${transaction.pibColor}|"  th:id="|pib_${transaction.id}_${session.client.id}_${transaction.currency.id}|">
                         <input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Показать" th:onclick="|showAgents(${transaction.id}${currency.id})|" th:id="|${transaction.id}${currency.id}|">
-                        <!--/*<input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${transaction.id}${currency.id}|" th:onclick="addRow(this.getAttribute('data-1'))">*/-->
+                        <input th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${transaction.id}${currency.id}|" th:onclick="addRow(this.getAttribute('data-1'))">
                         <input th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" type="text" th:value="${transaction.client.pib}" name="client_name" list="client_datalist">
                     </th>
                     <th th:id="|comment_${transaction.id}_${session.client.id}_${transaction.currency.id}|">
@@ -173,7 +176,7 @@
                     <th th:id="|${currency.name}tr0com|">0.0</th>
 
                     <th>
-                        <input type="text" value="1.0" name="rate" form="form">
+                        <input type="text" value="1.0" name="rate" form="form" th:id="|${currency.name}tr0rate|">
                     </th>
                 <th>
                     <input type="text" name="transportation" value="0.0" form="form" th:id="|${currency.name}tr0trans|" th:data-1="|${currency.name}tr0|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">

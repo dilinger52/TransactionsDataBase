@@ -352,6 +352,11 @@ public class AppController {
         for (int i = 0; i < positiveAmount.size(); i++) {
             amount.add(positiveAmount.get(i) + negativeAmount.get(i));
         }
+        if (amount.stream().filter(a -> a > 0 || a <0).count() <= 0) {
+            logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+            session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+            return "error";
+        }
         if (comment.size() == 0) {
             comment = new ArrayList<>();
             for (String name : clientName) {

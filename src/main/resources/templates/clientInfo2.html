@@ -91,6 +91,9 @@
             <tbody th:id="${currency.name}">
             <th:block th:each="id : ${session.transactionIds[currency.id]}">
                 <form method="post" action="edit_transaction" th:id="${id}"></form>
+                <form method="post" action="delete_transaction" th:id="|del${id}|">
+                    <input type="hidden" name="transaction_id" th:value="${id}">
+                </form>
             <tr th:each="transaction : ${session.transactions}" th:if="${transaction.id == id && transaction.currency.id == currency.id}" th:style="${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? '' : 'display:none'}" th:name="|${transaction.id}${currency.id}|">
 
                     <input th:form="${id}" th:if="${transaction.client.id == session.client.id}" type="hidden" name="client_name" th:value="${session.client.pib}">
@@ -98,6 +101,7 @@
                     <th>
                         <input th:form="${id}" type="hidden" name="transaction_id" th:value="${transaction.id}">
                         <input th:form="${id}" type="submit" value="Сохранить" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}">
+                        <input th:form="|del${id}|" type="submit" value="Удалить" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}">
                         <!--/*<input th:form="${id}" type="submit" value="Удалить" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" onclick="deleteRow()">*/-->
                     </th>
                 <th th:id="|date_${transaction.id}_${session.client.id}_${transaction.currency.id}|">

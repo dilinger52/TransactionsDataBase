@@ -716,7 +716,7 @@ public class AppController {
      * @param currencyId code/id of new currency
      * @param session collect parameters for view
      */
-    @PostMapping(path = "/add_currency")
+    @PostMapping(path = "/new_currency")
     public String saveNewCurrency(@RequestParam(name = "currency_name") String currencyName,
                                   @RequestParam(name = "currency_id") int currencyId,
                                   HttpSession session) {

@@ -70,8 +70,8 @@
         <h3 th:text="${currency.name}" class="inline">HRN</h3>
         <h3 class="inline" th:text="|Баланс на начало ${#dates.format(session.startDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['amount' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
         <h3 class="inline" th:text="|Баланс в конце ${#dates.format(session.endDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['balance' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
-        <table id="capture">
-            <thead id="thead">
+        <table id="capture" th:style="${currency.name == 'RUB' ? 'background-color: mistyrose;' : currency.name == 'USD' ? 'background-color: honeydew;' : currency.name == 'EUR' ? 'background-color: lavender;' : currency.name == 'PLN' ? 'background-color: lightcyan;' : ''}">
+            <thead id="thead" style="background-color: initial;">
             <tr>
                 <th class="ignore">Редактировать</th>
                 <th>Дата</th>

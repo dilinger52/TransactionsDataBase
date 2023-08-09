@@ -273,7 +273,7 @@ function addRow(id) {
          sum -= Number(nAmount.value);
      }
 //sum = -1 * sum;
-
+console.log(sum);
  const tr = document.createElement('tr');
     tr.id=id + "tr" + num;
     const input0 = document.createElement('input');
@@ -329,8 +329,6 @@ function addRow(id) {
                 } else {
                     input6.value = "0.0";
                 }
-
-                input6.value = "0.0";
                 input6.id = id + "tr" + num + "nAmount";
                 input6.setAttribute("Form", 'form');
                 input6.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
@@ -378,7 +376,7 @@ function addRow(id) {
         tr.appendChild(th12);
     var tbody = document.getElementById(id);
     tbody.appendChild(tr);
-
+    arithmetic(tr.id);
 }
 
 function deleteRow(id) {
@@ -493,7 +491,7 @@ function cleanPer(id) {
                         }
                         if (el.name == "comment") {
                             el.value = "";
-                            el.setAttribute("readonly", false);
+                            el.removeAttribute("readonly");
                         }
                         if (el.name == "positiveAmount") {
                             el.setAttribute("onkeyup", "arithmetic('" + id + "tr0')");
@@ -502,7 +500,7 @@ function cleanPer(id) {
                             el.setAttribute("onkeyup", "arithmetic('" + id + "tr0')");
                         }
                         if (el.name == "rate") {
-                            el.setAttribute("readonly", false);
+                            el.removeAttribute("readonly");
                         }
                     }
                 }
@@ -647,7 +645,7 @@ function cleanObm() {
                                     }
                                     if (el.name == "comment") {
                                         el.value = "";
-                                        el.setAttribute("readonly", false);
+                                        el.removeAttribute("readonly");
                                     }
                                     if (el.name == "positiveAmount") {
                                         el.setAttribute("onkeyup", "arithmetic('" + cur + "tr0')");
@@ -659,10 +657,10 @@ function cleanObm() {
                                         el.removeAttribute("onkeyup");
                                     }
                                     if (el.name == "commission") {
-                                        el.setAttribute("readonly", false);
+                                        el.removeAttribute("readonly");
                                     }
                                     if (el.name == "transportation") {
-                                        el.setAttribute("readonly", false);
+                                        el.removeAttribute("readonly");
                                     }
                                 }
                             }

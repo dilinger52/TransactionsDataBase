@@ -9,7 +9,7 @@
     <script src="html2canvas.min.js"></script>
 </head>
 <body>
-<div id="header">
+<div id="header" style="position: sticky; left: 20px; width: 98vw;">
 <h2 class="inline" th:text="|Клиент: ${session.client.pib}|"></h2>
     <th:block th:insert="userBlock.html :: user_block"></th:block>
 

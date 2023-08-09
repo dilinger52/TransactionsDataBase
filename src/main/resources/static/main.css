@@ -19,11 +19,13 @@ th input[type="text"]:focus {
 body, label{
 margin: 0px;
 padding: 0px;
+width: fit-content;
 }
 
 td, th, thead, tbody {
 border: 1px solid;
 padding: 5px;
+max-width: 120px;
 }
 
 th {

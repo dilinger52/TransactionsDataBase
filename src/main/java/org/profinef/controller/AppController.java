@@ -95,6 +95,8 @@ public class AppController {
     @GetMapping("/client_info")
     public String viewClientTransactions(@RequestParam(name = "client_id", required = false, defaultValue = "0")
                                              int clientId,
+                                         @RequestParam(name = "client_name", required = false)
+                                         String clientName,
                                          @RequestParam(name = "currency_id", required = false) List<Integer> currencyId,
                                          @RequestParam(name = "startDate", required = false) Date startDate,
                                          @RequestParam(name = "endDate", required = false) Date endDate,
@@ -103,12 +105,15 @@ public class AppController {
         session.removeAttribute("transaction");
         if (clientId == 0) {
             logger.debug("clientId = 0");
-            if (session.getAttribute("client") == null) {
+            if (clientName != null) {
+                clientId = clientManager.getClient(clientName).getId();
+            } else if (session.getAttribute("client") == null) {
                 logger.debug("client = null");
                 logger.info("Redirecting to main page");
                 return "redirect:/client";
+            } else {
+                clientId = ((Client) session.getAttribute("client")).getId();
             }
-            clientId = ((Client) session.getAttribute("client")).getId();
             logger.debug("clientId had get from session");
             logger.trace("clientId = " + clientId);
         }

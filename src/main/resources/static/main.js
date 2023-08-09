@@ -262,6 +262,18 @@ var rows = document.getElementsByName(id);
 function addRow(id) {
  var $TR = $('tr[id^="' + id + 'tr"]:last');
  var num = parseInt( $TR.prop("id").match(/\d+/g), 10 ) +1;
+
+ var sum = 0;
+     for (var i = 0; i < num; i++) {
+         var pAmount = document.getElementById(id + "tr" + i + "pAmount");
+         var nAmount = document.getElementById(id + "tr" + i + "nAmount");
+         console.log(pAmount);
+         console.log(nAmount);
+         sum -= Number(pAmount.value);
+         sum -= Number(nAmount.value);
+     }
+//sum = -1 * sum;
+
  const tr = document.createElement('tr');
     tr.id=id + "tr" + num;
     const input0 = document.createElement('input');
@@ -299,7 +311,11 @@ function addRow(id) {
                 input5.type = "text";
                 input5.name = "positiveAmount";
                 input5.id = id + "tr" + num + "pAmount";
-                input5.value = "0.0"
+                if (sum >= 0) {
+                     input5.value = sum.toFixed(2);
+                } else {
+                    input5.value = "0.0";
+                }
                 input5.setAttribute("Form", 'form');
                 input5.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
             th5.appendChild(input5);
@@ -308,6 +324,12 @@ function addRow(id) {
             const input6 = document.createElement('input');
                 input6.type = "text";
                 input6.name = "negativeAmount";
+                if (sum < 0) {
+                    input6.value = sum.toFixed(2);
+                } else {
+                    input6.value = "0.0";
+                }
+
                 input6.value = "0.0";
                 input6.id = id + "tr" + num + "nAmount";
                 input6.setAttribute("Form", 'form');
@@ -356,6 +378,7 @@ function addRow(id) {
         tr.appendChild(th12);
     var tbody = document.getElementById(id);
     tbody.appendChild(tr);
+
 }
 
 function deleteRow(id) {
@@ -435,6 +458,7 @@ function perevod(id) {
                     }
                 }
             }
+            perevodSum(id);
             }
 
 function perevodSum(id) {
@@ -490,28 +514,24 @@ function obmen() {
     currentButton.value = "Отменить";
     currentButton.setAttribute("onclick", "cleanObm()");
     var trs = document.querySelectorAll(`[id$="tr0"]`);
-    console.log(trs);
     for (var i = 0; i < trs.length; i++) {
         var cur = trs[i].id.substring(0, 3);
         var th = trs[i].children;
-        console.log(th);
-        if (i == 0) {
-            const checkbox = document.createElement('input');
-                checkbox.type = checkbox;
-                checkbox.name = cur;
-            th.appendChild(checkbox);
-        }
-                        for (var j = 0; j < th.length; j++) {
-                            var el = th[j];
+                        for (var k = 0; k < th.length; k++) {
+                        var elem = th[k].children;
+                        if (k == 0) {
+                                    const checkbox = document.createElement('input');
+                                        checkbox.type = "checkbox";
+                                        checkbox.name = cur;
+                                        checkbox.setAttribute("class", "inline");
+                                    th[k].appendChild(checkbox);
+                                }
+
+                           for (var j = 0; j < elem.length; j++) {
+                           var el = elem[j];
                             if (el.tagName == "INPUT") {
                                 if (el.type == "button") {
                                        el.style.display = "none";
-                                }
-                                if (el.name == "positiveAmount") {
-                                    el.setAttribute("readonly", true);
-                                }
-                                if (el.name == "negativeAmount") {
-                                    el.setAttribute("readonly", true);
                                 }
                                 if (el.name == "comment") {
                                     el.value = "Обмен";
@@ -523,6 +543,9 @@ function obmen() {
                                 if (el.name == "negativeAmount") {
                                     el.setAttribute("onkeyup", "obmenSum()");
                                 }
+                                if (el.name == "rate") {
+                                    el.setAttribute("onkeyup", "obmenSum()");
+                                }
                                 if (el.name == "commission") {
                                     el.setAttribute("readonly", true);
                                 }
@@ -532,7 +555,7 @@ function obmen() {
                             }
                         }
                     }
-
+                }
 
 }
 
@@ -560,7 +583,12 @@ function obmenSum() {
     var negativeAmount = Number(document.getElementById(name0 + 'tr0nAmount').value);
     var rate0 = Number(document.getElementById(name0 + 'tr0rate').value);
     var rate1 = Number(document.getElementById(name1 + 'tr0rate').value);
-    var rate = rate0 * rate1;
+    if (rate0 == rate1) {
+        var rate = rate0;
+    } else {
+        return;
+    }
+
         var exchangeRates = document.getElementsByClassName("exchange");
         console.log(exchangeRates);
         var currency1rate = 0;
@@ -578,13 +606,13 @@ function obmenSum() {
         console.log(currency2rate);
         var amount = positiveAmount + negativeAmount;
         if (currency1rate > currency2rate) {
-            result = amount * rate;
+            result = - amount * rate;
         }
 
         if (currency1rate <= currency2rate) {
-            result = amount / rate;
+            result = - amount / rate;
         }
-        if (amount >= 0) {
+        if (result >= 0) {
             document.getElementById(name1 + 'tr0pAmount').value = result;
             document.getElementById(name1 + 'tr0nAmount').value = 0;
         } else {
@@ -594,4 +622,50 @@ function obmenSum() {
         }
     arithmetic(name0 + "tr0");
     arithmetic(name1 + "tr0");
+}
+
+function cleanObm() {
+    var currentButton = document.getElementById("obm");
+        currentButton.value = "Обмен";
+        currentButton.setAttribute("onclick", "obmen()");
+        var trs = document.querySelectorAll(`[id$="tr0"]`);
+        for (var i = 0; i < trs.length; i++) {
+            var cur = trs[i].id.substring(0, 3);
+            var th = trs[i].children;
+                            for (var k = 0; k < th.length; k++) {
+                            var elem = th[k].children;
+
+                               for (var j = 0; j < elem.length; j++) {
+                               var el = elem[j];
+
+                                if (el.tagName == "INPUT") {
+                                    if (el.type == "checkbox") {
+                                        el.remove();
+                                    }
+                                    if (el.type == "button") {
+                                           el.style.display = "inherit";
+                                    }
+                                    if (el.name == "comment") {
+                                        el.value = "";
+                                        el.setAttribute("readonly", false);
+                                    }
+                                    if (el.name == "positiveAmount") {
+                                        el.setAttribute("onkeyup", "arithmetic('" + cur + "tr0')");
+                                    }
+                                    if (el.name == "negativeAmount") {
+                                        el.setAttribute("onkeyup", "arithmetic('" + cur + "tr0')");
+                                    }
+                                    if (el.name == "rate") {
+                                        el.removeAttribute("onkeyup");
+                                    }
+                                    if (el.name == "commission") {
+                                        el.setAttribute("readonly", false);
+                                    }
+                                    if (el.name == "transportation") {
+                                        el.setAttribute("readonly", false);
+                                    }
+                                }
+                            }
+                        }
+                    }
 }

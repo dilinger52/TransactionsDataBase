@@ -30,8 +30,13 @@
             <input type="hidden" name="client_id" th:value="${session.client.id}">
             <input type="submit" value="Изменить данные пользователя">
         </form>
-
-    <!--<button onclick="confirmDel(1)" class="inline">Удалить пользователя</button>-->
+        <form method="get" action="client_info">
+            <input type="text" list="client_datalist" id="client_name" name="client_name" placeholder="Поиск.." class="inline">
+            <datalist id="client_datalist">
+                <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
+            </datalist>
+            <input type="submit" value="Перейти" class="inline">
+        </form>
     </div>
 <div>
 <form method="get" action="client_info" class="inline">
@@ -43,7 +48,7 @@
     </th:block>
     <input type="submit" value="Найти" class="inline">
 </form>
-    <form id="color" class="inline">
+    <!--/*<form id="color" class="inline">
         <input type="radio" name="color" id="white" value="rgb(255,255,255)" class="inline check-with-label">
         <label for="white" class="inline sphere white label-for-check"></label>
         <input type="radio" name="color" id="red" value="rgb(255,0,0)" class="inline check-with-label">
@@ -62,7 +67,7 @@
         <label for="black" class="inline sphere black label-for-check"></label>
     </form>
     <button onclick="saveColors()" class="inline">Сохранить расцветку</button>
-    <button onclick="capture()" class="inline">Скриншот</button>
+    <button onclick="capture()" class="inline">Скриншот</button>*/-->
     <input class="inline" id="obm" type="button" value="Обмен" onclick="obmen()">
 </div>
 </div>
@@ -112,7 +117,7 @@
                 </th>
                     <th th:style="|color: ${transaction.pibColor}|"  th:id="|pib_${transaction.id}_${session.client.id}_${transaction.currency.id}|">
                         <input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Показать" th:onclick="|showAgents(${transaction.id}${currency.id})|" th:id="|${transaction.id}${currency.id}|">
-                        <input th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${transaction.id}${currency.id}|" th:onclick="addRow(this.getAttribute('data-1'))">
+                        <!--/*<input th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${transaction.id}${currency.id}|" th:onclick="addRow(this.getAttribute('data-1'))">*/-->
                         <input th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" type="text" th:value="${transaction.client.pib}" name="client_name" list="client_datalist">
                     </th>
                     <th th:id="|comment_${transaction.id}_${session.client.id}_${transaction.currency.id}|">
@@ -146,14 +151,12 @@
             </tr>
             </th:block>
             <form method="post" action="transaction" id="form">
-                <datalist id="client_datalist">
-                    <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
-                </datalist>
+
                 <input type="hidden" name="currency_name" th:value="${currency.name}" form="form">
                 <input type="hidden" name="client_name" th:value="${session.client.pib}" form="form">
             <tr th:id="|${currency.name}tr0|">
                     <th>
-                        <input type="submit" value="Сохранить" form="form">
+                        <input class="inline" type="submit" value="Сохранить" form="form">
                     </th>
                 <th>
                     <input type="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" name="date" form="form">

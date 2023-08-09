@@ -131,8 +131,20 @@ public class AppController {
             }
             logger.trace("currencyName = " + currencyName);
         }
-        if (startDate == null) startDate = Date.valueOf(LocalDate.now());
-        if (endDate == null) endDate = new Date(startDate.getTime() + 86400000);
+        if (startDate == null) {
+            if (session.getAttribute("startDate") == null) {
+                startDate = Date.valueOf(LocalDate.now());
+            } else {
+                startDate = new Date(((Timestamp) session.getAttribute("startDate")).getTime());
+            }
+        }
+        if (endDate == null) {
+            if (session.getAttribute("endDate") == null) {
+                endDate = new Date(startDate.getTime() + 86400000);
+            } else {
+                endDate = new Date(((Timestamp) session.getAttribute("endDate")).getTime());
+            }
+        }
         logger.trace("startDate = " + startDate);
         logger.trace("endDate = " + endDate);
         Client client = clientManager.getClient(clientId);
@@ -142,6 +154,7 @@ public class AppController {
         Set<String> comments = transManager.getAllComments();
         Map<String, Double> total = new HashMap<>();
         List<Currency> currencies = currencyManager.getAllCurrencies();
+
         Map<Integer, List<Integer>> transactionIds = new HashMap<>();
         for (Currency currency : currencies) {
             List<Integer> list = transactions.stream().filter(transaction -> transaction.getCurrency()

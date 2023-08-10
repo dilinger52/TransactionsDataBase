@@ -7,6 +7,7 @@ margin: 0px;
 padding: 1px;
 }
 th input[type="text"] {
+color: inherit;
 font-size: 16px;
 max-width: 100px;
 border: none;
@@ -14,6 +15,7 @@ padding: 0px;
 }
 
 th input[type="text"]:focus {
+
   border: none;
 }
 body, label{

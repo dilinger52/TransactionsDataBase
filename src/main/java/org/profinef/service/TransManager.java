@@ -213,10 +213,15 @@ public class TransManager {
         logger.debug("Adding account total");
         Account total = new Account();
         total.setClient(new Client("Всего"));
-        Map<Currency, Double> currencyDoubleMap = new TreeMap<>();
+        Map<Currency, Double> currencyDoubleMap = new TreeMap<>((o1, o2) -> {
+            if (Objects.equals(o1.getName(), "UAH") || Objects.equals(o2.getName(), "PLN")) return -1;
+            if (Objects.equals(o2.getName(), "UAH") || Objects.equals(o1.getName(), "PLN")) return 1;
+            if (Objects.equals(o1.getName(), "USD") || Objects.equals(o2.getName(), "RUB")) return -1;
+            if (Objects.equals(o2.getName(), "USD") || Objects.equals(o1.getName(), "RUB")) return 1;
+            return 0;
+        });
         List<Currency> currencies = currencyManager.getAllCurrencies();
-        for (Currency currency :
-                currencies) {
+        for (Currency currency : currencies) {
             double sum = 0;
             for (Account ac : clients)  {
                 sum += ac.getCurrencies().entrySet().stream()

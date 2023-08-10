@@ -46,7 +46,13 @@ public class AccountManager {
         logger.debug("Formatting account from dto to entity");
         Account account = new Account();
         account.setClient(clientManager.getClient(id));
-        Map<Currency, Double> currencies = new TreeMap<>();
+        Map<Currency, Double> currencies = new TreeMap<>((o1, o2) -> {
+            if (Objects.equals(o1.getName(), "UAH") || Objects.equals(o2.getName(), "PLN")) return -1;
+            if (Objects.equals(o2.getName(), "UAH") || Objects.equals(o1.getName(), "PLN")) return 1;
+            if (Objects.equals(o1.getName(), "USD") || Objects.equals(o2.getName(), "RUB")) return -1;
+            if (Objects.equals(o2.getName(), "USD") || Objects.equals(o1.getName(), "RUB")) return 1;
+            return 0;
+        });
         accountDtoList = accountDtoList.stream().filter(c -> c.getClientId() == id).collect(Collectors.toList());
         for (AccountDto accountDto : accountDtoList) {
             Currency currency = currencyManager.getCurrency(accountDto.getCurrencyId());

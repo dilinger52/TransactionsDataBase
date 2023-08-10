@@ -65,7 +65,7 @@
             <th>ФИО</th>
             <th>Номер телефона</th>
             <th>Telegram</th>
-            <th th:each="currency : ${session.currencies}" th:text="${currency.name}"></th>
+            <th th:each="currency : ${session.currencies}" th:if="${currency.name != 'RUB' && currency.name != 'PLN'}" th:text="${currency.name}"></th>
             <th>Детали</th>
         </tr>
         </thead>
@@ -74,7 +74,7 @@
             <th th:text="${client.client.pib}"></th>
             <th th:text="${client.client.phone}"></th>
             <th th:text="${client.client.telegram}"></th>
-            <th:block th:each="currency : ${client.currencies}">
+            <th:block th:each="currency : ${client.currencies}" th:if="${currency.key.name != 'RUB' && currency.key.name != 'PLN'}" >
                 <th th:text="${#numbers.formatDecimal(currency.value, 1, 'POINT', 2, 'COMMA')}"></th>
             </th:block>
             <th th:if="${client.client.pib != 'Всего'}">

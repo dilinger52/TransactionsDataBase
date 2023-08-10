@@ -299,7 +299,6 @@ public class AppController {
             clients.addAll(c);
         }
 
-
         List<Currency> currencies = currencyManager.getAllCurrencies();
         //List<Transaction> transactions = transManager.getAllTransactions();
         session.setAttribute("path", "/client");

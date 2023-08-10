@@ -153,11 +153,16 @@ $.ajax({
 }
 }
 
-/*function changeColor(id) {
-//console.log(id);
+function changeColor(id) {
+    console.log(id);
     var color = document.querySelector('input[name="color"]:checked').value;
-    id.style.color = color;
-}*/
+    console.log(typeof id);
+    if (typeof id == "string") {
+        document.getElementById(id).style.color = color;
+    } else {
+        id.style.color = color;
+    }
+}
 
 function saveColors() {
     var elements = document.getElementsByTagName("th");

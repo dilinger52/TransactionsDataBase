@@ -1,5 +1,5 @@
- //document.addEventListener('DOMContentLoaded', setTopPosition);
- //window.onresize = setTopPosition;
+ document.addEventListener('DOMContentLoaded', setTopPosition);
+ window.onresize = setTopPosition;
 
  // Function to set the top position based on the height of the reference element
      function setTopPosition() {
@@ -10,8 +10,13 @@
        const offset2 = 0; // Adjust this value as needed
        const topPosition = referenceElement.offsetHeight + offset;
        const topPosition2 = referenceElement.offsetHeight + offset2;
-       targetElement.style.marginTop = `${topPosition}px`;
-       targetElement2.style.top = `${topPosition2}px`;
+       if (targetElement != null) {
+        targetElement.style.marginTop = `${topPosition}px`;
+       }
+       if (targetElement2 != null) {
+               targetElement2.style.top = `${topPosition2}px`;
+              }
+
      }
 
 

@@ -78,7 +78,7 @@
         <h3 class="inline" th:text="|Баланс в конце ${#dates.format(session.endDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['balance' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
         <input class="inline" th:id="|per${currency.name}|" type="button" value="Перевод" th:data-1="${currency.name}" th:onclick="perevod(this.getAttribute('data-1'))">
         <input type="hidden" class="exchange" th:name="${currency.name}" th:value="${currency.averageExchange}">
-        <table id="capture" th:style="${currency.name == 'RUB' ? 'background-color: mistyrose;' : currency.name == 'USD' ? 'background-color: honeydew;' : currency.name == 'EUR' ? 'background-color: lavender;' : currency.name == 'PLN' ? 'background-color: lightcyan;' : ''}">
+        <table th:style="${currency.name == 'RUB' ? 'background-color: mistyrose;' : currency.name == 'USD' ? 'background-color: honeydew;' : currency.name == 'EUR' ? 'background-color: lavender;' : currency.name == 'PLN' ? 'background-color: lightcyan;' : ''}">
             <thead id="thead" style="background-color: initial;">
             <tr>
                 <th class="ignore">Редактировать</th>

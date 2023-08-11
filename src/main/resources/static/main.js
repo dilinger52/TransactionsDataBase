@@ -161,25 +161,25 @@ $.ajax({
 function changeColor(id) {
     console.log(id);
     var color = document.querySelector('input[name="color"]:checked').value;
-    console.log(typeof id);
-    if (typeof id == "string") {
-        document.getElementById(id).style.color = color;
-    } else {
-        id.style.color = color;
+    const elements = document.getElementsByName(id);
+    for (var i = 0; i < elements.length; i++) {
+        elements[i].style.color = color;
     }
+
 }
 
 function saveColors() {
-    var elements = document.getElementsByTagName("th");
+    var elements = document.getElementsByTagName("tr");
+    console.log(elements);
     const colors = new Map();
     for (var i = 0; i < elements.length; i++) {
         if (elements[i].style.color.length > 0) {
-            colors.set(elements[i].id, elements[i].style.color);
+            colors.set(elements[i].getAttribute("name"), elements[i].style.color);
         }
     }
-    //console.log(colors);
+    console.log(colors);
     const colorsTemp = JSON.stringify(colors, mapAwareReplacer);
-    //console.log(colorsTemp);
+    console.log(colorsTemp);
     $.ajax({
         type : "POST",
         url : "/save_colors",
@@ -676,4 +676,8 @@ function cleanObm() {
                             }
                         }
                     }
+}
+
+function init(mes) {
+    alert(mes);
 }

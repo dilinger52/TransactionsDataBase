@@ -80,7 +80,7 @@ public class TransManager {
                 transportation, client, comment, trBalance + newBalance - oldBalance, pibColor, amountColor, balanceColor, userId);
         transactionRepository.save(transactionDto);
         logger.debug("Transaction saved");
-        return newBalance;
+        return trBalance + newBalance - oldBalance;
     }
 
     private double updateCurrencyAmount(int clientId, int currencyId, double rate, double commission, double amount,

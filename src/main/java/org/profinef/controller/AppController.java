@@ -103,6 +103,7 @@ public class AppController {
                                          HttpSession session) {
         logger.info("Loading client info page...");
         session.removeAttribute("transaction");
+        session.removeAttribute("client_alert");
         if (clientId == 0) {
             logger.debug("clientId = 0");
             if (clientName != null) {
@@ -203,7 +204,15 @@ public class AppController {
         System.out.println(list);
         transactions = list;
 
+        List<HttpSession> sessions = new HttpSessionConfig().getActiveSessions();
+        for (HttpSession ses : sessions) {
+            if (ses.getAttribute("path") == "/client_info" && ses.getAttribute("client").equals(client)) {
+               session.setAttribute("client_alert", "Другой пользователь просматривает и/или редактирует данного клиента. Для получения актуальных данных дождитесь окончания работы данного пользователя");
+            }
+        }
+        List<Client> clients = clientManager.findAll();
         logger.trace("total = " + total);
+        session.setAttribute("clients", clients);
         session.setAttribute("comments", comments);
         session.setAttribute("path", "/client_info");
         session.setAttribute("currencies", currencies);
@@ -309,6 +318,8 @@ public class AppController {
         return "example";
     }
 
+
+
     /**
      * Generate page for editing transaction
      * @param transactionId id of transaction for editing
@@ -395,67 +406,28 @@ public class AppController {
             Transaction tr = transactionList.get(0);
 
             transManager.deleteTransaction(transactionList);
-            for (Transaction transaction : transactionList) {
-                Map<Currency, Double> oldBalance = new TreeMap<>();
-                if (oldBalances.containsKey(transaction.getClient())) {
-                    oldBalance = oldBalances.get(transaction.getClient());
-                }
-                Double b = accountManager.getAccount(transaction.getClient().getPib()).getCurrencies().get(transaction.getCurrency());
-                System.out.println("oldbalance" + transaction.getClient().getPib() + " " + transaction.getCurrency().getName() + " " +  b);
-                oldBalance.put(transaction.getCurrency(), b);
-                oldBalances.put(transaction.getClient(), oldBalance);
-            }
             for (int i = 0; i < clientName.size(); i++) {
                 Map<Currency, Double> oldBalance = new TreeMap<>();
                 if (oldBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
                     oldBalance = oldBalances.get(clientManager.getClient(clientName.get(i)));
                 }
-                Double b = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));
+                Double b = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate()).getBalance();
+                System.out.println("oldbalance" + clientName.get(i) + " " + currencyName.get(i) + " " +  b);
                 oldBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
                 oldBalances.put(clientManager.getClient(clientName.get(i)), oldBalance);
             }
             for (int i = 0; i < clientName.size(); i++) {
                 Double balance = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate()).getBalance();
-                transManager.update(tr.getId(), tr.getDate(), clientName.get(i), comment.get(i),
+                Double b = transManager.update(tr.getId(), tr.getDate(), clientName.get(i), comment.get(i),
                         currencyId.get(i), rate.get(i), commission.get(i), amount.get(i),
                         transportation.get(i), null, null, null, tr.getUser().getId(), balance);
-            }
-            for (int i = 0; i < clientName.size(); i++) {
                 Map<Currency, Double> newBalance = new TreeMap<>();
                 if (newBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
                     newBalance = newBalances.get(clientManager.getClient(clientName.get(i)));
                 }
-                Double b = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));
                 System.out.println("newbalance" + clientName.get(i) + " " + currencyName.get(i) + " " +  b);
                 newBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
                 newBalances.put(clientManager.getClient(clientName.get(i)), newBalance);
-                /*if (transManager.getTransactionByClientAndByIdAndByCurrencyId(transactionId.get(i), clientId.get(i),
-                        currencyId.get(i)) == null) {
-                    logger.debug("Found new client in transaction id=" + clientId.get(i));
-                    //clientCurrency.put(clientId.get(i), currencyId.get(i));
-                    Transaction tr = transManager.getTransaction(transactionId.get(i)).get(0);
-
-                    transManager.remittance(tr.getId(), tr.getDate(), clientName.get(i), comment.get(i),
-                            currencyId.get(i), rate.get(i), commission.get(i), amount.get(i),
-                            transportation.get(i), null, null, null);
-                    List<Integer> cur = new ArrayList<>();
-                    cur.add(currencyId.get(i));
-                    transManager.updateNext(clientName.get(i), cur, amount.get(i), tr.getDate());
-                } else {
-                    transManager.update(transactionId.get(i), clientName.get(i), comment.get(i), currencyId.get(i), rate.get(i),
-                            commission.get(i), amount.get(i), transportation.get(i));
-                }*/
-
-            }
-            for (Transaction transaction : transactionList) {
-                Map<Currency, Double> newBalance = new TreeMap<>();
-                if (newBalances.containsKey(transaction.getClient())) {
-                    newBalance = newBalances.get(transaction.getClient());
-                }
-                Double b = accountManager.getAccount(transaction.getClient().getPib()).getCurrencies().get(transaction.getCurrency());
-                newBalance.put(transaction.getCurrency(), b);
-                newBalances.put(transaction.getClient(), newBalance);
-
             }
             System.out.println("oldBalances" + oldBalances);
             System.out.println("newBalances" + newBalances);
@@ -778,15 +750,15 @@ public class AppController {
     public String saveColors(@RequestBody String colors, HttpSession session) throws JsonProcessingException {
         logger.info("Saving colors...");
         List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {});
+
         for (List<String> list : entryList) {
-            String[] arrList = list.get(0).split("_");
-            Transaction transaction = transManager.getTransactionByClientAndByIdAndByCurrencyId(
-                    Integer.parseInt(arrList[1]), Integer.parseInt(arrList[2]), Integer.parseInt(arrList[3]));
-            switch (arrList[0]) {
-                case "pib" -> transaction.setPibColor(list.get(1));
-                case "amount" -> transaction.setAmountColor(list.get(1));
-                case "balance" -> transaction.setBalanceColor(list.get(1));
-            }
+            int id = Integer.parseInt(list.get(0).substring(3));
+            int clientId = ((Client) session.getAttribute("client")).getId();
+            int currencyId = Integer.parseInt(list.get(0).substring(0, 3));
+            System.out.println(id + " " + clientId + " " + currencyId);
+            Transaction transaction = transManager.getTransactionByClientAndByIdAndByCurrencyId(id, clientId, currencyId);
+            transaction.setPibColor(list.get(1));
+
             transManager.save(transaction);
         }
         logger.info("Colors saved");
@@ -842,7 +814,7 @@ public class AppController {
     @PostMapping("/log_out")
     public String logout(HttpSession session) {
         logger.info("Logging out");
-        session.removeAttribute("user");
+        session.invalidate();
         return "redirect:/";
     }
 

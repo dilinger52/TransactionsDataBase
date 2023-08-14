@@ -24,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -156,15 +155,15 @@ public class AppController {
         Client client = clientManager.getClient(clientId);
         List<Transaction> transactions = transManager.findByClientForDate(clientId, currencyId,
                 new Timestamp(startDate.getTime()), new Timestamp(endDate.getTime() - 1));
-        System.out.println(transactions);
         Set<String> comments = transManager.getAllComments();
         Map<String, Double> total = new HashMap<>();
         List<Currency> currencies = currencyManager.getAllCurrencies();
 
         Map<Integer, List<Integer>> transactionIds = new HashMap<>();
         for (Currency currency : currencies) {
-            List<Integer> list = transactions.stream().filter(transaction -> transaction.getCurrency()
-                    .getId().equals(currency.getId())).map(Transaction::getId).sorted().collect(Collectors.toList());
+            List<Integer> list = transactions.stream()
+                    .filter(transaction -> transaction.getCurrency().getId().equals(currency.getId()))
+                    .map(Transaction::getId).collect(Collectors.toList());
             transactionIds.put(currency.getId(), list);
             List<Transaction> transactionList = transactions.stream().filter(transaction -> transaction.getCurrency()
                     .getId().equals(currency.getId())).toList();
@@ -181,7 +180,6 @@ public class AppController {
             }
         }
 
-        System.out.println(transactionIds);
         List<Transaction> list = new ArrayList<>();
         for (Transaction tr : transactions) {
 
@@ -193,7 +191,6 @@ public class AppController {
             }
 
         }
-        System.out.println(list);
         list.sort((o1, o2) -> {
             if (Objects.equals(o1.getId(), o2.getId())) {
                 if (Objects.equals(o1.getClient().getId(), client.getId())) return -1;
@@ -201,12 +198,11 @@ public class AppController {
             }
             return 0;
         });
-        System.out.println(list);
         transactions = list;
 
         List<HttpSession> sessions = new HttpSessionConfig().getActiveSessions();
         for (HttpSession ses : sessions) {
-            if (ses.getAttribute("path") == "/client_info" && ses.getAttribute("client").equals(client)) {
+            if (ses.getAttribute("path") == "/client_info" && ses.getAttribute("client").equals(client) && ses.getAttribute("user") != session.getAttribute("user")) {
                session.setAttribute("client_alert", "Другой пользователь просматривает и/или редактирует данного клиента. Для получения актуальных данных дождитесь окончания работы данного пользователя");
             }
         }
@@ -509,7 +505,6 @@ public class AppController {
             logger.debug("Currency convertation found");
             amount.set(0, amount.get(0) * -1);
         }
-        System.out.println(amount);
         try {
             /*if (amount.stream().filter(a -> a > 0).count() > 1) {
                 logger.debug("Found several positive amounts");
@@ -553,24 +548,29 @@ public class AppController {
             for (String name : currencyName) {
                 currencyId.add(currencyManager.getCurrency(name).getId());
             }
-            System.out.println("date" + date);
-            System.out.println(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()));
-            System.out.println(date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli())));
+            List<Integer> clientId = new ArrayList<>();
+            for (String name : clientName) {
+                clientId.add(clientManager.getClient(name).getId());
+            }
             for (int i = 0; i < clientName.size(); i++) {
                 if (amount.get(i) == 0) continue;
                 try {
                     if (date != null && date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()))) {
-                        Double oldBalance = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));
+                        Double trBalance = transManager.findPrevious(clientId.get(i), currencyId.get(i), new Timestamp(date.getTime())).getBalance();
+
+                        Map<Currency, Double> currencies = accountManager.getAccount(clientName.get(i)).getCurrencies();
+                        Currency currency = currencyManager.getCurrency(currencyId.get(i));
+                        Double oldBalance = currencies.get(currency);
                         Double newBalance = transManager.remittance(transactionId, new Timestamp(date.getTime()), clientName.get(i), comment.get(i),
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
-                                null, null, null, user.getId());
+                                null, null, null, user.getId(), trBalance);
                         List<Integer> list = new ArrayList<>();
                         list.add(currencyId.get(i));
                         transManager.updateNext(clientName.get(i), list, newBalance - oldBalance, new Timestamp(date.getTime()));
                     } else {
                         transManager.remittance(transactionId, null, clientName.get(i), comment.get(i),
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
-                                null, null, null, user.getId());
+                                null, null, null, user.getId(), 0);
                     }
                 } catch (Exception e) {
                     logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));

@@ -2,18 +2,7 @@ package org.profinef.controller;
 
 import com.monitorjbl.xlsx.StreamingReader;
 import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.util.IOUtils;
-import org.apache.poi.xssf.streaming.SXSSFRow;
-import org.apache.poi.xssf.streaming.SXSSFSheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
 import org.profinef.entity.User;
@@ -29,11 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.IntStream;
 
 /**
  * This class realised functionality to get file in office open xml format and use it for update the database
@@ -288,7 +275,7 @@ public class Uploader {
         try {
             //writing transaction to database
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId());
+                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId(), 0);
         } catch (RuntimeException e) {
             e.printStackTrace();
             //if currency did not exist create it and try again
@@ -299,7 +286,7 @@ public class Uploader {
                 ex.printStackTrace();
             }
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId());
+                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId(), 0);
         }
         //setting parameters to default
         amount = 0;

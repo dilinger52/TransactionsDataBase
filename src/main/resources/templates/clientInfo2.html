@@ -9,7 +9,7 @@
     <script src="html2canvas.min.js"></script>
 </head>
 <body>
-<div id="header" style="position: sticky; left: 20px; width: 98vw;">
+<div id="header" style="position: sticky;left: 0px;width: 98vw;background: white;top: 0px;margin: 0px;z-index: 10000;">
 <h2 class="inline" th:text="|Клиент: ${session.client.pib}|"></h2>
 
     <th:block th:insert="userBlock.html :: user_block"></th:block>
@@ -74,13 +74,15 @@
 </div>
 <div class="currencies">
     <div th:each="currency : ${session.currencies}" th:if="${#lists.contains(session.currency_name, currency.name) && currency.name != 'RUB'}" class="inline">
+        <div name="thead" style="position: sticky;background-color: white;">
         <h3 th:text="${currency.name}" class="inline">HRN</h3>
         <h3 class="inline" th:text="|Баланс на начало ${#dates.format(session.startDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['amount' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
         <h3 class="inline" th:text="|Баланс в конце ${#dates.format(session.endDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['balance' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
         <input class="inline" th:id="|per${currency.name}|" type="button" value="Перевод" th:data-1="${currency.name}" th:onclick="perevod(this.getAttribute('data-1'))">
         <input type="hidden" class="exchange" th:name="${currency.name}" th:value="${currency.averageExchange}">
-        <table th:style="${currency.name == 'RUB' ? 'background-color: mistyrose;' : currency.name == 'USD' ? 'background-color: honeydew;' : currency.name == 'EUR' ? 'background-color: lavender;' : currency.name == 'PLN' ? 'background-color: lightcyan;' : ''}">
-            <thead id="thead" style="background-color: initial;">
+        </div>
+        <table th:style="${currency.name == 'RUB' ? 'background-color: mistyrose;' : currency.name == 'USD' ? 'background-color: honeydew;' : currency.name == 'EUR' ? 'background-color: lavender;' : currency.name == 'PLN' ? 'background-color: lightcyan;' : currency.name == 'UAH' ? 'background-color: white;' : ''}">
+            <thead name="thead2" style="background-color: inherit; position: sticky;">
             <tr>
                 <th class="ignore">Редактировать</th>
                 <th>Дата</th>

@@ -5,18 +5,28 @@
      function setTopPosition() {
        const referenceElement = document.getElementById('header');
        const targetElement = document.getElementById('capture');
-       const targetElement2 = document.getElementById('thead');
+       const targetElement2 = document.getElementsByName('thead');
+       const targetElement3 = document.getElementsByName('thead2');
        const offset = -13; // Adjust this value as needed
        const offset2 = 0; // Adjust this value as needed
+       const offset3 = 46; // Adjust this value as needed
        const topPosition = referenceElement.offsetHeight + offset;
        const topPosition2 = referenceElement.offsetHeight + offset2;
+       const topPosition3 = referenceElement.offsetHeight + offset3;
        if (targetElement != null) {
         targetElement.style.marginTop = `${topPosition}px`;
        }
        if (targetElement2 != null) {
-               targetElement2.style.top = `${topPosition2}px`;
-              }
+       for (var i=0; i<targetElement2.length; i++) {
+       targetElement2[i].style.top = `${topPosition2}px`;
+       }
 
+              }
+if (targetElement3 != null) {
+               for (var i=0; i<targetElement2.length; i++) {
+                      targetElement3[i].style.top = `${topPosition3}px`;
+                      }
+              }
      }
 
 

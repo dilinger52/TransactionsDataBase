@@ -32,7 +32,7 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
     List<String> findAllComments();
     @Query(nativeQuery = true, value = "SELECT id FROM transaction ORDER BY id DESC LIMIT 0, 1")
     Integer getMaxId();
-    @Query(nativeQuery = true, value = "SELECT * FROM transaction WHERE client_id=?1 AND currency_id=?2 AND date < ?3  ORDER BY id DESC LIMIT 0, 1")
+    @Query(nativeQuery = true, value = "SELECT * FROM transaction WHERE client_id=?1 AND currency_id=?2 AND date < ?3  ORDER BY date DESC, id DESC LIMIT 0, 1")
     TransactionDto findAllByClientIdAndCurrencyIdAndDateBetweenLimit1(int clientId, int currencyId, Timestamp startDate);
 
     void deleteByDateBetween(Timestamp startDate, Timestamp endDate);

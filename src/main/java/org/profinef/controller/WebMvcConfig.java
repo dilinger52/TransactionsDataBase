@@ -49,7 +49,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
                             mes += "Смените пароль. Использование стандартного пароля не безопасно \n";
                         }
                         List<HttpSession> sessions = new HttpSessionConfig().getActiveSessions();
-                        System.out.println(sessions);
                         for (HttpSession ses : sessions) {
                             if (!ses.getId().equals(session.getId()) && ses.getAttribute("user").equals(user)) {
                                 mes += "Обнаружен вход с другого устройства. За детальной информацией обратитесь к администратору \n";

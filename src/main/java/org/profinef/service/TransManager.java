@@ -109,55 +109,12 @@ public class TransManager {
     public double undoTransaction(int transactionId, String clientName, int currencyId) {
         logger.debug("Undoing transaction");
         Client client = clientManager.getClient(clientName);
-        System.out.println(transactionId);
-        System.out.println(client.getId());
-        System.out.println(currencyId);
         TransactionDto transactionDto = transactionRepository
                 .findByIdAndClientIdAndCurrencyIdOrderByDate(transactionId, client.getId(), currencyId);
         logger.trace("Found transaction by id=" + transactionId + " and clientId=" + client.getId());
         return updateCurrencyAmount(client.getId(), transactionDto.getCurrencyId(), transactionDto.getRate(),
                 transactionDto.getCommission(), -transactionDto.getAmount(), transactionDto.getTransportation());
     }
-    /*
-    @Transactional
-    public void update(int transactionId, String clientName, String comment, int currencyId, double rate, double commission,
-                       double amount, double transportation, int userId) {
-        logger.debug("Updating transaction");
-        Client client = clientManager.getClient(clientName);
-        if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
-        if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
-                "Введите значение от -100 до 100 включительно");
-        if (transportation < 0) throw new RuntimeException("Неверная стоимость инкасации. " +
-                "Введите положительное значение");
-
-        TransactionDto oldTransactionDto = transactionRepository
-                .findByIdAndClientIdAndCurrencyIdOrderByDate(transactionId, client.getId(), currencyId);
-        logger.trace("Found transaction by id=" + transactionId + " and clientId=" + client.getId());
-        double oldTransactionBalance = oldTransactionDto.getBalance();
-        logger.trace("Old transaction balance: " + oldTransactionBalance);
-        double oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
-        logger.trace("Old balance: " + oldBalance);
-        undoTransaction(transactionId, clientName, currencyId);
-        double newBalance = remittance(transactionId, oldTransactionDto.getDate(), clientName, comment, currencyId, rate,
-                commission, amount, transportation, oldTransactionDto.getPibColor(), oldTransactionDto.getAmountColor(),
-                oldTransactionDto.getBalanceColor(), userId);
-        logger.trace("New balance: " + newBalance);
-        TransactionDto newTransactionDto = transactionRepository
-                .findByIdAndClientIdOrderByDate(transactionId, client.getId());
-        logger.trace("Found transaction by id=" + transactionId + " and clientId=" + client.getId());
-        double balanceDif = newBalance - oldBalance;
-
-        if (balanceDif != 0) {
-            newTransactionDto.setBalance(oldTransactionBalance + balanceDif);
-            transactionRepository.save(newTransactionDto);
-            logger.debug("Transaction updated");
-            List<Integer> cur = new ArrayList<>();
-            cur.add(currencyId);
-            updateNext(clientName, cur, balanceDif, newTransactionDto.getDate());
-        } else {
-            logger.debug("Transaction do not need to be updated");
-        }
-    }*/
 
     public void updateNext(String clientName, List<Integer> currencyId, Double balanceDif, Timestamp date) {
         logger.debug("Updating amount of next transactions");
@@ -169,8 +126,6 @@ public class TransManager {
         logger.trace("Found transactions by clientId=" + client.getId() + " currencyId=" + currencyId +
                 " and date after: " + date);
         for (TransactionDto transactionDto : transactionDtoList) {
-            System.out.println(transactionDto.getBalance());
-            System.out.println(balanceDif);
             transactionDto.setBalance(transactionDto.getBalance() + balanceDif);
             transactionRepository.save(transactionDto);
         }
@@ -370,21 +325,22 @@ public class TransManager {
     }
 
     public Set<String> getAllComments() {
+        logger.debug("finding comments");
         return new HashSet<>(transactionRepository.findAllComments());
     }
 
-    public Transaction findByIdAndClientIdOrderByDate(Integer transactionId, int id) {
-        return formatFromDto(transactionRepository.findByIdAndClientIdOrderByDate(transactionId, id));
-    }
     @Transactional
     public void deleteAfter(Timestamp afterDate) {
+        logger.debug("deleting after " + afterDate);
         for (AccountDto accountDto : accountRepository.findAll()) {
             TransactionDto tr = transactionRepository
                     .findAllByClientIdAndCurrencyIdAndDateBetweenLimit1(
                             accountDto.getClientId(), accountDto.getCurrencyId(), afterDate);
             if (tr != null) {
+                logger.debug("find previous transaction");
                 accountDto.setAmount(tr.getBalance());
             } else {
+                logger.debug("previous transaction are not founded");
                 accountDto.setAmount(0.0);
             }
             accountRepository.save(accountDto);
@@ -393,12 +349,14 @@ public class TransManager {
     }
 
     public TransactionDto findPrevious(int clientId, int currencyId, Timestamp afterDate) {
+        logger.debug("finding previous");
         return transactionRepository
                 .findAllByClientIdAndCurrencyIdAndDateBetweenLimit1(
                         clientId, currencyId, afterDate);
     }
 
     public List<Transaction> findByUser(Integer managerId, Timestamp startDate, Timestamp endDate, String clientName, List<Integer> currencyId) {
+        logger.debug("finding by user");
         Client client;
         try {
             client = clientManager.getClient(clientName);
@@ -419,6 +377,7 @@ public class TransManager {
     }
 
     public List<Transaction> findById(Integer id) {
+        logger.debug("finding by id");
         List<TransactionDto> transactionDtoList = transactionRepository.findAllById(id);
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto :

@@ -24,8 +24,8 @@
                     <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
                 </datalist>
             </div>
-            <input type="date" name="startDate" th:value="${#dates.format(session.startDate, 'yyyy-MM-dd')}" class="inline">
-            <input type="date" name="endDate" th:value="${#dates.format(session.endDate, 'yyyy-MM-dd')}" class="inline">
+            <input type="date" name="strDate" th:value="${#dates.format(session.strDate, 'yyyy-MM-dd')}" class="inline">
+            <input type="date" name="edDate" th:value="${#dates.format(session.edDate, 'yyyy-MM-dd')}" class="inline">
             <th:block th:each="currency : ${session.currencies}">
                 <input type="checkbox" th:id="|currency_id${currency.id}|" name="currency_id" th:value="${currency.id}" th:checked="${#lists.contains(session.currency_name, currency.name)}" class="inline">
                 <label th:for="|currency_id${currency.id}|" class="inline" th:text="${currency.name}"></label>

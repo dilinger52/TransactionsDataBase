@@ -70,7 +70,6 @@ public class Uploader {
                                       HttpSession session) throws Exception {
         logger.info("Getting file...");
         User user = (User) session.getAttribute("user");
-        System.out.println(dateAfter);
         //clean database before inserting new data. it needed to avoid doubles. method marked transactional, so
         //old information will be restored in case of exception, I hope
         if (dateAfter == null) {
@@ -215,7 +214,6 @@ public class Uploader {
                     }
                     //last cell for transaction. Insert transaction with previous info
                     if ((cell.getColumnIndex() % columnPerCurrency == 0) && isTransaction) {
-                        System.out.println("currencyId=" + (currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1)));
                         logger.info("Inserting transaction on sheet: " + sheet.getSheetName());
                         insertTransaction(row, cell.getColumnIndex(), currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1), user);
                         amount = 0;

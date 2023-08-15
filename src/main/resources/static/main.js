@@ -407,12 +407,16 @@ console.log(element);
 
 function arithmetic(id) {
     var positiveAmount = Number(document.getElementById(id + 'pAmount').value);
+    console.log(positiveAmount);
     var negativeAmount = Number(document.getElementById(id + 'nAmount').value);
     var commission = Number(document.getElementById(id + 'commission').value);
     var trans = Number(document.getElementById(id + 'trans').value);
+    var total = Number(document.getElementById(id + 'total').innerText);
+    var balance = Number(document.getElementById(id + 'balance').innerText);
 
     document.getElementById(id + 'com').innerHTML = ((positiveAmount + negativeAmount) * commission / 100).toFixed(2);
-    document.getElementById(id + 'total').innerHTML = ((positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(2)
+    document.getElementById(id + 'total').innerHTML = ((positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(2);
+    document.getElementById(id + 'balance').innerHTML = (balance - total + (positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(2);
 }
 
 function perevod(id) {

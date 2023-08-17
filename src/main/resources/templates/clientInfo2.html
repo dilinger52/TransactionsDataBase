@@ -66,6 +66,8 @@
         <label for="violet" class="inline sphere violet label-for-check"></label>
         <input type="radio" name="color" id="black" value="rgb(0,0,0)" class="inline check-with-label">
         <label for="black" class="inline sphere black label-for-check"></label>
+        <input type="radio" name="color" id="none" class="inline check-with-label" checked>
+        <label for="none" class="inline sphere none label-for-check"></label>
     </form>
     <button onclick="saveColors()" class="inline">Сохранить расцветку</button>
     <!--/*<button onclick="capture()" class="inline">Скриншот</button>*/-->
@@ -115,12 +117,10 @@
                         <input th:form="|del${id}|" type="submit" value="Удалить" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}">
                         <input th:form="${id}" type="submit" value="Удалить строку" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:onclick="|deleteRow(${currency.id}${iter.index})|">
                     </th>
-                <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                    <input th:form="${id}" type="date" th:value="${#dates.format(transaction.date, 'yyyy-MM-dd')}" name="date">
-                </th>
+                <th th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}" th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">                </th>
                     <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                         <input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Показать" th:onclick="|showAgents(${currency.id}${transaction.id})|" th:id="|${currency.id}${transaction.id}|">
-                        <!--/*<input th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${transaction.id}${currency.id}|" th:onclick="addRow(this.getAttribute('data-1'))">*/-->
+                        <input th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${currency.id}${iter.index}|" th:data-3="${id}" th:onclick="addRowInside(this.getAttribute('data-2'), this.getAttribute('data-1'), this.getAttribute('data-3'))">
                         <input th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" type="text" th:value="${transaction.client.pib}" name="client_name" list="client_datalist">
                     </th>
                     <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
@@ -128,11 +128,11 @@
                     </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                     <input th:form="${id}" type="text" th:if="${transaction.amount > 0}" th:value="${#numbers.formatDecimal(transaction.amount, 1, 2, 'POINT')}" name="positiveAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}pAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
-                    <input th:form="${id}" type="text" th:if="${transaction.amount < 0}" value="0" name="positiveAmount" th:id="|${transaction.id}${currency.id}${transaction.client.id}pAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input th:form="${id}" type="text" th:if="${transaction.amount <= 0}" value="0" name="positiveAmount" th:id="|${transaction.id}${currency.id}${transaction.client.id}pAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                 <input th:form="${id}" type="text" th:if="${transaction.amount < 0}" th:value="${#numbers.formatDecimal(transaction.amount, 1, 2, 'POINT')}" name="negativeAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}nAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
-                    <input th:form="${id}" type="text" th:if="${transaction.amount > 0}" value="0" name="negativeAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}nAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input th:form="${id}" type="text" th:if="${transaction.amount >= 0}" value="0" name="negativeAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}nAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                     <input th:form="${id}" type="text" th:value="${#numbers.formatDecimal(transaction.commission, 1, 2, 'POINT')}" name="commission"  th:id="|${transaction.id}${currency.id}${transaction.client.id}commission|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">

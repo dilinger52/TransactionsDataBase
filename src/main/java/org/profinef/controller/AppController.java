@@ -4,8 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.Hashing;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
 import org.profinef.dto.TransactionDto;
 import org.profinef.entity.*;
 import org.profinef.entity.Currency;
@@ -15,11 +16,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.*;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -27,6 +32,8 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static java.time.ZoneId.systemDefault;
 
@@ -137,17 +144,21 @@ public class AppController {
             logger.trace("currencyName = " + currencyName);
         }
         if (startDate == null) {
+            logger.debug("requested start date is null");
             if (session.getAttribute("startDate") == null) {
+                logger.debug("session start date is null");
                 startDate = Date.valueOf(LocalDate.now());
             } else {
                 startDate = new Date(((Timestamp) session.getAttribute("startDate")).getTime());
             }
         }
         if (endDate == null) {
-            if (session.getAttribute("endDate") == null) {
+            logger.debug("requested end date is null");
+            if (session.getAttribute("endDate1") == null) {
+                logger.debug("requested end date is null");
                 endDate = new Date(startDate.getTime() + 86400000);
             } else {
-                endDate = new Date(((Timestamp) session.getAttribute("endDate")).getTime());
+                endDate = new Date(((Timestamp) session.getAttribute("endDate1")).getTime());
             }
         }
         logger.trace("startDate = " + startDate);
@@ -208,6 +219,7 @@ public class AppController {
             }
         }
         List<Client> clients = clientManager.findAll();
+        clients.remove(client);
         logger.trace("total = " + total);
         session.setAttribute("clients", clients);
         session.setAttribute("comments", comments);
@@ -372,13 +384,29 @@ public class AppController {
                                   HttpSession session) {
         logger.info("Saving transaction after editing...");
         List<Double> amount = new ArrayList<>();
-        for (int i = 0; i < positiveAmount.size(); i++) {
+        System.out.println(positiveAmount);
+        System.out.println(negativeAmount);
+        int size = positiveAmount.size();
+        if (size < negativeAmount.size()) size = negativeAmount.size();
+        for (int i = 0; i < size; i++) {
+            if (positiveAmount.size() < size) {
+                positiveAmount.add(0.0);
+                if (positiveAmount.get(i) == null) {
+                    positiveAmount.set(i, 0.0);
+                }
+            }
+            if (negativeAmount.size() < size) {
+                negativeAmount.add(0.0);
+                if (negativeAmount.get(i) == null) {
+                    negativeAmount.set(i, 0.0);
+                }
+            }
+            if (positiveAmount.get(i) != 0 && positiveAmount.get(i) + negativeAmount.get(i) == 0) {
+                logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+                session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+                return "error";
+            }
             amount.add(positiveAmount.get(i) + negativeAmount.get(i));
-        }
-        if (amount.stream().filter(a -> a > 0 || a <0).count() <= 0) {
-            logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
-            session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
-            return "error";
         }
         if (comment.isEmpty()) {
             logger.debug("comment is empty");
@@ -403,16 +431,39 @@ public class AppController {
 
             transManager.deleteTransaction(transactionList);
             for (int i = 0; i < clientName.size(); i++) {
+                if (commission.size() < clientName.size()) {
+                    commission.add(0.0);
+                    if (commission.get(i) == null) {
+                        commission.set(i, 0.0);
+                    }
+                }
+                if (rate.size() < clientName.size()) {
+                    rate.add(0.0);
+                    if (rate.get(i) == null) {
+                        rate.set(i, 0.0);
+                    }
+                }
+                if (transportation.size() < clientName.size()) {
+                    transportation.add(0.0);
+                    if (transportation.get(i) == null) {
+                        transportation.set(i, 0.0);
+                    }
+                }
+
                 Map<Currency, Double> oldBalance = new TreeMap<>();
                 if (oldBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
                     oldBalance = oldBalances.get(clientManager.getClient(clientName.get(i)));
                 }
-                Double b = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate()).getBalance();
+                TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate());
+                Double b = 0.0;
+                if (previous != null) b = previous.getBalance();
                 oldBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
                 oldBalances.put(clientManager.getClient(clientName.get(i)), oldBalance);
             }
             for (int i = 0; i < clientName.size(); i++) {
-                Double balance = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate()).getBalance();
+                TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate());
+                Double balance = 0.0;
+                if (previous != null) balance = previous.getBalance();
                 Double b = transManager.update(tr.getId(), tr.getDate(), clientName.get(i), comment.get(i),
                         currencyId.get(i), rate.get(i), commission.get(i), amount.get(i),
                         transportation.get(i), null, null, null, tr.getUser().getId(), balance);
@@ -450,6 +501,7 @@ public class AppController {
      * @param transactionId id of transaction that need to be deleted
      * @param session collect parameters for view
      */
+    @Transactional
     @PostMapping(path = "delete_transaction")
     public String deleteTransaction(@RequestParam(name = "transaction_id") int transactionId, HttpSession session) {
         logger.info("Deleting transaction...");
@@ -470,6 +522,7 @@ public class AppController {
      * @param transportation external commission if money will be transferred for client
      * @param session collect parameters for view
      */
+    @Transactional
     @PostMapping(path = "/transaction")
     public String doTransaction(@RequestParam(name = "client_name") List<String> clientName,
                                 @RequestParam(name = "currency_name") List<String> currencyName,
@@ -523,7 +576,11 @@ public class AppController {
                 try {
                     if (date != null && date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()))) {
                         logger.debug("Date before today date");
-                        Double trBalance = transManager.findPrevious(clientId.get(i), currencyId.get(i), new Timestamp(date.getTime())).getBalance();
+                        TransactionDto previousTransaction = transManager.findPrevious(clientId.get(i), currencyId.get(i), new Timestamp(date.getTime()));
+                        Double trBalance = null;
+                        if (previousTransaction != null) {
+                            trBalance = previousTransaction.getBalance();
+                        }
                         logger.trace("trBalance: " + trBalance);
                         Double oldBalance = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));
                         logger.trace("oldBalance: " + oldBalance);
@@ -539,7 +596,7 @@ public class AppController {
                         logger.debug("Date is today");
                         transManager.remittance(transactionId, null, clientName.get(i), comment.get(i),
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
-                                null, null, null, user.getId(), 0);
+                                null, null, null, user.getId(), 0.0);
                     }
                 } catch (Exception e) {
                     logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));
@@ -978,5 +1035,84 @@ public class AppController {
         logger.info("Manager history page loaded");
         return "managerHistory";
     }
+
+    @GetMapping("/database")
+    public String makeBackUp(HttpSession session, HttpServletResponse response) throws IOException {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser.getRole() != Role.Admin) {
+            logger.info("Redirecting to error page with error: Отказано в доступе");
+            session.setAttribute("error", "Отказано в доступе");
+            return "error";
+        }
+
+        File dir = new File("C:\\Users\\O.Hryhorenko\\Documents\\Data\\transactions"); //path указывает на директорию
+        //File dir = new File("pom.xml"); //path указывает на директорию
+        /*for (File file :
+                lst) {*/
+            try {
+                ZipOutputStream zout = new ZipOutputStream(new FileOutputStream("output.zip"));
+                System.out.println(zout);
+                getZip(dir, zout);
+                zout.close();
+                // закрываем текущую запись для новой записи
+
+            }
+            catch(Exception ex){
+                ex.printStackTrace();
+                System.out.println(ex.getMessage());
+            }
+        File file = new File("output.zip");
+        logger.debug("File exist");
+        //get the mimetype
+        String mimeType = URLConnection.guessContentTypeFromName(file.getName());
+        if (mimeType == null) {
+            //unknown mimetype so set the mimetype to application/octet-stream
+            mimeType = "application/octet-stream";
+        }
+
+        response.setContentType(mimeType);
+        logger.debug("Content type set");
+
+
+        response.setHeader("Content-Disposition", String.format("inline; filename=\"" + file.getName() + "\""));
+
+        //Here we have mentioned it to show as attachment
+        //response.setHeader("Content-Disposition", String.format("attachment; filename=\"" + file.getName() + "\""));
+
+        response.setContentLength((int) file.length());
+
+        InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+
+        FileCopyUtils.copy(inputStream, response.getOutputStream());
+        /*}*/
+        return "redirect:/users";
+    }
+
+    private void getZip(File file, ZipOutputStream zout) throws IOException {
+        System.out.println(zout);
+        System.out.println(0);
+        System.out.println(file.getName());
+        ZipEntry entry1 = new ZipEntry(file.getName());
+        zout.putNextEntry(entry1);
+        if (file.isDirectory()) {
+            System.out.println(1);
+            File[] arFiles = file.listFiles();
+            assert arFiles != null;
+            for (File f : arFiles) {
+                getZip(f, zout);
+            }
+        } else {
+            System.out.println(2);
+            FileInputStream fis = new FileInputStream(file);
+            System.out.println(fis);
+            // считываем содержимое файла в массив byte
+            byte[] buffer = new byte[fis.available()];
+            int i = fis.read(buffer);
+            // добавляем содержимое к архиву
+            zout.write(buffer);
+            zout.closeEntry();
+        }
+    }
+
 
 }

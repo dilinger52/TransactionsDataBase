@@ -63,6 +63,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 return false;
             }
         };
-        registry.addInterceptor(authorizationInterceptor).addPathPatterns("/*").excludePathPatterns("/log_in", "/check_user", "/registration");
+        registry.addInterceptor(authorizationInterceptor).addPathPatterns("/*").excludePathPatterns("/log_in", "/check_user", "/registration", "/error");
     }
 }

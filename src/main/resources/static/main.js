@@ -258,8 +258,11 @@ ignoreElements: document.querySelector(".ignore")
 
 function showAgents(id) {
     var rows = document.getElementsByName(id);
+    var color = rows[0].style.color;
+    console.log(color);
     for (var i = 0; i < rows.length; i++) {
         rows[i].style.display = "";
+        rows[i].style.color = color;
     }
     var button = document.querySelector('input[id="' + id + '"');
     console.log(button);
@@ -305,7 +308,7 @@ console.log(sum);
     const th1 = document.createElement('th');
         const input1 = document.createElement('input');
             input1.type = "button";
-            input1.value = "Удалить";
+            input1.value = "Удалить строку";
             input1.setAttribute("onclick", "deleteRow('" + id + "tr" + num + "')");
         th1.appendChild(input1);
     tr.appendChild(th1);
@@ -396,6 +399,116 @@ console.log(sum);
         tr.appendChild(th12);
     var tbody = document.getElementById(id);
     tbody.appendChild(tr);
+    arithmetic(tr.id);
+}
+
+function addRowInside(id, table, form) {
+ var $TR = $('tr[id="' + id + '"]');
+ console.log($TR);
+ var num = parseInt( $TR.prop("id").match(/\d+/g), 10 );
+ console.log(num);
+
+ const tr = document.createElement('tr');
+    tr.id=id + "tr" + num;
+    const input0 = document.createElement('input');
+        input0.type = "hidden";
+        input0.name = "currency_name";
+        input0.value = table;
+        input0.setAttribute("Form", form);
+    tr.appendChild(input0);
+    const th1 = document.createElement('th');
+        const input1 = document.createElement('input');
+            input1.type = "button";
+            input1.value = "Удалить строку";
+            input1.setAttribute("onclick", "deleteRow('" + id + "tr" + num + "')");
+        th1.appendChild(input1);
+    tr.appendChild(th1);
+    const th2 = document.createElement('th');
+    tr.appendChild(th2);
+    const th3 = document.createElement('th');
+        const input3 = document.createElement('input');
+            input3.type = "text";
+            input3.name = "client_name";
+            input3.setAttribute("list", "client_datalist");
+            input3.setAttribute("Form", form);
+        th3.appendChild(input3);
+    tr.appendChild(th3);
+    const th4 = document.createElement('th');
+        const input4 = document.createElement('input');
+            input4.type = "text";
+            input4.name = "comment";
+            input4.setAttribute("Form", form);
+        th4.appendChild(input4);
+    tr.appendChild(th4);
+    const th5 = document.createElement('th');
+            const input5 = document.createElement('input');
+                input5.type = "text";
+                input5.name = "positiveAmount";
+                input5.id = id + "tr" + num + "pAmount";
+                input5.value = "0.0";
+                input5.setAttribute("Form", form);
+                input5.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+            th5.appendChild(input5);
+    tr.appendChild(th5);
+    const th6 = document.createElement('th');
+            const input6 = document.createElement('input');
+                input6.type = "text";
+                input6.name = "negativeAmount";
+                input6.value = "0.0";
+                input6.id = id + "tr" + num + "nAmount";
+                input6.setAttribute("Form", form);
+                input6.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+            th6.appendChild(input6);
+    tr.appendChild(th6);
+    const th7 = document.createElement('th');
+            const input7 = document.createElement('input');
+                input7.type = "text";
+                input7.name = "commission";
+                input7.value = "0.0";
+                input7.id = id + "tr" + num + "commission";
+                input7.setAttribute("Form", form);
+                input7.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+            th7.appendChild(input7);
+        tr.appendChild(th7);
+    const th8 = document.createElement('th');
+    th8.innerHTML = 0.0;
+    th8.id = id + "tr" + num + "com";
+    tr.appendChild(th8);
+    const th9 = document.createElement('th');
+            const input9 = document.createElement('input');
+                input9.type = "text";
+                input9.name = "rate";
+                input9.value = "1.0";
+                input9.setAttribute("Form", form);
+            th9.appendChild(input9);
+        tr.appendChild(th9);
+        const th10 = document.createElement('th');
+                const input10 = document.createElement('input');
+                    input10.type = "text";
+                    input10.name = "transportation";
+                    input10.value = "0.0";
+                    input10.id = id + "tr" + num + "trans";
+                    input10.setAttribute("Form", form);
+                    input10.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+                th10.appendChild(input10);
+            tr.appendChild(th10);
+    const th11 = document.createElement('th');
+        th11.innerHTML = 0.0;
+        th11.id = id + "tr" + num + "total";
+    tr.appendChild(th11);
+    const th12 = document.createElement('th');
+    th12.id = id + "tr" + num + "balance";
+    th12.innerHTML = 0.0;
+        tr.appendChild(th12);
+    var tbody = document.getElementById(table);
+    console.log("id" + id);
+    var temp = Number(id) + 1;
+    console.log("id + 1" + temp);
+    var nextTR = document.getElementById(Number(id) + 1);
+    if (nextTR == null) {
+        nextTR = document.getElementById(table + "tr0");
+    }
+    tbody.insertBefore(tr, nextTR);
     arithmetic(tr.id);
 }
 
@@ -694,4 +807,40 @@ function cleanObm() {
 
 function init(mes) {
     alert(mes);
+}
+
+function checkConnection() {
+const tempId = 1;
+    $.ajax({
+        type : "GET",
+        url : "/check_connection",
+        data : {id:tempId},
+        timeout : 100000,
+        success : function(response) {
+            connection = true;
+        },
+        error : function(e) {
+            console.log("ERROR: ", e);
+            connection = false;
+        },
+        done : function(e) {
+            console.log("DONE");
+        }
+    });
+}
+
+setInterval(checkConnection, 1000);
+setInterval(displayConnection, 5000);
+
+var connection = false;
+
+function displayConnection() {
+    var indicator = document.getElementById("connectionLabel");
+    if (connection == false) {
+        indicator.classList.remove("green");
+        indicator.classList.add("red");
+    } else {
+        indicator.classList.remove("red");
+        indicator.classList.add("green");
+    }
 }

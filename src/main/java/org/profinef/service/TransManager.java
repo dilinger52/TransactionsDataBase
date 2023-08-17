@@ -1,6 +1,5 @@
 package org.profinef.service;
 
-import jakarta.transaction.Transactional;
 import org.profinef.dto.AccountDto;
 import org.profinef.dto.CurrencyDto;
 import org.profinef.dto.TransactionDto;
@@ -15,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -47,10 +47,10 @@ public class TransManager {
         this.userManager = userManager;
     }
 
-    @Transactional
+
     public double remittance(int transactionId, Timestamp date, String clientName, String comment, int currencyId, double rate,
                              double commission, double amount, double transportation, String pibColor,
-                             String amountColor, String balanceColor, int userId, double trBalance) throws RuntimeException {
+                             String amountColor, String balanceColor, int userId, Double trBalance) throws RuntimeException {
         logger.debug("Saving transaction");
         //if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
@@ -58,8 +58,13 @@ public class TransManager {
         Client client = clientManager.getClient(clientName);
         if (date == null) date = new Timestamp(System.currentTimeMillis());
         double oldBalance = 0;
-        if (trBalance != 0) {
+        if (trBalance != null) {
+            if (trBalance != 0) {
+                oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
+            }
+        } else {
             oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
+            trBalance = 0.0;
         }
         double balance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
         TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
@@ -69,7 +74,6 @@ public class TransManager {
         return balance;
     }
 
-    @Transactional
     public double update(int transactionId, Timestamp date, String clientName, String comment, int currencyId, double rate,
                              double commission, double amount, double transportation, String pibColor,
                              String amountColor, String balanceColor, int userId, Double trBalance) throws RuntimeException {
@@ -132,7 +136,6 @@ public class TransManager {
         logger.debug("Transactions updated");
     }
 
-    @Transactional
     public void deleteTransaction(List<Transaction> transaction) {
         logger.debug("Deleting transactions");
         List<TransactionDto> transactionDtoList = new ArrayList<>();

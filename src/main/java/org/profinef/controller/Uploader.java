@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -64,6 +65,7 @@ public class Uploader {
      *
      * @param file file with information to update
      */
+    @Transactional
     @RequestMapping("/full")
     public String uploadDataFromExcel(@RequestParam("file") MultipartFile file,
                                       @RequestParam(name = "date", required = false, defaultValue = "0") java.sql.Date dateAfter,
@@ -273,7 +275,7 @@ public class Uploader {
         try {
             //writing transaction to database
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId(), 0);
+                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId(), 0.0);
         } catch (RuntimeException e) {
             e.printStackTrace();
             //if currency did not exist create it and try again
@@ -284,7 +286,7 @@ public class Uploader {
                 ex.printStackTrace();
             }
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId(), 0);
+                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId(), 0.0);
         }
         //setting parameters to default
         amount = 0;

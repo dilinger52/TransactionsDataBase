@@ -7,7 +7,10 @@
 </head>
 <body>
     <div style="float: right; margin-right: 25px; width: min-content;" th:fragment="user_block">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <div style="width: max-content;">
+            <input type="radio" id="connection" class="inline check-with-label">
+            <label for="connection" class="inline sphere2 green label-for-check" id="connectionLabel"></label>
       <p class="inline" th:text="${session.user.role.name}"></p>
       <h4 class="inline" th:text="${session.user.login}"></h4>
         <form th:if="${session.user.role.name == 'Admin'}" method="get" action="users" class="inline">

@@ -1,6 +1,10 @@
 *{
-margin: 7px;
+margin: 3px;
 padding: 3px;
+}
+p, h1, h2, h3, h4, h5, h6, h7, h8 {
+margin: 0;
+padding: 0;
 }
 input {
 margin: 0px;
@@ -162,6 +166,6 @@ margin-left: 14px;
 }
 
 .currencies {
-padding-top: 11px;
+/*padding-top: 11px;*/
 width: max-content;
 }

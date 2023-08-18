@@ -17,14 +17,14 @@
     <div class="inline">
     <input type="hidden" name="transaction_id" th:value="${transaction.id}">
     <label th:for="|client_name${transaction.client.pib}|">Клиент</label>
-    <input type="text" th:id="|client_name${transaction.client.pib}|" name="client_name" th:list="|client_datalist${transaction.client.pib}|" th:value="${transaction.client.pib}" required>
+    <input type="text" th:id="|client_name${transaction.client.pib}|" name="client_name" th:list="|client_datalist${transaction.client.pib}|" th:value="${transaction.client.pib}" required autocomplete="off">
     <datalist th:id="|client_datalist${transaction.client.pib}|">
       <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
     </datalist>
     </div>
     <div class="inline">
     <label th:for="|currency_id${transaction.client.pib}|">Валюта</label>
-    <input type="text" th:id="|currency1_id${transaction.client.pib}|" name="currency_name" th:list="|currency_datalist${transaction.client.pib}|" th:value="${transaction.currency.name}" required>
+    <input type="text" th:id="|currency1_id${transaction.client.pib}|" name="currency_name" th:list="|currency_datalist${transaction.client.pib}|" th:value="${transaction.currency.name}" required autocomplete="off">
     <datalist th:id="|currency_datalist${transaction.client.pib}|">
       <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
     </datalist>

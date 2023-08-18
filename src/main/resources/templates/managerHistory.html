@@ -19,7 +19,7 @@
         <form method="get" action="manager_history" class="inline">
             <div class="inline">
                 <label for="client_name">Поиск по ФИО</label>
-                <input type="text" list="client_name_datalist" id="client_name" name="client_name" placeholder="Поиск.." onkeyup="filterFunction()">
+                <input type="text" list="client_name_datalist" id="client_name" name="client_name" placeholder="Поиск.." onkeyup="filterFunction()" autocomplete="off">
                 <datalist id="client_name_datalist">
                     <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
                 </datalist>

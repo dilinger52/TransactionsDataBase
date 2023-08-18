@@ -24,7 +24,7 @@
     <div>
     <div class="inline">
     <label for="currency1">Валюта</label>
-    <input type="text" name="currency_name" id="currency1" onkeyup="transferCurrency()" list="currency_datalist" required>
+    <input type="text" name="currency_name" id="currency1" onkeyup="transferCurrency()" list="currency_datalist" required autocomplete="off">
         <datalist id="currency_datalist">
             <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
         </datalist>
@@ -37,7 +37,7 @@
     <div>
     <div class="inline">
     <label for="client1">Клиент отправляющий</label>
-    <input type="text" name="client_name" th:value="${session.client.pib}" id="client1" list="client_datalist" readonly>
+    <input type="text" name="client_name" th:value="${session.client.pib}" id="client1" readonly>
 
     </div>
     <div class="inline">
@@ -52,9 +52,9 @@
     <div>
     <div class="inline">
     <label for="client2">Клиент получающий</label>
-    <input type="text" name="client_name" id="client2" list="client_datalist" required>
+    <input type="text" name="client_name" id="client2" list="client_datalist" required autocomplete="off">
         <datalist id="client_datalist">
-            <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
+            <option th:each="client : ${session.clients}" th:if="${client.pib != 'Всего'}" th:value="${client.pib}"></option>
         </datalist>
     </div>
     <div class="inline">

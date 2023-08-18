@@ -403,13 +403,30 @@ console.log(sum);
 }
 
 function addRowInside(id, table, form) {
- var $TR = $('tr[id="' + id + '"]');
- console.log($TR);
- var num = parseInt( $TR.prop("id").match(/\d+/g), 10 );
- console.log(num);
+ var i = id.substring(0, 3);
+ var $TR = $('tr[id^="' + id + '"]:last');
+ var num;
+ if ($TR.prop("id").length < 5) {
+    num = $TR.prop("id") + 1;
+ } else {
+    num = parseInt($TR.prop("id")) + 1;
+ }
+var pAmount = document.querySelectorAll("input[form='" + form + "'][name='positiveAmount']");
+var nAmount = document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']");
 
+var sum = 0;
+     for (var j = 0; j < pAmount.length; j++) {
+        if (pAmount[j].parentElement.parentElement.id.substring(0, 3) != i) continue;
+         sum -= Number(pAmount[j].value);
+         sum -= Number(nAmount[j].value);
+     }
+//sum = -1 * sum;
+console.log(sum);
  const tr = document.createElement('tr');
-    tr.id=id + "tr" + num;
+    tr.id = num;
+    tr.style.color = document.getElementById(id).style.color;
+    tr.setAttribute("name", i + form);
+    tr.setAttribute("onclick", "changeColor('" + i + form + "')");
     const input0 = document.createElement('input');
         input0.type = "hidden";
         input0.name = "currency_name";
@@ -417,15 +434,18 @@ function addRowInside(id, table, form) {
         input0.setAttribute("Form", form);
     tr.appendChild(input0);
     const th1 = document.createElement('th');
+        th1.style.borderTop = "none";
         const input1 = document.createElement('input');
             input1.type = "button";
             input1.value = "Удалить строку";
-            input1.setAttribute("onclick", "deleteRow('" + id + "tr" + num + "')");
+            input1.setAttribute("onclick", "deleteRow('" + num + "')");
         th1.appendChild(input1);
     tr.appendChild(th1);
     const th2 = document.createElement('th');
+        th2.style.borderTop = "none";
     tr.appendChild(th2);
     const th3 = document.createElement('th');
+        th3.style.borderTop = "none";
         const input3 = document.createElement('input');
             input3.type = "text";
             input3.name = "client_name";
@@ -434,6 +454,7 @@ function addRowInside(id, table, form) {
         th3.appendChild(input3);
     tr.appendChild(th3);
     const th4 = document.createElement('th');
+        th4.style.borderTop = "none";
         const input4 = document.createElement('input');
             input4.type = "text";
             input4.name = "comment";
@@ -441,40 +462,53 @@ function addRowInside(id, table, form) {
         th4.appendChild(input4);
     tr.appendChild(th4);
     const th5 = document.createElement('th');
+        th5.style.borderTop = "none";
             const input5 = document.createElement('input');
                 input5.type = "text";
                 input5.name = "positiveAmount";
-                input5.id = id + "tr" + num + "pAmount";
-                input5.value = "0.0";
+                input5.id = num + "pAmount";
+                if (sum >= 0) {
+                    input5.value = sum.toFixed(2);
+                } else {
+                    input5.value = "0.0";
+                }
                 input5.setAttribute("Form", form);
-                input5.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+                input5.setAttribute("onkeyup", "arithmetic('" + num + "')");
             th5.appendChild(input5);
     tr.appendChild(th5);
     const th6 = document.createElement('th');
+        th6.style.borderTop = "none";
             const input6 = document.createElement('input');
                 input6.type = "text";
                 input6.name = "negativeAmount";
-                input6.value = "0.0";
-                input6.id = id + "tr" + num + "nAmount";
+                if (sum < 0) {
+                    input6.value = sum.toFixed(2);
+                } else {
+                    input6.value = "0.0";
+                }
+                input6.id = num + "nAmount";
                 input6.setAttribute("Form", form);
-                input6.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+                input6.setAttribute("onkeyup", "arithmetic('" + num + "')");
             th6.appendChild(input6);
     tr.appendChild(th6);
     const th7 = document.createElement('th');
+        th7.style.borderTop = "none";
             const input7 = document.createElement('input');
                 input7.type = "text";
                 input7.name = "commission";
                 input7.value = "0.0";
-                input7.id = id + "tr" + num + "commission";
+                input7.id = num + "commission";
                 input7.setAttribute("Form", form);
-                input7.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+                input7.setAttribute("onkeyup", "arithmetic('" + num + "')");
             th7.appendChild(input7);
         tr.appendChild(th7);
     const th8 = document.createElement('th');
+        th8.style.borderTop = "none";
     th8.innerHTML = 0.0;
-    th8.id = id + "tr" + num + "com";
+    th8.id = num + "com";
     tr.appendChild(th8);
     const th9 = document.createElement('th');
+        th9.style.borderTop = "none";
             const input9 = document.createElement('input');
                 input9.type = "text";
                 input9.name = "rate";
@@ -483,28 +517,31 @@ function addRowInside(id, table, form) {
             th9.appendChild(input9);
         tr.appendChild(th9);
         const th10 = document.createElement('th');
+            th10.style.borderTop = "none";
                 const input10 = document.createElement('input');
                     input10.type = "text";
                     input10.name = "transportation";
                     input10.value = "0.0";
-                    input10.id = id + "tr" + num + "trans";
+                    input10.id = num + "trans";
                     input10.setAttribute("Form", form);
-                    input10.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+                    input10.setAttribute("onkeyup", "arithmetic('" + num + "')");
                 th10.appendChild(input10);
             tr.appendChild(th10);
     const th11 = document.createElement('th');
+        th11.style.borderTop = "none";
         th11.innerHTML = 0.0;
-        th11.id = id + "tr" + num + "total";
+        th11.id = num + "total";
     tr.appendChild(th11);
     const th12 = document.createElement('th');
-    th12.id = id + "tr" + num + "balance";
+    th12.style.borderTop = "none";
+    th12.id = num + "balance";
     th12.innerHTML = 0.0;
         tr.appendChild(th12);
     var tbody = document.getElementById(table);
     console.log("id" + id);
     var temp = Number(id) + 1;
     console.log("id + 1" + temp);
-    var nextTR = document.getElementById(Number(id) + 1);
+    var nextTR = document.getElementsByName(Number(i + form) + 1)[0];
     if (nextTR == null) {
         nextTR = document.getElementById(table + "tr0");
     }
@@ -513,7 +550,7 @@ function addRowInside(id, table, form) {
 }
 
 function deleteRow(id) {
-var element = document.getElementById(id);
+var element = document.querySelector("tr[id='" + id + "']");
 console.log(element);
     element.remove();
 }

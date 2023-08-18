@@ -29,21 +29,21 @@
     <div class="inline">
       <input type="hidden" name="transaction_id" th:value="${t.id}">
       <label for="client_name">Клиент</label>
-      <input type="text" id="client_name" name="client_name" list="client_datalist" th:value="${t.client.pib}" required>
+      <input type="text" id="client_name" name="client_name" list="client_datalist" th:value="${t.client.pib}" required autocomplete="off">
       <datalist id="client_datalist">
         <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
       </datalist>
     </div>
     <div class="inline">
       <label for="comment">Комментарий</label>
-      <input type="text" list="comment_datalist" id="comment" name="comment" th:value="${t.comment}">
+      <input type="text" list="comment_datalist" id="comment" name="comment" th:value="${t.comment}" autocomplete="off">
       <datalist id="comment_datalist">
         <option th:each="comment : ${session.comments}" th:value="${comment}"></option>
       </datalist>
     </div>
     <div class="inline">
       <label for="currency_id">Валюта</label>
-      <input type="text" id="currency_id" name="currency_name" list="currency_datalist" th:value="${t.currency.name}" required>
+      <input type="text" id="currency_id" name="currency_name" list="currency_datalist" th:value="${t.currency.name}" required autocomplete="off">
       <datalist id="currency_datalist">
         <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
       </datalist>
@@ -62,7 +62,8 @@
     </div>
     <div class="inline">
       <label for="amount">Объем</label>
-      <input type="text" id="amount" name="amount" th:value="${t.amount}" onkeyup="sumInputs()" required>
+      <input type="text" id="amount" name="positiveAmount" th:value="${t.amount}" onkeyup="sumInputs()" required>
+      <input type="hidden" name="negativeAmount" value="0.0">
     </div>
     <div class="inline">
       <label for="value">Рекомендуемое значение:</label>

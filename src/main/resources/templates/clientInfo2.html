@@ -13,11 +13,14 @@
 <h2 class="inline" th:text="|Клиент: ${session.client.pib}|"></h2>
 
     <th:block th:insert="userBlock.html :: user_block"></th:block>
-    <p style="color: red;" th:text="${session.client_alert}"></p>
+    <p style="color: red;" th:if="${session.client_alert != null}" th:text="${session.client_alert}"></p>
     <div>
 <form method="get" action="client" class="inline">
     <input type="submit" value="<- Назад">
 </form>
+        <form method="get" action="add_transaction" class="inline">
+            <input type="submit" value="Новая транзакция">
+        </form>
         <form method="get" action="convertation" class="inline">
             <input type="submit" value="Обмен валют">
         </form>
@@ -32,7 +35,7 @@
             <input type="submit" value="Изменить данные пользователя">
         </form>
         <form method="get" action="client_info">
-            <input type="text" list="client_datalist" id="client_name" name="client_name" placeholder="Поиск.." class="inline">
+            <input type="text" list="client_datalist" id="client_name" name="client_name" placeholder="Поиск.." class="inline" autocomplete="off">
             <datalist id="client_datalist">
                 <option th:each="client : ${session.clients}" th:value="${client.pib}"></option>
             </datalist>
@@ -117,7 +120,7 @@
                         <input th:form="|del${id}|" type="submit" value="Удалить" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}">
                         <input th:form="${id}" type="submit" value="Удалить строку" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:onclick="|deleteRow(${currency.id}${iter.index})|">
                     </th>
-                <th th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}" th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">                </th>
+                    <th th:text="${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? #dates.format(transaction.date, 'dd-MM-yyyy HH:mm') : ''}" th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}"></th>
                     <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                         <input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Показать" th:onclick="|showAgents(${currency.id}${transaction.id})|" th:id="|${currency.id}${transaction.id}|">
                         <input th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${currency.id}${iter.index}|" th:data-3="${id}" th:onclick="addRowInside(this.getAttribute('data-2'), this.getAttribute('data-1'), this.getAttribute('data-3'))">

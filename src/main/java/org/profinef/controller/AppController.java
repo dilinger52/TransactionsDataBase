@@ -220,6 +220,7 @@ public class AppController {
         }
         List<Client> clients = clientManager.findAll();
         clients.remove(client);
+        clients.sort(Comparator.comparing(Client::getPib));
         logger.trace("total = " + total);
         session.setAttribute("clients", clients);
         session.setAttribute("comments", comments);
@@ -538,6 +539,10 @@ public class AppController {
         List<Double> amount = new ArrayList<>();
         for (int i = 0; i < positiveAmount.size(); i++) {
             amount.add(positiveAmount.get(i) + negativeAmount.get(i));
+        }
+
+        if (session.getAttribute("path") == "/convertation" || session.getAttribute("path") == "/transfer") {
+            amount.set(0, (-1) * amount.get(0));
         }
         User user = (User) session.getAttribute("user");
         try {

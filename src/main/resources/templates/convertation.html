@@ -27,7 +27,7 @@
     <div>
     <div class="inline">
         <label for="currency1">Валюта продаваемая</label>
-        <input type="text" name="currency_name" id="currency1" onkeyup="convertDescription()" list="currency_datalist" required>
+        <input type="text" name="currency_name" id="currency1" onkeyup="convertDescription()" list="currency_datalist" required autocomplete="off">
         <datalist id="currency_datalist">
             <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
         </datalist>
@@ -45,7 +45,7 @@
     <div>
     <div class="inline">
         <label for="currency2">Валюта покупаемая</label>
-        <input type="text" name="currency_name" id="currency2" onkeyup="convertDescription()" list="currency_datalist" required>
+        <input type="text" name="currency_name" id="currency2" onkeyup="convertDescription()" list="currency_datalist" required autocomplete="off">
     </div>
     <div class="inline">
         <input type="hidden" name="positiveAmount" value="0" id="changeInput">

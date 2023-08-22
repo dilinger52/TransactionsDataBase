@@ -874,10 +874,10 @@ var connection = false;
 function displayConnection() {
     var indicator = document.getElementById("connectionLabel");
     if (connection == false) {
-        indicator.classList.remove("green");
+        indicator.classList.remove("lime");
         indicator.classList.add("red");
     } else {
         indicator.classList.remove("red");
-        indicator.classList.add("green");
+        indicator.classList.add("lime");
     }
 }

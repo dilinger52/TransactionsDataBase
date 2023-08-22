@@ -581,7 +581,10 @@ public class AppController {
                 try {
                     if (date != null && date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()))) {
                         logger.debug("Date before today date");
-                        TransactionDto previousTransaction = transManager.findPrevious(clientId.get(i), currencyId.get(i), new Timestamp(date.getTime()));
+                        System.out.println(date);
+                        date = new Date(date.getTime() + 86400000 - 1000);
+                        System.out.println(date);
+                        TransactionDto previousTransaction = transManager.findPrevious(clientId.get(i), currencyId.get(i), new Timestamp(date.getTime() + 1));
                         Double trBalance = null;
                         if (previousTransaction != null) {
                             trBalance = previousTransaction.getBalance();

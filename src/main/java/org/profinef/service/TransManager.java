@@ -67,6 +67,7 @@ public class TransManager {
             trBalance = 0.0;
         }
         double balance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
+        System.out.println(date);
         TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
                 transportation, client, comment, trBalance + balance - oldBalance, pibColor, amountColor, balanceColor, userId);
         transactionRepository.save(transactionDto);

@@ -28,7 +28,6 @@ public class Scheduler {
     }
 
 
-    @PostConstuct
     public void makeBackUp() throws Exception {
         logger.info("Making backup");
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());

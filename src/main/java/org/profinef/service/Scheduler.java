@@ -1,5 +1,6 @@
 package org.profinef.service;
 
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,7 @@ public class Scheduler {
         logger.info("Updating exchange rates");
         nbuManager.getTodayCurrencyExchange();
     }
-
-
+    @PostConstruct
     public void makeBackUp() throws Exception {
         logger.info("Making backup");
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());

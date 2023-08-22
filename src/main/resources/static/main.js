@@ -539,7 +539,11 @@ console.log(sum);
         tr.appendChild(th12);
     var tbody = document.getElementById(table);
     console.log("id" + id);
-    var temp = Number(id) + 1;
+    var temp = Number(id);
+    if (id.substring(id.length - 1) == '9') {
+        temp = Number(id.substring(0, id.length - 1) + '10')
+    }
+
     console.log("id + 1" + temp);
     var nextTR = document.getElementsByName(Number(i + form) + 1)[0];
     if (nextTR == null) {

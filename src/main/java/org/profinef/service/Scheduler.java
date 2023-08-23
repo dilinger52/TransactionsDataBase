@@ -28,6 +28,7 @@ public class Scheduler {
         nbuManager.getTodayCurrencyExchange();
     }
     @PostConstruct
+    @Scheduled(cron = "0 0 8 * * *")
     public void makeBackUp() throws Exception {
         logger.info("Making backup");
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());

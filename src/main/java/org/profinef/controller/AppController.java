@@ -523,7 +523,7 @@ public class AppController {
      * @param transportation external commission if money will be transferred for client
      * @param session collect parameters for view
      */
-    @Transactional
+
     @PostMapping(path = "/transaction")
     public String doTransaction(@RequestParam(name = "client_name") List<String> clientName,
                                 @RequestParam(name = "currency_name") List<String> currencyName,

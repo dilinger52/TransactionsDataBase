@@ -65,15 +65,13 @@ public class Uploader {
      *
      * @param file file with information to update
      */
-    @Transactional
+
     @RequestMapping("/full")
     public String uploadDataFromExcel(@RequestParam("file") MultipartFile file,
                                       @RequestParam(name = "date", required = false, defaultValue = "0") java.sql.Date dateAfter,
                                       HttpSession session) throws Exception {
         logger.info("Getting file...");
         User user = (User) session.getAttribute("user");
-        //clean database before inserting new data. it needed to avoid doubles. method marked transactional, so
-        //old information will be restored in case of exception, I hope
         if (dateAfter == null) {
             session.setAttribute("error", "date is null");
             clientManager.deleteAll();

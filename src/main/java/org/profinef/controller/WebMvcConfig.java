@@ -50,7 +50,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         }
                         List<HttpSession> sessions = new HttpSessionConfig().getActiveSessions();
                         for (HttpSession ses : sessions) {
-                            if (!ses.getId().equals(session.getId()) && ses.getAttribute("user").equals(user)) {
+                            if (!ses.getId().equals(session.getId()) && user.equals(ses.getAttribute("user"))) {
                                 mes += "Обнаружен вход с другого устройства. За детальной информацией обратитесь к администратору \n";
                                 break;
                             }

@@ -131,23 +131,23 @@
                     </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                     <input th:form="${id}" type="text" th:if="${transaction.amount > 0}" th:value="${#numbers.formatDecimal(transaction.amount, 1, 2, 'POINT')}" name="positiveAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}pAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
-                    <input th:form="${id}" type="text" th:if="${transaction.amount <= 0}" value="0" name="positiveAmount" th:id="|${transaction.id}${currency.id}${transaction.client.id}pAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input th:form="${id}" type="text" th:if="${transaction.amount <= 0}" name="positiveAmount" th:id="|${transaction.id}${currency.id}${transaction.client.id}pAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                 <input th:form="${id}" type="text" th:if="${transaction.amount < 0}" th:value="${#numbers.formatDecimal(transaction.amount, 1, 2, 'POINT')}" name="negativeAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}nAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
-                    <input th:form="${id}" type="text" th:if="${transaction.amount >= 0}" value="0" name="negativeAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}nAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input th:form="${id}" type="text" th:if="${transaction.amount >= 0}" name="negativeAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}nAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                    <input th:form="${id}" type="text" th:value="${#numbers.formatDecimal(transaction.commission, 1, 2, 'POINT')}" name="commission"  th:id="|${transaction.id}${currency.id}${transaction.client.id}commission|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input th:form="${id}" type="text" th:value="${transaction.commission != 0 ? #numbers.formatDecimal(transaction.commission, 1, 2, 'POINT') : ''}" name="commission"  th:id="|${transaction.id}${currency.id}${transaction.client.id}commission|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${#numbers.formatDecimal(transaction.commission * transaction.amount / 100, 1, 2, 'POINT')}" th:id="|${transaction.id}${currency.id}${transaction.client.id}com|">
 
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                    <input th:form="${id}" type="text" th:value="${#numbers.formatDecimal(transaction.rate, 1, 2, 'POINT')}" name="rate">
+                    <input th:form="${id}" type="text" th:value="${transaction.rate != 1 ? #numbers.formatDecimal(transaction.rate, 1, 2, 'POINT') : ''}" name="rate">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                    <input  th:form="${id}" type="text" name="transportation" th:value="${#numbers.formatDecimal(transaction.transportation, 1, 2, 'POINT')}"  th:id="|${transaction.id}${currency.id}${transaction.client.id}trans|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input  th:form="${id}" type="text" name="transportation" th:value="${transaction.transportation != 0 ? #numbers.formatDecimal(transaction.transportation, 1, 2, 'POINT') : ''}"  th:id="|${transaction.id}${currency.id}${transaction.client.id}trans|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${#numbers.formatDecimal(transaction.amount + transaction.commission * transaction.amount / 100 + transaction.transportation, 1, 2, 'POINT')}" th:id="|${transaction.id}${currency.id}${transaction.client.id}total|"></th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${#numbers.formatDecimal(transaction.balance, 1, 2, 'POINT')}" th:id="|${transaction.id}${currency.id}${transaction.client.id}balance|"></th>
@@ -174,23 +174,23 @@
                         <input type="text" name="comment" form="form">
                     </th>
                 <th>
-                    <input type="text" name="positiveAmount" form="form" value="0.0" th:id="|${currency.name}tr0pAmount|" th:data-1="|${currency.name}tr0|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input type="text" name="positiveAmount" form="form" th:id="|${currency.name}tr0pAmount|" th:data-1="|${currency.name}tr0|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
                 <th>
-                    <input type="text" name="negativeAmount" form="form" value="0.0" th:id="|${currency.name}tr0nAmount|" th:data-1="|${currency.name}tr0|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input type="text" name="negativeAmount" form="form" th:id="|${currency.name}tr0nAmount|" th:data-1="|${currency.name}tr0|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
                 <th>
-                    <input type="text" value="0.0" name="commission" form="form" th:id="|${currency.name}tr0commission|" th:data-1="|${currency.name}tr0|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input type="text" name="commission" form="form" th:id="|${currency.name}tr0commission|" th:data-1="|${currency.name}tr0|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
-                    <th th:id="|${currency.name}tr0com|">0.0</th>
+                    <th th:id="|${currency.name}tr0com|"></th>
 
                     <th>
-                        <input type="text" value="1.0" name="rate" form="form" th:id="|${currency.name}tr0rate|">
+                        <input type="text" name="rate" form="form" th:id="|${currency.name}tr0rate|">
                     </th>
                 <th>
-                    <input type="text" name="transportation" value="0.0" form="form" th:id="|${currency.name}tr0trans|" th:data-1="|${currency.name}tr0|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input type="text" name="transportation" form="form" th:id="|${currency.name}tr0trans|" th:data-1="|${currency.name}tr0|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
-                <th th:id="|${currency.name}tr0total|">0.0</th>
+                <th th:id="|${currency.name}tr0total|"></th>
                 <th th:id="|${currency.name}tr0balance|"></th>
 
             </tr>

@@ -91,11 +91,11 @@ function convert() {
     console.log(currency1rate);
     console.log(currency2rate);
     if (currency1rate > currency2rate) {
-        result = Number(amount.value) * Number(rate.value);
+        result = - Number(amount.value) * Number(rate.value);
     }
 
     if (currency1rate <= currency2rate) {
-        result = Number(amount.value) / Number(rate.value);
+        result = - Number(amount.value) / Number(rate.value);
     }
     console.log(result);
     document.getElementById("changeDiv").value = result.toFixed(2);
@@ -107,8 +107,8 @@ function convertDescription() {
     var currency = document.getElementsByName("currency_name");
     var comment = document.getElementsByName("comment");
 
-    comment[0].value = "Обмен на " + currency[1].value;
-    comment[1].value = "Обмен с " + currency[0].value;
+    comment[0].value = "Обмен " + currency[1].value;
+    comment[1].value = "Обмен " + currency[0].value;
     convert();
 }
 
@@ -334,10 +334,8 @@ console.log(sum);
                 input5.type = "text";
                 input5.name = "positiveAmount";
                 input5.id = id + "tr" + num + "pAmount";
-                if (sum >= 0) {
+                if (sum > 0) {
                      input5.value = sum.toFixed(2);
-                } else {
-                    input5.value = "0.0";
                 }
                 input5.setAttribute("Form", 'form');
                 input5.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
@@ -349,8 +347,6 @@ console.log(sum);
                 input6.name = "negativeAmount";
                 if (sum < 0) {
                     input6.value = sum.toFixed(2);
-                } else {
-                    input6.value = "0.0";
                 }
                 input6.id = id + "tr" + num + "nAmount";
                 input6.setAttribute("Form", 'form');
@@ -361,21 +357,18 @@ console.log(sum);
             const input7 = document.createElement('input');
                 input7.type = "text";
                 input7.name = "commission";
-                input7.value = "0.0";
                 input7.id = id + "tr" + num + "commission";
                 input7.setAttribute("Form", 'form');
                 input7.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
             th7.appendChild(input7);
         tr.appendChild(th7);
     const th8 = document.createElement('th');
-    th8.innerHTML = 0.0;
     th8.id = id + "tr" + num + "com";
     tr.appendChild(th8);
     const th9 = document.createElement('th');
             const input9 = document.createElement('input');
                 input9.type = "text";
                 input9.name = "rate";
-                input9.value = "1.0";
                 input9.setAttribute("Form", 'form');
             th9.appendChild(input9);
         tr.appendChild(th9);
@@ -383,19 +376,16 @@ console.log(sum);
                 const input10 = document.createElement('input');
                     input10.type = "text";
                     input10.name = "transportation";
-                    input10.value = "0.0";
                     input10.id = id + "tr" + num + "trans";
                     input10.setAttribute("Form", 'form');
                     input10.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
                 th10.appendChild(input10);
             tr.appendChild(th10);
     const th11 = document.createElement('th');
-        th11.innerHTML = 0.0;
         th11.id = id + "tr" + num + "total";
     tr.appendChild(th11);
     const th12 = document.createElement('th');
     th12.id = id + "tr" + num + "balance";
-    th12.innerHTML = 0.0;
         tr.appendChild(th12);
     var tbody = document.getElementById(id);
     tbody.appendChild(tr);
@@ -467,10 +457,8 @@ console.log(sum);
                 input5.type = "text";
                 input5.name = "positiveAmount";
                 input5.id = num + "pAmount";
-                if (sum >= 0) {
+                if (sum > 0) {
                     input5.value = sum.toFixed(2);
-                } else {
-                    input5.value = "0.0";
                 }
                 input5.setAttribute("Form", form);
                 input5.setAttribute("onkeyup", "arithmetic('" + num + "')");
@@ -483,8 +471,6 @@ console.log(sum);
                 input6.name = "negativeAmount";
                 if (sum < 0) {
                     input6.value = sum.toFixed(2);
-                } else {
-                    input6.value = "0.0";
                 }
                 input6.id = num + "nAmount";
                 input6.setAttribute("Form", form);
@@ -496,7 +482,6 @@ console.log(sum);
             const input7 = document.createElement('input');
                 input7.type = "text";
                 input7.name = "commission";
-                input7.value = "0.0";
                 input7.id = num + "commission";
                 input7.setAttribute("Form", form);
                 input7.setAttribute("onkeyup", "arithmetic('" + num + "')");
@@ -504,7 +489,6 @@ console.log(sum);
         tr.appendChild(th7);
     const th8 = document.createElement('th');
         th8.style.borderTop = "none";
-    th8.innerHTML = 0.0;
     th8.id = num + "com";
     tr.appendChild(th8);
     const th9 = document.createElement('th');
@@ -512,7 +496,6 @@ console.log(sum);
             const input9 = document.createElement('input');
                 input9.type = "text";
                 input9.name = "rate";
-                input9.value = "1.0";
                 input9.setAttribute("Form", form);
             th9.appendChild(input9);
         tr.appendChild(th9);
@@ -521,7 +504,6 @@ console.log(sum);
                 const input10 = document.createElement('input');
                     input10.type = "text";
                     input10.name = "transportation";
-                    input10.value = "0.0";
                     input10.id = num + "trans";
                     input10.setAttribute("Form", form);
                     input10.setAttribute("onkeyup", "arithmetic('" + num + "')");
@@ -529,13 +511,11 @@ console.log(sum);
             tr.appendChild(th10);
     const th11 = document.createElement('th');
         th11.style.borderTop = "none";
-        th11.innerHTML = 0.0;
         th11.id = num + "total";
     tr.appendChild(th11);
     const th12 = document.createElement('th');
     th12.style.borderTop = "none";
     th12.id = num + "balance";
-    th12.innerHTML = 0.0;
         tr.appendChild(th12);
     var tbody = document.getElementById(table);
     console.log("id" + id);

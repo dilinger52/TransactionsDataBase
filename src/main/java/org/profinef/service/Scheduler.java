@@ -32,6 +32,11 @@ public class Scheduler {
     public void makeBackUp() throws Exception {
         logger.info("Making backup");
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        databaseUtil.backup("root", "2223334456", "transactions", "backup\\" + date + ".sql");
+        boolean done = databaseUtil.backup("root", "2223334456", "transactions", "backup\\" + date + ".sql");
+        if (done) {
+            logger.info("Backup made");
+        } else {
+            logger.info("some errors");
+        }
     }
 }

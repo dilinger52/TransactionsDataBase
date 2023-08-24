@@ -392,16 +392,18 @@ public class AppController {
         for (int i = 0; i < size; i++) {
             if (positiveAmount.size() < size) {
                 positiveAmount.add(0.0);
+            }
                 if (positiveAmount.get(i) == null) {
                     positiveAmount.set(i, 0.0);
                 }
-            }
+
             if (negativeAmount.size() < size) {
                 negativeAmount.add(0.0);
+            }
                 if (negativeAmount.get(i) == null) {
                     negativeAmount.set(i, 0.0);
                 }
-            }
+
             if (positiveAmount.get(i) != 0 && positiveAmount.get(i) + negativeAmount.get(i) == 0) {
                 logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
                 session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
@@ -434,22 +436,25 @@ public class AppController {
             for (int i = 0; i < clientName.size(); i++) {
                 if (commission.size() < clientName.size()) {
                     commission.add(0.0);
+                }
                     if (commission.get(i) == null) {
                         commission.set(i, 0.0);
                     }
-                }
+
                 if (rate.size() < clientName.size()) {
                     rate.add(0.0);
+                }
                     if (rate.get(i) == null) {
                         rate.set(i, 0.0);
                     }
-                }
+
                 if (transportation.size() < clientName.size()) {
                     transportation.add(0.0);
+                }
                     if (transportation.get(i) == null) {
                         transportation.set(i, 0.0);
                     }
-                }
+
 
                 Map<Currency, Double> oldBalance = new TreeMap<>();
                 if (oldBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
@@ -537,11 +542,35 @@ public class AppController {
                                 HttpSession session) {
         logger.info("Creating new transaction...");
         List<Double> amount = new ArrayList<>();
-        for (int i = 0; i < positiveAmount.size(); i++) {
+        System.out.println(positiveAmount);
+        System.out.println(negativeAmount);
+        int size = positiveAmount.size();
+        if (size < negativeAmount.size()) size = negativeAmount.size();
+        for (int i = 0; i < size; i++) {
+            if (positiveAmount.size() < size) {
+                positiveAmount.add(0.0);
+            }
+                if (positiveAmount.get(i) == null) {
+                    positiveAmount.set(i, 0.0);
+                }
+            if (negativeAmount.size() < size) {
+                negativeAmount.add(0.0);
+            }
+                if (negativeAmount.get(i) == null) {
+                    negativeAmount.set(i, 0.0);
+                }
+
+            System.out.println(positiveAmount);
+            System.out.println(negativeAmount);
+            if (positiveAmount.get(i) != 0 && positiveAmount.get(i) + negativeAmount.get(i) == 0) {
+                logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+                session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+                return "error";
+            }
             amount.add(positiveAmount.get(i) + negativeAmount.get(i));
         }
 
-        if (session.getAttribute("path") == "/convertation" || session.getAttribute("path") == "/transfer") {
+        if (session.getAttribute("path") == "/transfer") {
             amount.set(0, (-1) * amount.get(0));
         }
         User user = (User) session.getAttribute("user");
@@ -577,6 +606,27 @@ public class AppController {
                 clientId.add(clientManager.getClient(name).getId());
             }
             for (int i = 0; i < clientName.size(); i++) {
+                if (commission.size() < clientName.size()) {
+                    commission.add(0.0);
+                }
+                    if (commission.get(i) == null) {
+                        commission.set(i, 0.0);
+                    }
+
+                if (rate.size() < clientName.size()) {
+                    rate.add(0.0);
+                }
+                    if (rate.get(i) == null) {
+                        rate.set(i, 0.0);
+                    }
+
+                if (transportation.size() < clientName.size()) {
+                    transportation.add(0.0);
+                }
+                    if (transportation.get(i) == null) {
+                        transportation.set(i, 0.0);
+                    }
+
                 if (amount.get(i) == 0) continue;
                 try {
                     if (date != null && date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()))) {

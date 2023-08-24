@@ -17,7 +17,7 @@
     <input type="hidden" name="id" th:value="${session.client.id}">
     <input type="submit" value="Удалить пользователя">
 </form>
-<form method="post" action="new_client">
+<form method="post" action="add_client">
     <input type="hidden" name="client_id" th:value="${session.client != null ? session.client.id : '0'}">
     <label for="client_name">ФИО</label>
     <input type="text" id="client_name" name="client_name" th:value="${session.client != null ? session.client.pib : ''}" required>

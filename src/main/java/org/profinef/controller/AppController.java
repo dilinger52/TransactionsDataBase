@@ -178,7 +178,7 @@ public class AppController {
             transactionIds.put(currency.getId(), list);
             List<Transaction> transactionList = transactions.stream().filter(transaction -> transaction.getCurrency()
                     .getId().equals(currency.getId())).toList();
-            TransactionDto transactionDto = transManager.findPrevious(clientId, currency.getId(), new Timestamp(startDate.getTime()));
+            TransactionDto transactionDto = transManager.findPrevious(clientId, currency.getId(), new Timestamp(startDate.getTime()), 0);
             if (transactionDto == null) {
                 total.put("amount" + currency.getId(), 0.0);
             } else {
@@ -455,14 +455,14 @@ public class AppController {
                 if (oldBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
                     oldBalance = oldBalances.get(clientManager.getClient(clientName.get(i)));
                 }
-                TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate());
+                TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate(), transactionId.get(0));
                 Double b = 0.0;
                 if (previous != null) b = previous.getBalance();
                 oldBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
                 oldBalances.put(clientManager.getClient(clientName.get(i)), oldBalance);
             }
             for (int i = 0; i < clientName.size(); i++) {
-                TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate());
+                TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate(), transactionId.get(0));
                 Double balance = 0.0;
                 if (previous != null) balance = previous.getBalance();
                 Double b = transManager.update(tr.getId(), tr.getDate(), clientName.get(i), comment.get(i),
@@ -582,7 +582,7 @@ public class AppController {
                     if (date != null && date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()))) {
                         logger.debug("Date before today date");
                         date = new Date(date.getTime() + 86400000 - 1000);
-                        TransactionDto previousTransaction = transManager.findPrevious(clientId.get(i), currencyId.get(i), new Timestamp(date.getTime() + 1));
+                        TransactionDto previousTransaction = transManager.findPrevious(clientId.get(i), currencyId.get(i), new Timestamp(date.getTime()), 0);
                         Double trBalance = null;
                         if (previousTransaction != null) {
                             trBalance = previousTransaction.getBalance();
@@ -1095,9 +1095,6 @@ public class AppController {
     }
 
     private void getZip(File file, ZipOutputStream zout) throws IOException {
-        System.out.println(zout);
-        System.out.println(0);
-        System.out.println(file.getName());
         ZipEntry entry1 = new ZipEntry(file.getName());
         zout.putNextEntry(entry1);
         if (file.isDirectory()) {
@@ -1108,9 +1105,7 @@ public class AppController {
                 getZip(f, zout);
             }
         } else {
-            System.out.println(2);
             FileInputStream fis = new FileInputStream(file);
-            System.out.println(fis);
             // считываем содержимое файла в массив byte
             byte[] buffer = new byte[fis.available()];
             int i = fis.read(buffer);

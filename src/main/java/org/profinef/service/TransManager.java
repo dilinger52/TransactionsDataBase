@@ -82,8 +82,11 @@ public class TransManager {
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
                 "Введите значение от -100 до 100 включительно");
         Client client = clientManager.getClient(clientName);
+        System.out.println(trBalance);
         double oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
+        System.out.println(oldBalance);
         double newBalance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
+        System.out.println(newBalance);
         TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
                 transportation, client, comment, trBalance + newBalance - oldBalance, pibColor, amountColor, balanceColor, userId);
         transactionRepository.save(transactionDto);
@@ -338,7 +341,7 @@ public class TransManager {
         for (AccountDto accountDto : accountRepository.findAll()) {
             TransactionDto tr = transactionRepository
                     .findAllByClientIdAndCurrencyIdAndDateBetweenLimit1(
-                            accountDto.getClientId(), accountDto.getCurrencyId(), afterDate);
+                            accountDto.getClientId(), accountDto.getCurrencyId(), afterDate, 0);
             if (tr != null) {
                 logger.debug("find previous transaction");
                 accountDto.setAmount(tr.getBalance());
@@ -351,11 +354,11 @@ public class TransManager {
         transactionRepository.deleteByDateBetween(afterDate, new Timestamp(System.currentTimeMillis()));
     }
 
-    public TransactionDto findPrevious(int clientId, int currencyId, Timestamp afterDate) {
+    public TransactionDto findPrevious(int clientId, int currencyId, Timestamp afterDate, int trId) {
         logger.debug("finding previous");
         return transactionRepository
                 .findAllByClientIdAndCurrencyIdAndDateBetweenLimit1(
-                        clientId, currencyId, afterDate);
+                        clientId, currencyId, afterDate, trId);
     }
 
     public List<Transaction> findByUser(Integer managerId, Timestamp startDate, Timestamp endDate, String clientName, List<Integer> currencyId) {

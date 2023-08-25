@@ -292,8 +292,8 @@ function addRow(id) {
          var nAmount = document.getElementById(id + "tr" + i + "nAmount");
          console.log(pAmount);
          console.log(nAmount);
-         sum -= Number(pAmount.value);
-         sum -= Number(nAmount.value);
+         sum -= Number(pAmount.value.replace(/ /g,'').replace(',','.'));
+         sum -= Number(nAmount.value.replace(/ /g,'').replace(',','.'));
      }
 //sum = -1 * sum;
 console.log(sum);
@@ -335,7 +335,7 @@ console.log(sum);
                 input5.name = "positiveAmount";
                 input5.id = id + "tr" + num + "pAmount";
                 if (sum > 0) {
-                     input5.value = sum.toFixed(2);
+                     input5.value = numberWithSpaces(sum.toFixed(2));
                 }
                 input5.setAttribute("Form", 'form');
                 input5.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
@@ -346,7 +346,7 @@ console.log(sum);
                 input6.type = "text";
                 input6.name = "negativeAmount";
                 if (sum < 0) {
-                    input6.value = sum.toFixed(2);
+                    input6.value = numberWithSpaces(sum.toFixed(2));
                 }
                 input6.id = id + "tr" + num + "nAmount";
                 input6.setAttribute("Form", 'form');
@@ -407,8 +407,8 @@ var nAmount = document.querySelectorAll("input[form='" + form + "'][name='negati
 var sum = 0;
      for (var j = 0; j < pAmount.length; j++) {
         if (pAmount[j].parentElement.parentElement.id.substring(0, 3) != i) continue;
-         sum -= Number(pAmount[j].value);
-         sum -= Number(nAmount[j].value);
+         sum -= Number(pAmount[j].value.replace(/ /g,'').replace(',','.'));
+         sum -= Number(nAmount[j].value.replace(/ /g,'').replace(',','.'));
      }
 //sum = -1 * sum;
 console.log(sum);
@@ -458,7 +458,7 @@ console.log(sum);
                 input5.name = "positiveAmount";
                 input5.id = num + "pAmount";
                 if (sum > 0) {
-                    input5.value = sum.toFixed(2);
+                    input5.value = numberWithSpaces(sum.toFixed(2));
                 }
                 input5.setAttribute("Form", form);
                 input5.setAttribute("onkeyup", "arithmetic('" + num + "')");
@@ -470,7 +470,7 @@ console.log(sum);
                 input6.type = "text";
                 input6.name = "negativeAmount";
                 if (sum < 0) {
-                    input6.value = sum.toFixed(2);
+                    input6.value = numberWithSpaces(sum.toFixed(2));
                 }
                 input6.id = num + "nAmount";
                 input6.setAttribute("Form", form);
@@ -540,17 +540,23 @@ console.log(element);
 }
 
 function arithmetic(id) {
-    var positiveAmount = Number(document.getElementById(id + 'pAmount').value);
+    var positiveAmount = Number(document.getElementById(id + 'pAmount').value.replace(/ /g,'').replace(',','.'));
     console.log(positiveAmount);
-    var negativeAmount = Number(document.getElementById(id + 'nAmount').value);
-    var commission = Number(document.getElementById(id + 'commission').value);
-    var trans = Number(document.getElementById(id + 'trans').value);
-    var total = Number(document.getElementById(id + 'total').innerText);
-    var balance = Number(document.getElementById(id + 'balance').innerText);
+    var negativeAmount = Number(document.getElementById(id + 'nAmount').value.replace(/ /g,'').replace(',','.'));
+    var commission = Number(document.getElementById(id + 'commission').value.replace(/ /g,'').replace(',','.'));
 
-    document.getElementById(id + 'com').innerHTML = ((positiveAmount + negativeAmount) * commission / 100).toFixed(2);
-    document.getElementById(id + 'total').innerHTML = ((positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(2);
-    document.getElementById(id + 'balance').innerHTML = (balance - total + (positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(2);
+    var trans = Number(document.getElementById(id + 'trans').value.replace(/ /g,'').replace(',','.'));
+    var total = Number(document.getElementById(id + 'total').textContent.replace(/ /g,'').replace(',','.'));
+    var balance = Number(document.getElementById(id + 'balance').textContent.replace(/ /g,'').replace(',','.'));
+    document.getElementById(id + 'com').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) * commission / 100).toFixed(2));
+    document.getElementById(id + 'total').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(2));
+    document.getElementById(id + 'balance').innerHTML = numberWithSpaces((balance - total + (positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(2));
+}
+
+function numberWithSpaces(x) {
+  var parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return parts.join(".");
 }
 
 function perevod(id) {

@@ -120,7 +120,7 @@ public class TransManager {
                 .findByIdAndClientIdAndCurrencyIdOrderByDate(transactionId, client.getId(), currencyId);
         logger.trace("Found transaction by id=" + transactionId + " and clientId=" + client.getId());
         return updateCurrencyAmount(client.getId(), transactionDto.getCurrencyId(), transactionDto.getRate(),
-                transactionDto.getCommission(), -transactionDto.getAmount(), transactionDto.getTransportation());
+                transactionDto.getCommission(), -transactionDto.getAmount(), -transactionDto.getTransportation());
     }
 
     public void updateNext(String clientName, List<Integer> currencyId, Double balanceDif, Timestamp date) {
@@ -132,8 +132,11 @@ public class TransManager {
                         new Timestamp(System.currentTimeMillis()));
         logger.trace("Found transactions by clientId=" + client.getId() + " currencyId=" + currencyId +
                 " and date after: " + date);
+        System.out.println(balanceDif);
         for (TransactionDto transactionDto : transactionDtoList) {
+            System.out.println(transactionDto.getBalance());
             transactionDto.setBalance(transactionDto.getBalance() + balanceDif);
+            System.out.println(transactionDto.getBalance());
             transactionRepository.save(transactionDto);
         }
         logger.debug("Transactions updated");

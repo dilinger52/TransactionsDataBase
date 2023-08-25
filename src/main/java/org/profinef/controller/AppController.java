@@ -377,13 +377,60 @@ public class AppController {
                                   @RequestParam(name = "client_name") List<String> clientName,
                                   @RequestParam(name = "comment") List<String> comment,
                                   @RequestParam(name = "currency_name") List<String> currencyName,
-                                  @RequestParam(name = "rate") List<Double> rate,
-                                  @RequestParam(name = "commission") List<Double> commission,
-                                  @RequestParam(name = "positiveAmount") List<Double> positiveAmount,
-                                  @RequestParam(name = "negativeAmount") List<Double> negativeAmount,
-                                  @RequestParam(name = "transportation") List<Double> transportation,
+                                  @RequestParam(name = "rate") List<String> rateS,
+                                  @RequestParam(name = "commission") List<String> commissionS,
+                                  @RequestParam(name = "positiveAmount") List<String> positiveAmountS,
+                                  @RequestParam(name = "negativeAmount") List<String> negativeAmountS,
+                                  @RequestParam(name = "transportation") List<String> transportationS,
                                   HttpSession session) {
         logger.info("Saving transaction after editing...");
+
+        List<Double> rate = new ArrayList<>();
+        for (String s : rateS) {
+            s = s.replaceAll("\\s+", "").replaceAll(",", ".");
+            if (!s.isEmpty()) {
+                rate.add(Double.valueOf(s));
+            } else {
+                rate.add(null);
+            }
+        }
+        List<Double> commission = new ArrayList<>();
+        for (String s : commissionS) {
+            s = s.replaceAll("\\s+", "").replaceAll(",", ".");
+            if (!s.isEmpty()) {
+                commission.add(Double.valueOf(s));
+            } else {
+                commission.add(null);
+            }
+        }
+        List<Double> positiveAmount = new ArrayList<>();
+        System.out.println(positiveAmountS);
+        for (String s : positiveAmountS) {
+            s = s.replaceAll("\\s+", "").replaceAll(",", ".");
+            if (!s.isEmpty()) {
+                positiveAmount.add(Double.valueOf(s));
+            } else {
+                positiveAmount.add(null);
+            }
+        }
+        List<Double> negativeAmount = new ArrayList<>();
+        for (String s : negativeAmountS) {
+            s = s.replaceAll("\\s+", "").replaceAll(",", ".");
+            if (!s.isEmpty()) {
+                negativeAmount.add(Double.valueOf(s));
+            } else {
+                negativeAmount.add(null);
+            }
+        }
+        List<Double> transportation = new ArrayList<>();
+        for (String s : transportationS) {
+            s = s.replaceAll("\\s+", "").replaceAll(",", ".");
+            if (!s.isEmpty()) {
+                transportation.add(Double.valueOf(s));
+            } else {
+                transportation.add(null);
+            }
+        }
         List<Double> amount = new ArrayList<>();
         System.out.println(positiveAmount);
         System.out.println(negativeAmount);
@@ -427,6 +474,7 @@ public class AppController {
             for (String name : clientName) {
                 clientId.add(clientManager.getClient(name).getId());
             }
+            System.out.println(transactionId);
             List<Transaction> transactionList = transManager.getTransaction(transactionId.get(0));
             Map<Client, Map<Currency, Double>> oldBalances = new TreeMap<>();
             Map<Client, Map<Currency, Double>> newBalances = new TreeMap<>();
@@ -480,6 +528,8 @@ public class AppController {
                 newBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
                 newBalances.put(clientManager.getClient(clientName.get(i)), newBalance);
             }
+            logger.trace("oldBalances: " + oldBalances);
+            logger.trace("newBalances: " + newBalances);
                 Set<Map.Entry<Client, Map<Currency, Double>>> set = oldBalances.entrySet();
             for (Map.Entry<Client, Map<Currency, Double>> entry : set) {
                 Client key = entry.getKey();
@@ -533,14 +583,60 @@ public class AppController {
     public String doTransaction(@RequestParam(name = "client_name") List<String> clientName,
                                 @RequestParam(name = "currency_name") List<String> currencyName,
                                 @RequestParam(name = "comment", required = false) List<String> comment,
-                                @RequestParam(name = "rate") List<Double> rate,
-                                @RequestParam(name = "commission") List<Double> commission,
-                                @RequestParam(name = "positiveAmount") List<Double> positiveAmount,
-                                @RequestParam(name = "negativeAmount") List<Double> negativeAmount,
-                                @RequestParam(name = "transportation") List<Double> transportation,
+                                @RequestParam(name = "rate") List<String> rateS,
+                                @RequestParam(name = "commission") List<String> commissionS,
+                                @RequestParam(name = "positiveAmount") List<String> positiveAmountS,
+                                @RequestParam(name = "negativeAmount") List<String> negativeAmountS,
+                                @RequestParam(name = "transportation") List<String> transportationS,
                                 @RequestParam(name = "date", required = false) Date date,
                                 HttpSession session) {
         logger.info("Creating new transaction...");
+
+        List<Double> rate = new ArrayList<>();
+        for (String s : rateS) {
+            s = s.replaceAll("\\s+", "").replaceAll(",", ".");
+            if (!s.isEmpty()) {
+                rate.add(Double.valueOf(s));
+            } else {
+                rate.add(null);
+            }
+        }
+        List<Double> commission = new ArrayList<>();
+        for (String s : commissionS) {
+            s = s.replaceAll("\\s+", "").replaceAll(",", ".");
+            if (!s.isEmpty()) {
+                commission.add(Double.valueOf(s));
+            } else {
+                commission.add(null);
+            }
+        }
+        List<Double> positiveAmount = new ArrayList<>();
+        for (String s : positiveAmountS) {
+            s = s.replaceAll("\\s+", "").replaceAll(",", ".");
+            if (!s.isEmpty()) {
+                positiveAmount.add(Double.valueOf(s));
+            } else {
+                positiveAmount.add(null);
+            }
+        }
+        List<Double> negativeAmount = new ArrayList<>();
+        for (String s : negativeAmountS) {
+            s = s.replaceAll("\\s+", "").replaceAll(",", ".");
+            if (!s.isEmpty()) {
+                negativeAmount.add(Double.valueOf(s));
+            } else {
+                negativeAmount.add(null);
+            }
+        }
+        List<Double> transportation = new ArrayList<>();
+        for (String s : transportationS) {
+            s = s.replaceAll("\\s+", "").replaceAll(",", ".");
+            if (!s.isEmpty()) {
+                transportation.add(Double.valueOf(s));
+            } else {
+                transportation.add(null);
+            }
+        }
         List<Double> amount = new ArrayList<>();
         System.out.println(positiveAmount);
         System.out.println(negativeAmount);

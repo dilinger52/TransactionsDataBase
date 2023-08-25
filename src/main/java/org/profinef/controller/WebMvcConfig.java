@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -30,6 +31,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
         thymeleafViewResolver.setTemplateEngine( templateEngine );
         thymeleafViewResolver.setCharacterEncoding( "UTF-8" );
         return thymeleafViewResolver;
+    }
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(new CustomStringToArrayConverter());
     }
 
     @Override

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Configuration
-public class HttpSessionConfig implements Serializable {
+public class HttpSessionConfig{
 
     private static final Map<String, HttpSession> sessions = new HashMap<>();
 

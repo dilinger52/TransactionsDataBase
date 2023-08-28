@@ -178,7 +178,7 @@ public class AppController {
             transactionIds.put(currency.getId(), list);
             List<Transaction> transactionList = transactions.stream().filter(transaction -> transaction.getCurrency()
                     .getId().equals(currency.getId())).toList();
-            TransactionDto transactionDto = transManager.findPrevious(clientId, currency.getId(), new Timestamp(startDate.getTime()), 0);
+            TransactionDto transactionDto = transManager.findPrevious(clientId, currency.getId(), new Timestamp(startDate.getTime() - 1), 0);
             if (transactionDto == null) {
                 total.put("amount" + currency.getId(), 0.0);
             } else {
@@ -490,10 +490,10 @@ public class AppController {
                     }
 
                 if (rate.size() < clientName.size()) {
-                    rate.add(0.0);
+                    rate.add(1.0);
                 }
                     if (rate.get(i) == null) {
-                        rate.set(i, 0.0);
+                        rate.set(i, 1.0);
                     }
 
                 if (transportation.size() < clientName.size()) {
@@ -710,10 +710,10 @@ public class AppController {
                     }
 
                 if (rate.size() < clientName.size()) {
-                    rate.add(0.0);
+                    rate.add(1.0);
                 }
                     if (rate.get(i) == null) {
-                        rate.set(i, 0.0);
+                        rate.set(i, 1.0);
                     }
 
                 if (transportation.size() < clientName.size()) {

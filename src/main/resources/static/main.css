@@ -1,5 +1,5 @@
 *{
-margin: 7px;
+margin: 0px;
 padding: 3px;
 }
 /*p, h1, h2, h3, h4, h5, h6, h7, h8 {
@@ -66,6 +66,7 @@ top: 320px;
 }
 
 thead.main {
+position: sticky;
 top: 246px;
 }
 

@@ -34,7 +34,7 @@
             <input type="hidden" name="client_id" th:value="${session.client.id}">
             <input type="submit" value="Изменить данные пользователя">
         </form>
-        <form method="get" action="client_info">
+        <form method="get" action="client_info" class="inline">
             <input type="text" list="client_datalist" id="client_name" name="client_name" placeholder="Поиск.." class="inline" autocomplete="off">
             <datalist id="client_datalist">
                 <option th:each="client : ${session.clients}" th:value="${client.pib}"></option>

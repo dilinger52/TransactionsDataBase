@@ -7,9 +7,9 @@
        const targetElement = document.getElementById('capture');
        const targetElement2 = document.getElementsByName('thead');
        const targetElement3 = document.getElementsByName('thead2');
-       const offset = -13; // Adjust this value as needed
+       const offset = -6; // Adjust this value as needed
        const offset2 = 0; // Adjust this value as needed
-       const offset3 = 46; // Adjust this value as needed
+       const offset3 = 33; // Adjust this value as needed
        const topPosition = referenceElement.offsetHeight + offset;
        const topPosition2 = referenceElement.offsetHeight + offset2;
        const topPosition3 = referenceElement.offsetHeight + offset3;

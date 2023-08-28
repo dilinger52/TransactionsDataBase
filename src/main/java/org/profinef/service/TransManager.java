@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -49,15 +51,15 @@ public class TransManager {
 
 
     public double remittance(int transactionId, Timestamp date, String clientName, String comment, int currencyId, double rate,
-                             double commission, double amount, double transportation, String pibColor,
-                             String amountColor, String balanceColor, int userId, Double trBalance) throws RuntimeException {
+                                 double commission, double amount, double transportation, String pibColor,
+                                 String amountColor, String balanceColor, int userId, Double trBalance) throws RuntimeException {
         logger.debug("Saving transaction");
         //if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
                 "Введите значение от -100 до 100 включительно");
         Client client = clientManager.getClient(clientName);
         if (date == null) date = new Timestamp(System.currentTimeMillis());
-        double oldBalance = 0;
+        double oldBalance = 0.0;
         if (trBalance != null) {
             if (trBalance != 0) {
                 oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
@@ -68,7 +70,7 @@ public class TransManager {
         }
         double balance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
         TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
-                transportation, client, comment, trBalance + balance - oldBalance, pibColor, amountColor, balanceColor, userId);
+                transportation, client, comment,  trBalance + balance - oldBalance, pibColor, amountColor, balanceColor, userId);
         transactionRepository.save(transactionDto);
         logger.debug("Transaction saved");
         return balance;
@@ -87,26 +89,27 @@ public class TransManager {
         System.out.println(oldBalance);
         double newBalance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
         System.out.println(newBalance);
+        double result = trBalance + newBalance - oldBalance;
         TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
-                transportation, client, comment, trBalance + newBalance - oldBalance, pibColor, amountColor, balanceColor, userId);
+                transportation, client, comment, result, pibColor, amountColor, balanceColor, userId);
         transactionRepository.save(transactionDto);
         logger.debug("Transaction saved");
-        return trBalance + newBalance - oldBalance;
+        return result;
     }
 
     private double updateCurrencyAmount(int clientId, int currencyId, double rate, double commission, double amount,
-                                        double transportation) {
+                                            double transportation) {
         logger.debug("Updating currency amount");
         Optional<CurrencyDto> currencyOpt = currencyRepository.findById(currencyId);
         if (currencyOpt.isEmpty()) throw new RuntimeException("Валюта не найдена");
         logger.trace("Found currency by id=" + currencyId);
         AccountDto accountDto = accountRepository.findByClientIdAndCurrencyId(clientId, currencyId);
         if (accountDto == null) {
-            accountRepository.save(new AccountDto(clientId, currencyId, 0));
+            accountRepository.save(new AccountDto(clientId, currencyId, 0.0));
             accountDto = accountRepository.findByClientIdAndCurrencyId(clientId, currencyId);
         }
         logger.trace("Found account by clientId=" + clientId + " and currencyId=" + currencyId);
-        double balance = accountDto.getAmount() + amount * (1 + commission/100) + transportation;
+        double balance = accountDto.getAmount() + amount * ( 1 + commission / 100) + transportation;
         accountDto.setAmount(balance);
         accountRepository.save(accountDto);
         logger.debug("Currency amount updated");

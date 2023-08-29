@@ -81,8 +81,8 @@
     <div th:each="currency : ${session.currencies}" th:if="${#lists.contains(session.currency_name, currency.name) && currency.name != 'RUB'}" class="inline">
         <div name="thead" style="position: sticky;background-color: white;">
         <h3 th:text="${currency.name}" class="inline">HRN</h3>
-        <h3 class="inline" th:text="|Баланс на начало ${#dates.format(session.startDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['amount' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
-        <h3 class="inline" th:text="|Баланс в конце ${#dates.format(session.endDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['balance' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
+        <h3 class="inline" th:text="|Баланс на начало ${#dates.format(session.startDate, 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['amount' + currency.id], 1, 'WHITESPACE')}|"></h3>
+        <h3 class="inline" th:text="|Баланс в конце ${#dates.format(session.endDate, 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['balance' + currency.id], 1, 'WHITESPACE')}|"></h3>
         <input class="inline" th:id="|per${currency.name}|" type="button" value="Перевод" th:data-1="${currency.name}" th:onclick="perevod(this.getAttribute('data-1'))">
         <input type="hidden" class="exchange" th:name="${currency.name}" th:value="${currency.averageExchange}">
         </div>
@@ -130,27 +130,27 @@
                         <input th:form="${id}" type="text" th:value="${transaction.comment}" name="comment">
                     </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                    <input th:form="${id}" type="text" th:if="${transaction.amount > 0}" th:value="${#numbers.formatDecimal(transaction.amount, 1,'WHITESPACE',2,'POINT')}" name="positiveAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}pAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input th:form="${id}" type="text" th:if="${transaction.amount > 0}" th:value="${#numbers.formatInteger(transaction.amount, 1,'WHITESPACE')}" name="positiveAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}pAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                     <input th:form="${id}" type="text" th:if="${transaction.amount <= 0}" name="positiveAmount" th:id="|${transaction.id}${currency.id}${transaction.client.id}pAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                <input th:form="${id}" type="text" th:if="${transaction.amount < 0}" th:value="${#numbers.formatDecimal(transaction.amount, 1,'WHITESPACE',2,'POINT')}" name="negativeAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}nAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                <input th:form="${id}" type="text" th:if="${transaction.amount < 0}" th:value="${#numbers.formatInteger(transaction.amount, 1,'WHITESPACE')}" name="negativeAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}nAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                     <input th:form="${id}" type="text" th:if="${transaction.amount >= 0}" name="negativeAmount"  th:id="|${transaction.id}${currency.id}${transaction.client.id}nAmount|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                    <input th:form="${id}" type="text" th:value="${transaction.commission != 0 ? #numbers.formatDecimal(transaction.commission, 1,'WHITESPACE',2,'POINT') : ''}" name="commission"  th:id="|${transaction.id}${currency.id}${transaction.client.id}commission|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input th:form="${id}" type="text" th:value="${transaction.commission != 0 ? #numbers.formatDecimal(transaction.commission, 1,'WHITESPACE', 1, 'POINT') : ''}" name="commission"  th:id="|${transaction.id}${currency.id}${transaction.client.id}commission|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
-                <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${#numbers.formatDecimal(transaction.commission * transaction.amount / 100, 1,'WHITESPACE',2,'POINT')}" th:id="|${transaction.id}${currency.id}${transaction.client.id}com|">
+                <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${#numbers.formatInteger(transaction.commission * transaction.amount / 100, 1,'WHITESPACE')}" th:id="|${transaction.id}${currency.id}${transaction.client.id}com|">
 
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                    <input th:form="${id}" type="text" th:value="${transaction.rate != 1 ? #numbers.formatDecimal(transaction.rate, 1,'WHITESPACE',2,'POINT') : ''}" name="rate">
+                    <input th:form="${id}" type="text" th:value="${transaction.rate != 1 ? #numbers.formatInteger(transaction.rate, 1,'WHITESPACE') : ''}" name="rate">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                    <input  th:form="${id}" type="text" name="transportation" th:value="${transaction.transportation != 0 ? #numbers.formatDecimal(transaction.transportation, 1,'WHITESPACE',2,'POINT') : ''}"  th:id="|${transaction.id}${currency.id}${transaction.client.id}trans|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
+                    <input  th:form="${id}" type="text" name="transportation" th:value="${transaction.transportation != 0 ? #numbers.formatInteger(transaction.transportation, 1,'WHITESPACE') : ''}"  th:id="|${transaction.id}${currency.id}${transaction.client.id}trans|" th:data-1="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="arithmetic(this.getAttribute('data-1'))">
                 </th>
-                <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${#numbers.formatDecimal(transaction.amount + transaction.commission * transaction.amount / 100 + transaction.transportation, 1,'WHITESPACE',2,'POINT')}" th:id="|${transaction.id}${currency.id}${transaction.client.id}total|"></th>
-                <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${#numbers.formatDecimal(transaction.balance, 1,'WHITESPACE',2,'POINT')}" th:id="|${transaction.id}${currency.id}${transaction.client.id}balance|"></th>
+                <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${#numbers.formatInteger(transaction.amount + transaction.commission * transaction.amount / 100 + transaction.transportation, 1,'WHITESPACE')}" th:id="|${transaction.id}${currency.id}${transaction.client.id}total|"></th>
+                <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${#numbers.formatInteger(transaction.balance, 1,'WHITESPACE')}" th:id="|${transaction.id}${currency.id}${transaction.client.id}balance|"></th>
 
 
                     <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:if="${session.user.role.name == 'Admin'}" th:text="${transaction.user.login}"></th>

@@ -404,7 +404,6 @@ public class AppController {
             }
         }
         List<Double> positiveAmount = new ArrayList<>();
-        System.out.println(positiveAmountS);
         for (String s : positiveAmountS) {
             s = s.replaceAll("\\s+", "").replaceAll(",", ".");
             if (!s.isEmpty()) {
@@ -432,8 +431,6 @@ public class AppController {
             }
         }
         List<Double> amount = new ArrayList<>();
-        System.out.println(positiveAmount);
-        System.out.println(negativeAmount);
         int size = positiveAmount.size();
         if (size < negativeAmount.size()) size = negativeAmount.size();
         for (int i = 0; i < size; i++) {
@@ -474,7 +471,6 @@ public class AppController {
             for (String name : clientName) {
                 clientId.add(clientManager.getClient(name).getId());
             }
-            System.out.println(transactionId);
             List<Transaction> transactionList = transManager.getTransaction(transactionId.get(0));
             Map<Client, Map<Currency, Double>> oldBalances = new TreeMap<>();
             Map<Client, Map<Currency, Double>> newBalances = new TreeMap<>();
@@ -579,6 +575,7 @@ public class AppController {
      * @param session collect parameters for view
      */
 
+    @Transactional
     @PostMapping(path = "/transaction")
     public String doTransaction(@RequestParam(name = "client_name") List<String> clientName,
                                 @RequestParam(name = "currency_name") List<String> currencyName,
@@ -638,8 +635,6 @@ public class AppController {
             }
         }
         List<Double> amount = new ArrayList<>();
-        System.out.println(positiveAmount);
-        System.out.println(negativeAmount);
         int size = positiveAmount.size();
         if (size < negativeAmount.size()) size = negativeAmount.size();
         for (int i = 0; i < size; i++) {
@@ -656,8 +651,6 @@ public class AppController {
                     negativeAmount.set(i, 0.0);
                 }
 
-            System.out.println(positiveAmount);
-            System.out.println(negativeAmount);
             if (positiveAmount.get(i) != 0 && positiveAmount.get(i) + negativeAmount.get(i) == 0) {
                 logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
                 session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
@@ -1203,7 +1196,6 @@ public class AppController {
                 lst) {*/
             try {
                 ZipOutputStream zout = new ZipOutputStream(new FileOutputStream("output.zip"));
-                System.out.println(zout);
                 getZip(dir, zout);
                 zout.close();
                 // закрываем текущую запись для новой записи
@@ -1211,7 +1203,6 @@ public class AppController {
             }
             catch(Exception ex){
                 ex.printStackTrace();
-                System.out.println(ex.getMessage());
             }
         File file = new File("output.zip");
         logger.debug("File exist");
@@ -1244,7 +1235,6 @@ public class AppController {
         ZipEntry entry1 = new ZipEntry(file.getName());
         zout.putNextEntry(entry1);
         if (file.isDirectory()) {
-            System.out.println(1);
             File[] arFiles = file.listFiles();
             assert arFiles != null;
             for (File f : arFiles) {

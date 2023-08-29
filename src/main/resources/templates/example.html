@@ -75,7 +75,7 @@
             <th th:text="${client.client.phone}"></th>
             <th th:text="${client.client.telegram}"></th>
             <th:block th:each="currency : ${client.currencies}" th:if="${currency.key.name != 'RUB'}" >
-                <th th:text="${#numbers.formatDecimal(currency.value, 1, 'POINT', 2, 'COMMA')}"></th>
+                <th th:text="${#numbers.formatInteger(currency.value, 1, 'WHITESPACE')}"></th>
             </th:block>
             <th th:if="${client.client.pib != 'Всего'}">
                 <form method="get" action="client_info">

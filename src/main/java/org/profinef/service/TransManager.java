@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -84,11 +82,8 @@ public class TransManager {
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
                 "Введите значение от -100 до 100 включительно");
         Client client = clientManager.getClient(clientName);
-        System.out.println(trBalance);
         double oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
-        System.out.println(oldBalance);
         double newBalance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
-        System.out.println(newBalance);
         double result = trBalance + newBalance - oldBalance;
         TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
                 transportation, client, comment, result, pibColor, amountColor, balanceColor, userId);
@@ -135,11 +130,8 @@ public class TransManager {
                         new Timestamp(System.currentTimeMillis()));
         logger.trace("Found transactions by clientId=" + client.getId() + " currencyId=" + currencyId +
                 " and date after: " + date);
-        System.out.println(balanceDif);
         for (TransactionDto transactionDto : transactionDtoList) {
-            System.out.println(transactionDto.getBalance());
             transactionDto.setBalance(transactionDto.getBalance() + balanceDif);
-            System.out.println(transactionDto.getBalance());
             transactionRepository.save(transactionDto);
         }
         logger.debug("Transactions updated");

@@ -1,3 +1,17 @@
+ let cords = ['scrollX','scrollY'];
+ // сохраняем позицию скролла в localStorage
+ window.addEventListener('unload', e => cords.forEach(cord => localStorage[cord] = window[cord]));
+ // вешаем событие на загрузку (ресурсов) страницы
+ window.addEventListener('load', e => {
+     // если в localStorage имеются данные
+     if (localStorage[cords[0]]) {
+         // скроллим к сохраненным координатам
+         window.scroll(...cords.map(cord => localStorage[cord]));
+         // удаляем данные с localStorage
+         cords.forEach(cord => localStorage.removeItem(cord));
+     }
+ });
+
  document.addEventListener('DOMContentLoaded', setTopPosition);
  window.onresize = setTopPosition;
 
@@ -98,9 +112,9 @@ function convert() {
         result = - Number(amount.value) / Number(rate.value);
     }
     console.log(result);
-    document.getElementById("changeDiv").value = result.toFixed(2);
-    document.getElementById("changeInput").value = result.toFixed(2);
-    document.getElementById("rate2").value = (Number(rate.value)).toFixed(3);
+    document.getElementById("changeDiv").value = result;
+    document.getElementById("changeInput").value = result;
+    document.getElementById("rate2").value = (Number(rate.value));
 }
 
 function convertDescription() {
@@ -318,6 +332,7 @@ console.log(sum);
         const input3 = document.createElement('input');
             input3.type = "text";
             input3.name = "client_name";
+            input3.setAttribute("autocomplete", "off");
             input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", 'form');
         th3.appendChild(input3);
@@ -338,6 +353,7 @@ console.log(sum);
                      input5.value = numberWithSpaces(sum);
                 }
                 input5.setAttribute("Form", 'form');
+                input5.setAttribute("autocomplete", "off");
                 input5.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
             th5.appendChild(input5);
     tr.appendChild(th5);
@@ -349,6 +365,7 @@ console.log(sum);
                     input6.value = numberWithSpaces(sum);
                 }
                 input6.id = id + "tr" + num + "nAmount";
+                input6.setAttribute("autocomplete", "off");
                 input6.setAttribute("Form", 'form');
                 input6.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
             th6.appendChild(input6);
@@ -360,6 +377,7 @@ console.log(sum);
                 input7.id = id + "tr" + num + "commission";
                 input7.setAttribute("Form", 'form');
                 input7.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+                input7.style.width = "50px";
             th7.appendChild(input7);
         tr.appendChild(th7);
     const th8 = document.createElement('th');
@@ -370,6 +388,7 @@ console.log(sum);
                 input9.type = "text";
                 input9.name = "rate";
                 input9.setAttribute("Form", 'form');
+                input9.style.width = "50px";
             th9.appendChild(input9);
         tr.appendChild(th9);
         const th10 = document.createElement('th');
@@ -377,6 +396,7 @@ console.log(sum);
                     input10.type = "text";
                     input10.name = "transportation";
                     input10.id = id + "tr" + num + "trans";
+                    input10.style.width = "50px";
                     input10.setAttribute("Form", 'form');
                     input10.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
                 th10.appendChild(input10);
@@ -384,10 +404,7 @@ console.log(sum);
     const th11 = document.createElement('th');
         th11.id = id + "tr" + num + "total";
     tr.appendChild(th11);
-    const th12 = document.createElement('th');
-    th12.id = id + "tr" + num + "balance";
-        tr.appendChild(th12);
-    var tbody = document.getElementById(id);
+           var tbody = document.getElementById(id);
     tbody.appendChild(tr);
     arithmetic(tr.id);
 }
@@ -439,6 +456,7 @@ console.log(sum);
         const input3 = document.createElement('input');
             input3.type = "text";
             input3.name = "client_name";
+            input3.setAttribute("autocomplete", "off");
             input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", form);
         th3.appendChild(input3);
@@ -456,6 +474,7 @@ console.log(sum);
             const input5 = document.createElement('input');
                 input5.type = "text";
                 input5.name = "positiveAmount";
+                input5.setAttribute("autocomplete", "off");
                 input5.id = num + "pAmount";
                 if (sum > 0) {
                     input5.value = numberWithSpaces(sum);
@@ -468,6 +487,7 @@ console.log(sum);
         th6.style.borderTop = "none";
             const input6 = document.createElement('input');
                 input6.type = "text";
+                input6.setAttribute("autocomplete", "off");
                 input6.name = "negativeAmount";
                 if (sum < 0) {
                     input6.value = numberWithSpaces(sum);
@@ -483,6 +503,7 @@ console.log(sum);
                 input7.type = "text";
                 input7.name = "commission";
                 input7.id = num + "commission";
+                input7.style.width = "50px";
                 input7.setAttribute("Form", form);
                 input7.setAttribute("onkeyup", "arithmetic('" + num + "')");
             th7.appendChild(input7);
@@ -496,6 +517,7 @@ console.log(sum);
             const input9 = document.createElement('input');
                 input9.type = "text";
                 input9.name = "rate";
+                input9.style.width = "50px";
                 input9.setAttribute("Form", form);
             th9.appendChild(input9);
         tr.appendChild(th9);
@@ -505,6 +527,7 @@ console.log(sum);
                     input10.type = "text";
                     input10.name = "transportation";
                     input10.id = num + "trans";
+                    input10.style.width = "50px";
                     input10.setAttribute("Form", form);
                     input10.setAttribute("onkeyup", "arithmetic('" + num + "')");
                 th10.appendChild(input10);
@@ -513,11 +536,7 @@ console.log(sum);
         th11.style.borderTop = "none";
         th11.id = num + "total";
     tr.appendChild(th11);
-    const th12 = document.createElement('th');
-    th12.style.borderTop = "none";
-    th12.id = num + "balance";
-        tr.appendChild(th12);
-    var tbody = document.getElementById(table);
+            var tbody = document.getElementById(table);
     console.log("id" + id);
     var temp = Number(id);
     if (id.substring(id.length - 1) == '9') {

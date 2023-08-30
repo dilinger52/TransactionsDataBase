@@ -120,7 +120,7 @@
                         <input th:form="|del${id}|" type="submit" value="Удалить" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}">
                         <input th:form="${id}" type="submit" value="Удалить строку" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:onclick="|deleteRow(${currency.id}${iter.index})|">
                     </th>
-                    <th th:text="${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? #dates.format(transaction.date, 'dd-MM-yyyy HH:mm') : ''}" th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}"></th>
+                    <th th:text="${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? #dates.format(transaction.date, 'dd-MM-yyyy') : ''}" th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}"></th>
                     <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                         <input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Показать" th:onclick="|showAgents(${currency.id}${transaction.id})|" th:id="|${currency.id}${transaction.id}|">
                         <input th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${currency.id}${iter.index}|" th:data-3="${id}" th:onclick="addRowInside(this.getAttribute('data-2'), this.getAttribute('data-1'), this.getAttribute('data-3'))">
@@ -162,7 +162,7 @@
                         <input class="inline" type="submit" value="Сохранить" form="form">
                     </th>
                 <th>
-                    <input type="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" name="date" form="form">
+                    <input style="width: 60px" type="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" name="date" form="form">
                 </th>
                     <th>
                         <input type="button" value="Добавить" th:data-1="|${currency.name}|" th:onclick="addRow(this.getAttribute('data-1'))">

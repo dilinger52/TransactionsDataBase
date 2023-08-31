@@ -354,7 +354,7 @@ console.log(sum);
                 }
                 input5.setAttribute("Form", 'form');
                 input5.setAttribute("autocomplete", "off");
-                input5.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+                input5.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
             th5.appendChild(input5);
     tr.appendChild(th5);
     const th6 = document.createElement('th');
@@ -367,7 +367,7 @@ console.log(sum);
                 input6.id = id + "tr" + num + "nAmount";
                 input6.setAttribute("autocomplete", "off");
                 input6.setAttribute("Form", 'form');
-                input6.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+                input6.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
             th6.appendChild(input6);
     tr.appendChild(th6);
     const th7 = document.createElement('th');
@@ -376,7 +376,7 @@ console.log(sum);
                 input7.name = "commission";
                 input7.id = id + "tr" + num + "commission";
                 input7.setAttribute("Form", 'form');
-                input7.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+                input7.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 input7.style.width = "50px";
             th7.appendChild(input7);
         tr.appendChild(th7);
@@ -398,7 +398,7 @@ console.log(sum);
                     input10.id = id + "tr" + num + "trans";
                     input10.style.width = "50px";
                     input10.setAttribute("Form", 'form');
-                    input10.setAttribute("onkeyup", "arithmetic('" + id + "tr" + num + "')");
+                    input10.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 th10.appendChild(input10);
             tr.appendChild(th10);
     const th11 = document.createElement('th');
@@ -412,12 +412,7 @@ console.log(sum);
 function addRowInside(id, table, form) {
  var i = id.substring(0, 3);
  var $TR = $('tr[id^="' + id + '"]:last');
- var num;
- if ($TR.prop("id").length < 5) {
-    num = $TR.prop("id") + 1;
- } else {
-    num = parseInt($TR.prop("id")) + 1;
- }
+ var num = $TR.prop("id") + 1;
 var pAmount = document.querySelectorAll("input[form='" + form + "'][name='positiveAmount']");
 var nAmount = document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']");
 
@@ -480,7 +475,7 @@ console.log(sum);
                     input5.value = numberWithSpaces(sum);
                 }
                 input5.setAttribute("Form", form);
-                input5.setAttribute("onkeyup", "arithmetic('" + num + "')");
+                input5.setAttribute("onkeyup", "changeAssociated('" + num + "')");
             th5.appendChild(input5);
     tr.appendChild(th5);
     const th6 = document.createElement('th');
@@ -494,7 +489,7 @@ console.log(sum);
                 }
                 input6.id = num + "nAmount";
                 input6.setAttribute("Form", form);
-                input6.setAttribute("onkeyup", "arithmetic('" + num + "')");
+                input6.setAttribute("onkeyup", "changeAssociated('" + num + "')");
             th6.appendChild(input6);
     tr.appendChild(th6);
     const th7 = document.createElement('th');
@@ -505,7 +500,7 @@ console.log(sum);
                 input7.id = num + "commission";
                 input7.style.width = "50px";
                 input7.setAttribute("Form", form);
-                input7.setAttribute("onkeyup", "arithmetic('" + num + "')");
+                input7.setAttribute("onkeyup", "changeAssociated('" + num + "')");
             th7.appendChild(input7);
         tr.appendChild(th7);
     const th8 = document.createElement('th');
@@ -529,7 +524,7 @@ console.log(sum);
                     input10.id = num + "trans";
                     input10.style.width = "50px";
                     input10.setAttribute("Form", form);
-                    input10.setAttribute("onkeyup", "arithmetic('" + num + "')");
+                    input10.setAttribute("onkeyup", "changeAssociated('" + num + "')");
                 th10.appendChild(input10);
             tr.appendChild(th10);
     const th11 = document.createElement('th');
@@ -554,8 +549,11 @@ console.log(sum);
 
 function deleteRow(id) {
 var element = document.querySelector("tr[id='" + id + "']");
+var form = element.querySelector("[id$='pAmount'").form.id;
 console.log(element);
     element.remove();
+console.log(document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']")[0].dataset.id);
+    changeAssociated(document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']")[0].dataset.id);
 }
 
 function arithmetic(id) {
@@ -566,10 +564,42 @@ function arithmetic(id) {
 
     var trans = Number(document.getElementById(id + 'trans').value.replace(/ /g,'').replace(',','.'));
     var total = Number(document.getElementById(id + 'total').textContent.replace(/ /g,'').replace(',','.'));
-    var balance = Number(document.getElementById(id + 'balance').textContent.replace(/ /g,'').replace(',','.'));
-    document.getElementById(id + 'com').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) * commission / 100));
-    document.getElementById(id + 'total').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans));
-    document.getElementById(id + 'balance').innerHTML = numberWithSpaces((balance - total + (positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans));
+    document.getElementById(id + 'com').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) * commission / 100).toFixed(0));
+    document.getElementById(id + 'total').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(0));
+}
+
+function changeAssociated(id) {
+    arithmetic(id);
+    var form = document.getElementById(id + 'pAmount').form.id;
+        var i = document.getElementById(id + 'pAmount').parentElement.parentElement.id.substring(0, 3);
+var pAmount = document.querySelectorAll("input[form='" + form + "'][name='positiveAmount']");
+    var nAmount = document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']");
+    var target;
+    var sum = 0;
+         for (var j = 0; j < pAmount.length; j++) {
+            if (pAmount[j].parentElement.parentElement.id.substring(0, 3) != i) continue;
+            if (j == 1) {
+                target = pAmount[j].parentElement.parentElement;
+                continue;
+            }
+             sum -= Number(pAmount[j].value.replace(/ /g,'').replace(',','.'));
+             sum -= Number(nAmount[j].value.replace(/ /g,'').replace(',','.'));
+         }
+    console.log(target);
+    console.log(sum);
+    var target1;
+    var target2;
+    if (sum >= 0) {
+        target1 = target.querySelector("[name='positiveAmount']");
+        target2 = target.querySelector("[name='negativeAmount']");
+    } else {
+        target1 = target.querySelector("[name='negativeAmount']");
+        target2 = target.querySelector("[name='positiveAmount']");
+    }
+    target1.value = sum.toFixed(0);
+    target2.value = '';
+    console.log(target1.dataset.id);
+    arithmetic(target1.dataset.id);
 }
 
 function numberWithSpaces(x) {

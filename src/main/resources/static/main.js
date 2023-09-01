@@ -15,6 +15,16 @@
  document.addEventListener('DOMContentLoaded', setTopPosition);
  window.onresize = setTopPosition;
 
+document.addEventListener('keydown',
+(event) => {
+    console.log(`KeyboardEvent: key='${event.key}' | code='${event.code}'`);
+    /*if (KeyboardEvent.key = 'Delete') {
+        document.querySelector("input:hover").value = '';
+    }*/
+  },
+  true,
+);
+
  // Function to set the top position based on the height of the reference element
      function setTopPosition() {
        const referenceElement = document.getElementById('header');
@@ -355,6 +365,7 @@ console.log(sum);
                 input5.setAttribute("Form", 'form');
                 input5.setAttribute("autocomplete", "off");
                 input5.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
+                input5.dataset.id = id + "tr" + num;
             th5.appendChild(input5);
     tr.appendChild(th5);
     const th6 = document.createElement('th');
@@ -368,6 +379,7 @@ console.log(sum);
                 input6.setAttribute("autocomplete", "off");
                 input6.setAttribute("Form", 'form');
                 input6.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
+                input6.dataset.id = id + "tr" + num;
             th6.appendChild(input6);
     tr.appendChild(th6);
     const th7 = document.createElement('th');
@@ -377,6 +389,8 @@ console.log(sum);
                 input7.id = id + "tr" + num + "commission";
                 input7.setAttribute("Form", 'form');
                 input7.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
+                input7.dataset.id = id + "tr" + num;
+
                 input7.style.width = "50px";
             th7.appendChild(input7);
         tr.appendChild(th7);
@@ -475,6 +489,7 @@ console.log(sum);
                     input5.value = numberWithSpaces(sum);
                 }
                 input5.setAttribute("Form", form);
+                input5.dataset.id = num;
                 input5.setAttribute("onkeyup", "changeAssociated('" + num + "')");
             th5.appendChild(input5);
     tr.appendChild(th5);
@@ -488,6 +503,7 @@ console.log(sum);
                     input6.value = numberWithSpaces(sum);
                 }
                 input6.id = num + "nAmount";
+                input6.dataset.id = num;
                 input6.setAttribute("Form", form);
                 input6.setAttribute("onkeyup", "changeAssociated('" + num + "')");
             th6.appendChild(input6);
@@ -572,12 +588,25 @@ function changeAssociated(id) {
     arithmetic(id);
     var form = document.getElementById(id + 'pAmount').form.id;
         var i = document.getElementById(id + 'pAmount').parentElement.parentElement.id.substring(0, 3);
-var pAmount = document.querySelectorAll("input[form='" + form + "'][name='positiveAmount']");
-    var nAmount = document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']");
+var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][name='positiveAmount']"));
+    var nAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']"));
+    console.log(pAmount);
+    for (var k = 0; k < pAmount.length; ) {
+
+    console.log(pAmount[k].parentElement.parentElement.id.substring(0, 3));
+        if (pAmount[k].parentElement.parentElement.id.substring(0, 3) != i) {
+            pAmount.splice(k, 1);
+            nAmount.splice(k, 1);
+            continue;
+        }
+        k++;
+    }
+    console.log(pAmount);
     var target;
     var sum = 0;
          for (var j = 0; j < pAmount.length; j++) {
-            if (pAmount[j].parentElement.parentElement.id.substring(0, 3) != i) continue;
+         if (pAmount[j].parentElement.parentElement.id.substring(0, 3) != i) continue;
+
             if (j == 1) {
                 target = pAmount[j].parentElement.parentElement;
                 continue;

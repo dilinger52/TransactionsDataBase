@@ -62,12 +62,10 @@ left: 0px;
 thead {
 background: white;
 width: 100%;
-top: 320px;
 }
 
 thead.main {
 position: sticky;
-top: 246px;
 }
 
 .under-header {

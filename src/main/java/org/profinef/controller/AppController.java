@@ -106,7 +106,7 @@ public class AppController {
                                          @RequestParam(name = "currency_id", required = false) List<Integer> currencyId,
                                          @RequestParam(name = "startDate", required = false) Date startDate,
                                          @RequestParam(name = "endDate", required = false) Date endDate,
-                                         HttpSession session) {
+                                         HttpSession session) throws InterruptedException {
         logger.info("Loading client info page...");
         session.removeAttribute("transaction");
         session.removeAttribute("client_alert");
@@ -516,7 +516,7 @@ public class AppController {
                 if (previous != null) balance = previous.getBalance();
                 Double b = transManager.update(tr.getId(), tr.getDate(), clientName.get(i), comment.get(i),
                         currencyId.get(i), rate.get(i), commission.get(i), amount.get(i),
-                        transportation.get(i), null, null, null, tr.getUser().getId(), balance);
+                        transportation.get(i), tr.getPibColor(), tr.getAmountColor(), tr.getBalanceColor(), tr.getUser().getId(), balance);
                 Map<Currency, Double> newBalance = new TreeMap<>();
                 if (newBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
                     newBalance = newBalances.get(clientManager.getClient(clientName.get(i)));

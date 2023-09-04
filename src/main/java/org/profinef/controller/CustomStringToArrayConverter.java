@@ -11,7 +11,6 @@ import java.util.List;
 public class CustomStringToArrayConverter implements Converter<String, List<String>> {
     @Override
     public List<String> convert(String source) {
-        System.out.println("hear");
         return Arrays.stream(StringUtils.delimitedListToStringArray(source, ";")).toList();
     }
 }

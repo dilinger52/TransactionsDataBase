@@ -1,3 +1,14 @@
+ function changeColor(id) {
+     console.log(id);
+     var color = document.querySelector('input[name="color"]:checked').value;
+     const elements = document.getElementsByName(id);
+     for (var i = 0; i < elements.length; i++) {
+         elements[i].style.color = color;
+     }
+     saveColors();
+ }
+
+
  let cords = ['scrollX','scrollY'];
  // сохраняем позицию скролла в localStorage
  window.addEventListener('unload', e => cords.forEach(cord => localStorage[cord] = window[cord]));
@@ -12,18 +23,63 @@
      }
  });
 
+
+  window.addEventListener('unload', e => {
+    localStorage[color] = document.querySelector('input[name="color"]:checked').id;
+    alert(localStorage[color]);
+  });
+  // вешаем событие на загрузку (ресурсов) страницы
+  window.addEventListener('load', e => {
+  console.log(localStorage[color]);
+      // если в localStorage имеются данные
+      if (localStorage[color]) {
+         document.getElementById(localStorage[color]).setAttribute("checked", true);
+      }
+  });
+
  document.addEventListener('DOMContentLoaded', setTopPosition);
  window.onresize = setTopPosition;
 
 document.addEventListener('keydown',
 (event) => {
-    console.log(`KeyboardEvent: key='${event.key}' | code='${event.code}'`);
-    /*if (KeyboardEvent.key = 'Delete') {
+    if (event.key == 'Delete') {
         document.querySelector("input:hover").value = '';
-    }*/
+    }
   },
   true,
 );
+
+var currentRow = '';
+document.addEventListener("DOMContentLoaded", function(e) {
+inputs = document.getElementsByTagName('input');
+
+for (var z = 0; z < inputs.length; z++) {
+    inputs[z].addEventListener('focus', async function(element){
+        if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH') return;
+        if (currentRow != element.srcElement.parentElement.parentElement.getAttribute("name")) {
+            var oldRow = currentRow;
+            currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
+            localStorage[focus] = element.srcElement.id;
+            await new Promise(resolve => setTimeout(resolve, 150));
+            document.getElementById(oldRow.substring(3)).submit();
+        }
+    });
+}
+});
+window.addEventListener('load', e => {
+
+inputs = document.getElementsByTagName('input');
+    for (d = 0; d < inputs.length; d++) {
+     // если в localStorage имеются данные
+     if (localStorage[focus] == inputs[d].id) {
+        const end = inputs[d].value.length;
+
+        inputs[d].setSelectionRange(end, end);
+        inputs[d].focus();
+        break;
+     }
+     }
+ });
 
  // Function to set the top position based on the height of the reference element
      function setTopPosition() {
@@ -192,15 +248,7 @@ $.ajax({
 }
 }
 
-function changeColor(id) {
-    console.log(id);
-    var color = document.querySelector('input[name="color"]:checked').value;
-    const elements = document.getElementsByName(id);
-    for (var i = 0; i < elements.length; i++) {
-        elements[i].style.color = color;
-    }
 
-}
 
 function saveColors() {
     var elements = document.getElementsByTagName("tr");
@@ -220,9 +268,8 @@ function saveColors() {
         contentType : "application/json",
         data : colorsTemp,
         timeout : 100000,
-        success : function(colorsTemp) {
-            console.log("SUCCESS: ", colorsTemp);
-            alert("Сохранено");
+        success : function() {
+            console.log("SUCCESS: ");
         },
         error : function(e) {
             console.log("ERROR: ", e);

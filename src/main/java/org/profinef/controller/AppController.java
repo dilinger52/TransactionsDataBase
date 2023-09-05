@@ -432,6 +432,11 @@ public class AppController {
         List<Double> amount = new ArrayList<>();
         int size = positiveAmount.size();
         if (size < negativeAmount.size()) size = negativeAmount.size();
+        if (size < 1) {
+            logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+            session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+            return "error";
+        }
         for (int i = 0; i < size; i++) {
             if (positiveAmount.size() < size) {
                 positiveAmount.add(0.0);
@@ -447,10 +452,10 @@ public class AppController {
                     negativeAmount.set(i, 0.0);
                 }
 
-            if (!Objects.equals(positiveAmount.get(i), 0.0) && positiveAmount.get(i) + negativeAmount.get(i) == 0) {
+            if (positiveAmount.isEmpty() || (!Objects.equals(positiveAmount.get(i), 0.0) && positiveAmount.get(i) + negativeAmount.get(i) == 0)) {
                 logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
                 session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
-                return "error";
+                return "error.html";
             }
             amount.add(positiveAmount.get(i) + negativeAmount.get(i));
         }
@@ -650,7 +655,7 @@ public class AppController {
                     negativeAmount.set(i, 0.0);
                 }
 
-            if (positiveAmount.get(i) != 0 && positiveAmount.get(i) + negativeAmount.get(i) == 0) {
+            if (positiveAmount.isEmpty() || (positiveAmount.get(i) != 0 && positiveAmount.get(i) + negativeAmount.get(i) == 0)) {
                 logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
                 session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
                 return "error";

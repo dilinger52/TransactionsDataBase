@@ -32,11 +32,17 @@ public class Scheduler {
     public void makeBackUp() throws Exception {
         logger.info("Making backup");
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        boolean done = databaseUtil.backup("root", "2223334456", "transactions", "backup\\" + date + ".sql");
-        if (done) {
-            logger.info("Backup made");
+        boolean doneLocal = databaseUtil.backup("root", "2223334456", "transactions", "backup\\" + date + ".sql");
+        if (doneLocal) {
+            logger.info("Local backup made");
         } else {
-            logger.info("some errors");
+            logger.info("some errors with local backup");
         }
+        /*boolean doneNetwork = databaseUtil.backup("root", "2223334456", "transactions", "\\\\192.168.2.169\\D:\\backup\\" + date + ".sql");
+        if (doneNetwork) {
+            logger.info("Network backup made");
+        } else {
+            logger.info("some errors with network backup");
+        }*/
     }
 }

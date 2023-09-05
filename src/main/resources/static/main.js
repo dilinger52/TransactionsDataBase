@@ -49,13 +49,19 @@ document.addEventListener('keydown',
   true,
 );
 
+var timerId;
 var currentRow = '';
 document.addEventListener("DOMContentLoaded", function(e) {
 inputs = document.getElementsByTagName('input');
 
 for (var z = 0; z < inputs.length; z++) {
-    inputs[z].addEventListener('focus', async function(element){
+    inputs[z].addEventListener('focus', (element) => {autosave(element)});
+}
+});
+
+async function autosave(element){
         if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH') return;
+        var form;
         if (currentRow != element.srcElement.parentElement.parentElement.getAttribute("name")) {
             var oldRow = currentRow;
             console.log(oldRow);
@@ -63,16 +69,29 @@ for (var z = 0; z < inputs.length; z++) {
             console.log(currentRow);
             localStorage[focus] = element.srcElement.id;
             await new Promise(resolve => setTimeout(resolve, 150));
-            var form = document.getElementById(oldRow.substring(3));
+            form = document.getElementById(oldRow.substring(3));
             if (form != null) {
                 form.submit();
             }
         }
-    });
-}
-});
-window.addEventListener('load', e => {
+        if (timerId != null) {
+            clearInterval(timerId);
+        }
+        form = document.getElementById(currentRow.substring(3));
+        var positiveAmount = Number(document.querySelector("input[form='" + form.id + "'][name='positiveAmount']").value.replace(/ /g,'').replace(',','.'));
+        console.log(positiveAmount);
+        var negativeAmount = Number(document.querySelector("input[form='" + form.id + "'][name='negativeAmount']").value.replace(/ /g,'').replace(',','.'));
+        console.log(negativeAmount);
+        console.log(positiveAmount + negativeAmount != 0);
+        if (form != null && positiveAmount + negativeAmount != 0) {
+            timerId = setInterval(function() {
+        	    form.submit();
+            }, 180000); //30 min
+        }
+    }
 
+
+window.addEventListener('load', e => {
 inputs = document.getElementsByTagName('input');
     for (d = 0; d < inputs.length; d++) {
      // если в localStorage имеются данные

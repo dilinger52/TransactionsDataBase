@@ -1285,7 +1285,7 @@ public class AppController {
         }
         logger.info("Found " + accounts.size() + " accounts");
         for (Account account : accounts) {
-            logger.trace("Updating " + account.getClient().getPib());
+            logger.info("Updating " + account.getClient().getPib());
             Map<Currency, Double> currencies = account.getCurrencies();
 
             List<Integer> currenciesId = currencies.keySet().stream().map(Currency::getId).toList();

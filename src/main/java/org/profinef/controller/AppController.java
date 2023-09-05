@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.Hashing;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.profinef.dto.TransactionDto;
@@ -1251,5 +1250,71 @@ public class AppController {
         }
     }
 
+    @GetMapping("/recashe")
+    public String getRefreshPage(HttpSession session) {
+        logger.info("Loading refresh cashe page...");
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser.getRole() != Role.Admin) {
+            logger.info("Redirecting to error page with error: Отказано в доступе");
+            session.setAttribute("error", "Отказано в доступе");
+            return "error";
+        }
+        session.setAttribute("clients", clientManager.findAll());
+        logger.info("Refresh page loaded");
+        return "recashe";
+    }
+
+    @PostMapping("/recashe")
+    public String refreshCashe(@RequestParam(name = "date") Date date,
+                               @RequestParam(name = "client", required = false) String clientName,
+                               HttpSession session) {
+        logger.info("Updating balance values");
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser.getRole() != Role.Admin) {
+            logger.info("Redirecting to error page with error: Отказано в доступе");
+            session.setAttribute("error", "Отказано в доступе");
+            return "error";
+        }
+        List<Account> accounts = new ArrayList<>();
+        if (clientName.isEmpty()) {
+            logger.debug("client name is empty");
+            accounts = accountManager.getAllAccounts();
+        } else {
+            logger.debug("client name found");
+            accounts.add(accountManager.getAccount(clientName));
+        }
+        logger.info("Found " + accounts.size() + " accounts");
+        for (Account account : accounts) {
+            logger.trace("Updating " + account.getClient().getPib());
+            Map<Currency, Double> currencies = account.getCurrencies();
+
+            List<Integer> currenciesId = currencies.keySet().stream().map(Currency::getId).toList();
+            List<Transaction> transactions = transManager.findByClientForDate(account.getClient().getId(), currenciesId, new Timestamp(date.getTime()), new Timestamp(System.currentTimeMillis()));
+            logger.trace("transactions: " + transactions);
+            for (Currency currency : currencies.keySet()) {
+                Optional<Transaction> trOpt = transactions.stream().filter(t -> Objects.equals(t.getCurrency().getId(), currency.getId())).findFirst();
+                if (trOpt.isEmpty()) continue;
+                Transaction first = trOpt.get();
+                logger.trace("first: " + first);
+                TransactionDto previous = transManager.findPrevious(account.getClient().getId(), currency.getId(), new Timestamp(date.getTime() - 1), first.getId());
+                logger.trace("previous: " + previous);
+                Double previousBalance = 0.0;
+                if (previous != null) {
+                    previousBalance = previous.getBalance();
+                }
+                logger.trace("previousBalance: " + previousBalance);
+                currencies.put(currency, previousBalance);
+                account.setCurrencies(currencies);
+                accountManager.save(account);
+            }
+            for (Transaction t : transactions) {
+                transManager.remittance(t.getId(), t.getDate(), t.getClient().getPib(), t.getComment(), t.getCurrency().getId(), t.getRate(), t.getCommission(),
+                        t.getAmount(), t.getTransportation(), t.getPibColor(), t.getAmountColor(), t.getBalanceColor(), t.getUser().getId(), 0.0);
+            }
+
+        }
+        logger.info("Data updated");
+        return "redirect:/client";
+    }
 
 }

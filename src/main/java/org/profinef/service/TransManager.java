@@ -125,7 +125,7 @@ public class TransManager {
         logger.debug("Updating amount of next transactions");
         Client client = clientManager.getClient(clientName);
         List<TransactionDto> transactionDtoList = transactionRepository
-                .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAsc(
+                .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAscIdAsc(
                         client.getId(), currencyId, new Timestamp(date.getTime() + 1),
                         new Timestamp(System.currentTimeMillis()));
         logger.trace("Found transactions by clientId=" + client.getId() + " currencyId=" + currencyId +
@@ -290,7 +290,7 @@ public class TransManager {
     public List<Transaction> findByClientForDate(int clientId, List<Integer> currencyId, Timestamp startDate, Timestamp endDate) {
         logger.debug("getting transactions by clientId for date");
         List<TransactionDto> transactionDtoList = transactionRepository
-                .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAsc(
+                .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAscIdAsc(
                         clientId, currencyId, startDate, endDate);
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto : transactionDtoList) {

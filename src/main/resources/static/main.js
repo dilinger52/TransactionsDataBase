@@ -43,7 +43,7 @@
 document.addEventListener('keydown',
 (event) => {
     if (event.key == 'Delete') {
-        document.querySelector("input:hover").value = '';
+        document.querySelector("input:focus").value = '';
     }
   },
   true,
@@ -58,10 +58,15 @@ for (var z = 0; z < inputs.length; z++) {
         if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH') return;
         if (currentRow != element.srcElement.parentElement.parentElement.getAttribute("name")) {
             var oldRow = currentRow;
+            console.log(oldRow);
             currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
+            console.log(currentRow);
             localStorage[focus] = element.srcElement.id;
             await new Promise(resolve => setTimeout(resolve, 150));
-            document.getElementById(oldRow.substring(3)).submit();
+            var form = document.getElementById(oldRow.substring(3));
+            if (form != null) {
+                form.submit();
+            }
         }
     });
 }
@@ -649,7 +654,7 @@ var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][n
         k++;
     }
     console.log(pAmount);
-    var target;
+    var target = null;
     var sum = 0;
          for (var j = 0; j < pAmount.length; j++) {
          if (pAmount[j].parentElement.parentElement.id.substring(0, 3) != i) continue;
@@ -665,6 +670,7 @@ var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][n
     console.log(sum);
     var target1;
     var target2;
+    if (target != null) {
     if (sum >= 0) {
         target1 = target.querySelector("[name='positiveAmount']");
         target2 = target.querySelector("[name='negativeAmount']");
@@ -676,6 +682,7 @@ var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][n
     target2.value = '';
     console.log(target1.dataset.id);
     arithmetic(target1.dataset.id);
+    }
 }
 
 function numberWithSpaces(x) {

@@ -155,7 +155,7 @@
 
                 <input type="hidden" name="currency_name" th:value="${currency.name}" form="form">
                 <input type="hidden" name="client_name" th:value="${session.client.pib}" form="form">
-            <tr th:id="|${currency.name}tr0|">
+            <tr th:id="|${currency.name}tr0|" th:name="|${currency.name}form|">
                     <th>
                         <input class="inline" type="submit" value="Сохранить" form="form">
                     </th>

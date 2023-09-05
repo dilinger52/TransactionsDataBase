@@ -123,5 +123,22 @@ public class AccountManager {
         }
         throw new RuntimeException("Клиент с таким именем уже существует");
     }
+
+    public void save(Account account) {
+        accountRepository.saveAll(formatToDto(account));
+    }
+
+    private List<AccountDto> formatToDto(Account account) {
+        List<AccountDto> result = new ArrayList<>();
+        Map<Currency, Double> currencies = account.getCurrencies();
+        for (Currency currency : currencies.keySet()) {
+            AccountDto accountDto = new AccountDto();
+            accountDto.setClientId(account.getClient().getId());
+            accountDto.setCurrencyId(currency.getId());
+            accountDto.setAmount(currencies.get(currency));
+            result.add(accountDto);
+        }
+        return result;
+    }
 }
 

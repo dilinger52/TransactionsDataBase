@@ -59,10 +59,24 @@ for (var z = 0; z < inputs.length; z++) {
 }
 });
 
+/*window.addEventListener('unload', () => {
+            var form = document.getElementById(currentRow.substring(3));
+            var positiveAmount = Number(document.querySelector("input[form='" + form.id + "'][name='positiveAmount']").value.replace(/ /g,'').replace(',','.'));
+            console.log('unl ' + positiveAmount);
+            var negativeAmount = Number(document.querySelector("input[form='" + form.id + "'][name='negativeAmount']").value.replace(/ /g,'').replace(',','.'));
+            console.log('unl ' + negativeAmount);
+            console.log('unl ' + positiveAmount + negativeAmount != 0);
+            if (form != null && positiveAmount + negativeAmount != 0) {
+                form.submit();
+            }
+
+});*/
+
 async function autosave(element){
-        if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH') return;
+console.log(element.srcElement.type);
+        if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button') return;
         var form;
-        if (currentRow != element.srcElement.parentElement.parentElement.getAttribute("name")) {
+
             var oldRow = currentRow;
             console.log(oldRow);
             currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
@@ -73,7 +87,7 @@ async function autosave(element){
             if (form != null) {
                 form.submit();
             }
-        }
+
         if (timerId != null) {
             clearInterval(timerId);
         }
@@ -86,7 +100,7 @@ async function autosave(element){
         if (form != null && positiveAmount + negativeAmount != 0) {
             timerId = setInterval(function() {
         	    form.submit();
-            }, 180000); //30 min
+            }, 600000); //10 min
         }
     }
 
@@ -99,7 +113,9 @@ inputs = document.getElementsByTagName('input');
         const end = inputs[d].value.length;
 
         inputs[d].setSelectionRange(end, end);
+        showAgents(inputs[d].parentElement.parentElement.getAttribute('name'));
         inputs[d].focus();
+
         break;
      }
      }
@@ -416,6 +432,7 @@ console.log(sum);
             input3.setAttribute("autocomplete", "off");
             input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", 'form');
+            input3.addEventListener('change', (element) => {autosave(element)});
         th3.appendChild(input3);
     tr.appendChild(th3);
     const th4 = document.createElement('th');
@@ -423,6 +440,7 @@ console.log(sum);
             input4.type = "text";
             input4.name = "comment";
             input4.setAttribute("Form", 'form');
+            input4.addEventListener('focus', (element) => {autosave(element)});
         th4.appendChild(input4);
     tr.appendChild(th4);
     const th5 = document.createElement('th');
@@ -437,6 +455,7 @@ console.log(sum);
                 input5.setAttribute("autocomplete", "off");
                 input5.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 input5.dataset.id = id + "tr" + num;
+                input5.addEventListener('focus', (element) => {autosave(element)});
             th5.appendChild(input5);
     tr.appendChild(th5);
     const th6 = document.createElement('th');
@@ -451,6 +470,7 @@ console.log(sum);
                 input6.setAttribute("Form", 'form');
                 input6.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 input6.dataset.id = id + "tr" + num;
+                input6.addEventListener('focus', (element) => {autosave(element)});
             th6.appendChild(input6);
     tr.appendChild(th6);
     const th7 = document.createElement('th');
@@ -461,7 +481,7 @@ console.log(sum);
                 input7.setAttribute("Form", 'form');
                 input7.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 input7.dataset.id = id + "tr" + num;
-
+                input7.addEventListener('focus', (element) => {autosave(element)});
                 input7.style.width = "50px";
             th7.appendChild(input7);
         tr.appendChild(th7);
@@ -474,6 +494,7 @@ console.log(sum);
                 input9.name = "rate";
                 input9.setAttribute("Form", 'form');
                 input9.style.width = "50px";
+                input9.addEventListener('focus', (element) => {autosave(element)});
             th9.appendChild(input9);
         tr.appendChild(th9);
         const th10 = document.createElement('th');
@@ -484,6 +505,7 @@ console.log(sum);
                     input10.style.width = "50px";
                     input10.setAttribute("Form", 'form');
                     input10.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
+                    input10.addEventListener('focus', (element) => {autosave(element)});
                 th10.appendChild(input10);
             tr.appendChild(th10);
     const th11 = document.createElement('th');
@@ -539,6 +561,7 @@ console.log(sum);
             input3.setAttribute("autocomplete", "off");
             input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", form);
+            input3.addEventListener('change', (element) => {autosave(element)});
         th3.appendChild(input3);
     tr.appendChild(th3);
     const th4 = document.createElement('th');
@@ -547,6 +570,7 @@ console.log(sum);
             input4.type = "text";
             input4.name = "comment";
             input4.setAttribute("Form", form);
+            input4.addEventListener('focus', (element) => {autosave(element)});
         th4.appendChild(input4);
     tr.appendChild(th4);
     const th5 = document.createElement('th');
@@ -562,6 +586,7 @@ console.log(sum);
                 input5.setAttribute("Form", form);
                 input5.dataset.id = num;
                 input5.setAttribute("onkeyup", "changeAssociated('" + num + "')");
+                input5.addEventListener('focus', (element) => {autosave(element)});
             th5.appendChild(input5);
     tr.appendChild(th5);
     const th6 = document.createElement('th');
@@ -577,6 +602,7 @@ console.log(sum);
                 input6.dataset.id = num;
                 input6.setAttribute("Form", form);
                 input6.setAttribute("onkeyup", "changeAssociated('" + num + "')");
+                input6.addEventListener('focus', (element) => {autosave(element)});
             th6.appendChild(input6);
     tr.appendChild(th6);
     const th7 = document.createElement('th');
@@ -588,6 +614,7 @@ console.log(sum);
                 input7.style.width = "50px";
                 input7.setAttribute("Form", form);
                 input7.setAttribute("onkeyup", "changeAssociated('" + num + "')");
+                input7.addEventListener('focus', (element) => {autosave(element)});
             th7.appendChild(input7);
         tr.appendChild(th7);
     const th8 = document.createElement('th');
@@ -601,6 +628,7 @@ console.log(sum);
                 input9.name = "rate";
                 input9.style.width = "50px";
                 input9.setAttribute("Form", form);
+                input9.addEventListener('focus', (element) => {autosave(element)});
             th9.appendChild(input9);
         tr.appendChild(th9);
         const th10 = document.createElement('th');
@@ -612,6 +640,7 @@ console.log(sum);
                     input10.style.width = "50px";
                     input10.setAttribute("Form", form);
                     input10.setAttribute("onkeyup", "changeAssociated('" + num + "')");
+                    input10.addEventListener('focus', (element) => {autosave(element)});
                 th10.appendChild(input10);
             tr.appendChild(th10);
     const th11 = document.createElement('th');

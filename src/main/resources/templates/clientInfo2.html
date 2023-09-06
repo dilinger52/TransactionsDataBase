@@ -23,14 +23,8 @@
 <form method="get" action="client" class="inline">
     <input type="submit" value="<- Назад">
 </form>
-        <form method="get" action="add_transaction" class="inline">
-            <input type="submit" value="Новая транзакция">
-        </form>
         <form method="get" action="convertation" class="inline">
             <input type="submit" value="Обмен валют">
-        </form>
-        <form method="get" action="transfer" class="inline">
-            <input type="submit" value="Выполнить перевод">
         </form>
         <form method="post" action="download/client_info" class="inline">
             <input type="submit" value="Скачать таблицу">
@@ -142,7 +136,7 @@
 
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                    <input style="width: 50px" th:form="${id}" type="text" th:value="${transaction.rate != 1 ? transaction.rate : ''}" name="rate">
+                    <input style="width: 50px" th:form="${id}" type="text" th:value="${transaction.rate != 1 ? transaction.rate : ''}" name="rate" th:id="|${transaction.id}${currency.id}${transaction.client.id}rate|">
                 </th>
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                     <input style="width: 50px" th:form="${id}" type="text" name="transportation" th:value="${transaction.transportation != 0 ? #numbers.formatInteger(transaction.transportation, 1,'WHITESPACE') : ''}"  th:id="|${transaction.id}${currency.id}${transaction.client.id}trans|" th:data-id="|${transaction.id}${currency.id}${transaction.client.id}|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))">

@@ -1,10 +1,12 @@
  function changeColor(id) {
-     console.log(id);
+
      var color = document.querySelector('input[name="color"]:checked').value;
+     document.getElementById(id).style.color = color;
+     /*var color = document.querySelector('input[name="color"]:checked').value;
      const elements = document.getElementsByName(id);
      for (var i = 0; i < elements.length; i++) {
          elements[i].style.color = color;
-     }
+     }*/
      saveColors();
  }
 
@@ -30,7 +32,6 @@
   });
   // вешаем событие на загрузку (ресурсов) страницы
   window.addEventListener('load', e => {
-  console.log(localStorage[color]);
       // если в localStorage имеются данные
       if (localStorage[color]) {
          document.getElementById(localStorage[color]).setAttribute("checked", true);
@@ -56,7 +57,12 @@ inputs = document.getElementsByTagName('input');
 
 for (var z = 0; z < inputs.length; z++) {
     inputs[z].addEventListener('focus', (element) => {autosave(element)});
+    if (localStorage[inputs[z].id] != null && inputs[z].type != 'button') {
+        inputs[z].value = localStorage[inputs[z].id];
+    }
+
 }
+//localStorage.clear();
 });
 
 /*window.addEventListener('unload', () => {
@@ -73,16 +79,13 @@ for (var z = 0; z < inputs.length; z++) {
 });*/
 
 async function autosave(element){
-console.log(element.srcElement.type);
+    saveColors();
         if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button') return;
         var form;
 
             var oldRow = currentRow;
-            console.log(oldRow);
             currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
-            console.log(currentRow);
             localStorage[focus] = element.srcElement.id;
-            await new Promise(resolve => setTimeout(resolve, 150));
             form = document.getElementById(oldRow.substring(3));
             if (form != null) {
                 form.submit();
@@ -93,16 +96,52 @@ console.log(element.srcElement.type);
         }
         form = document.getElementById(currentRow.substring(3));
         var positiveAmount = Number(document.querySelector("input[form='" + form.id + "'][name='positiveAmount']").value.replace(/ /g,'').replace(',','.'));
-        console.log(positiveAmount);
         var negativeAmount = Number(document.querySelector("input[form='" + form.id + "'][name='negativeAmount']").value.replace(/ /g,'').replace(',','.'));
-        console.log(negativeAmount);
-        console.log(positiveAmount + negativeAmount != 0);
         if (form != null && positiveAmount + negativeAmount != 0) {
             timerId = setInterval(function() {
         	    form.submit();
             }, 600000); //10 min
         }
     }
+
+    /*async function autosave(element){
+            if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button') return;
+
+
+
+            var form;
+
+            if (currentRow != element.srcElement.parentElement.parentElement.getAttribute("name")){
+                var oldRow = currentRow;
+                currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
+                localStorage[focus] = element.srcElement.id;
+
+                await new Promise(resolve => setTimeout(resolve, 150));
+                form = document.getElementById(oldRow.substring(3));
+                if (form != null) {
+                    form.submit();
+                }
+            }
+            if (timerId != null) {
+                clearInterval(timerId);
+            }
+            form = document.getElementById(currentRow.substring(3));
+            var inputs = element.srcElement.parentElement.parentElement.querySelectorAll("input[form='" + form.id + "'][type='text']");
+                                    for (var p = 0; p < inputs.length; p++) {
+                                        localStorage[inputs[p].id] = inputs[p].value;
+                                    }
+                                     console.log(localStorage);
+            var positiveAmount = Number(document.querySelector("input[form='" + form.id + "'][name='positiveAmount']").value.replace(/ /g,'').replace(',','.'));
+            console.log(positiveAmount);
+            var negativeAmount = Number(document.querySelector("input[form='" + form.id + "'][name='negativeAmount']").value.replace(/ /g,'').replace(',','.'));
+            console.log(negativeAmount);
+            console.log(positiveAmount + negativeAmount != 0);
+            if (form != null && positiveAmount + negativeAmount != 0) {
+                timerId = setInterval(function() {
+            	    form.submit();
+                }, 600000); //10 min
+            }
+        }*/
 
 
 window.addEventListener('load', e => {
@@ -113,7 +152,11 @@ inputs = document.getElementsByTagName('input');
         const end = inputs[d].value.length;
 
         inputs[d].setSelectionRange(end, end);
-        showAgents(inputs[d].parentElement.parentElement.getAttribute('name'));
+
+        if (inputs[d].parentElement.parentElement.id.substring(3, 6) != 'tr0') {
+            showAgents(inputs[d].parentElement.parentElement.getAttribute('name'));
+        }
+
         inputs[d].focus();
 
         break;
@@ -180,8 +223,7 @@ function sumInputs() {
    for (var j = 0; j < numList.length; j++) {
         var d = document.getElementById("divIn" + j);
         var v  =  - (sum - Number(numList[j].value) * Number(rateList[j].value)) / Number(rateList[j].value);
-        //console.log(j + ',' + v);
-        //console.log(v.toFixed(2));
+
         d.querySelector('p[id="value"]').innerHTML = v.toFixed(2);
         //d.querySelector('input[id="amount"]').value = v.toFixed(2);
    }
@@ -196,7 +238,7 @@ function convert() {
     var currency1 = document.getElementById("currency1");
     var currency2 = document.getElementById("currency2");
     var exchangeRates = document.getElementsByClassName("exchange");
-    console.log(exchangeRates);
+
     var currency1rate = 0;
     var currency2rate = 0;
     var result = 0;
@@ -208,8 +250,7 @@ function convert() {
             currency2rate = Number(exchangeRates[i].value);
         }
     }
-    console.log(currency1rate);
-    console.log(currency2rate);
+
     if (currency1rate > currency2rate) {
         result = - Number(amount.value) * Number(rate.value);
     }
@@ -217,7 +258,7 @@ function convert() {
     if (currency1rate <= currency2rate) {
         result = - Number(amount.value) / Number(rate.value);
     }
-    console.log(result);
+
     document.getElementById("changeDiv").value = result;
     document.getElementById("changeInput").value = result;
     document.getElementById("rate2").value = (Number(rate.value));
@@ -290,18 +331,18 @@ $.ajax({
 
 
 
-function saveColors() {
-    var elements = document.getElementsByTagName("tr");
-    console.log(elements);
+async function saveColors() {
+    var elements = document.querySelectorAll("*");
     const colors = new Map();
     for (var i = 0; i < elements.length; i++) {
-        if (elements[i].style.color.length > 0) {
-            colors.set(elements[i].getAttribute("name"), elements[i].style.color);
+
+        if (elements[i].style.color.length > 0 && elements[i].id.length > 0) {
+        console.log(elements[i].id);
+            colors.set(elements[i].getAttribute("id"), elements[i].style.color);
         }
     }
     console.log(colors);
     const colorsTemp = JSON.stringify(colors, mapAwareReplacer);
-    console.log(colorsTemp);
     $.ajax({
         type : "POST",
         url : "/save_colors",
@@ -330,7 +371,7 @@ function mapAwareReplacer(key, value) {
 
 function capture() {
 window.scrollTo(0,0);
-console.log(document.querySelector(".ignore"));
+
 html2canvas(document.querySelector("#capture")/*, {
 ignoreElements: document.querySelector(".ignore")
 }*/).then(canvas => {
@@ -370,13 +411,13 @@ ignoreElements: document.querySelector(".ignore")
 function showAgents(id) {
     var rows = document.getElementsByName(id);
     var color = rows[0].style.color;
-    console.log(color);
+
     for (var i = 0; i < rows.length; i++) {
         rows[i].style.display = "";
         rows[i].style.color = color;
     }
     var button = document.querySelector('input[id="' + id + '"');
-    console.log(button);
+
     button.setAttribute('onclick', 'hideAgents(id)');
     button.value = "Скрыть";
 }
@@ -388,7 +429,7 @@ var rows = document.getElementsByName(id);
         rows[i].style.display = "none";
     }
     var button = document.querySelector('input[id="' + id + '"');
-    console.log(button);
+
     button.setAttribute('onclick', 'showAgents(id)');
     button.value = "Показать";
 }
@@ -401,13 +442,12 @@ function addRow(id) {
      for (var i = 0; i < num; i++) {
          var pAmount = document.getElementById(id + "tr" + i + "pAmount");
          var nAmount = document.getElementById(id + "tr" + i + "nAmount");
-         console.log(pAmount);
-         console.log(nAmount);
+
          sum -= Number(pAmount.value.replace(/ /g,'').replace(',','.'));
          sum -= Number(nAmount.value.replace(/ /g,'').replace(',','.'));
      }
 //sum = -1 * sum;
-console.log(sum);
+
  const tr = document.createElement('tr');
     tr.id=id + "tr" + num;
     const input0 = document.createElement('input');
@@ -530,7 +570,7 @@ var sum = 0;
          sum -= Number(nAmount[j].value.replace(/ /g,'').replace(',','.'));
      }
 //sum = -1 * sum;
-console.log(sum);
+
  const tr = document.createElement('tr');
     tr.id = num;
     tr.style.color = document.getElementById(id).style.color;
@@ -561,7 +601,7 @@ console.log(sum);
             input3.setAttribute("autocomplete", "off");
             input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", form);
-            input3.addEventListener('change', (element) => {autosave(element)});
+
         th3.appendChild(input3);
     tr.appendChild(th3);
     const th4 = document.createElement('th');
@@ -647,14 +687,14 @@ console.log(sum);
         th11.style.borderTop = "none";
         th11.id = num + "total";
     tr.appendChild(th11);
-            var tbody = document.getElementById(table);
-    console.log("id" + id);
+    var tbody = document.getElementById(table);
+
+
     var temp = Number(id);
     if (id.substring(id.length - 1) == '9') {
         temp = Number(id.substring(0, id.length - 1) + '10')
     }
 
-    console.log("id + 1" + temp);
     var nextTR = document.getElementsByName(Number(i + form) + 1)[0];
     if (nextTR == null) {
         nextTR = document.getElementById(table + "tr0");
@@ -666,15 +706,15 @@ console.log(sum);
 function deleteRow(id) {
 var element = document.querySelector("tr[id='" + id + "']");
 var form = element.querySelector("[id$='pAmount'").form.id;
-console.log(element);
+
     element.remove();
-console.log(document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']")[0].dataset.id);
+
     changeAssociated(document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']")[0].dataset.id);
 }
 
 function arithmetic(id) {
     var positiveAmount = Number(document.getElementById(id + 'pAmount').value.replace(/ /g,'').replace(',','.'));
-    console.log(positiveAmount);
+
     var negativeAmount = Number(document.getElementById(id + 'nAmount').value.replace(/ /g,'').replace(',','.'));
     var commission = Number(document.getElementById(id + 'commission').value.replace(/ /g,'').replace(',','.'));
 
@@ -690,10 +730,9 @@ function changeAssociated(id) {
         var i = document.getElementById(id + 'pAmount').parentElement.parentElement.id.substring(0, 3);
 var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][name='positiveAmount']"));
     var nAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']"));
-    console.log(pAmount);
+
     for (var k = 0; k < pAmount.length; ) {
 
-    console.log(pAmount[k].parentElement.parentElement.id.substring(0, 3));
         if (pAmount[k].parentElement.parentElement.id.substring(0, 3) != i) {
             pAmount.splice(k, 1);
             nAmount.splice(k, 1);
@@ -701,7 +740,7 @@ var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][n
         }
         k++;
     }
-    console.log(pAmount);
+
     var target = null;
     var sum = 0;
          for (var j = 0; j < pAmount.length; j++) {
@@ -714,8 +753,7 @@ var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][n
              sum -= Number(pAmount[j].value.replace(/ /g,'').replace(',','.'));
              sum -= Number(nAmount[j].value.replace(/ /g,'').replace(',','.'));
          }
-    console.log(target);
-    console.log(sum);
+
     var target1;
     var target2;
     if (target != null) {
@@ -728,7 +766,7 @@ var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][n
     }
     target1.value = sum.toFixed(0);
     target2.value = '';
-    console.log(target1.dataset.id);
+
     arithmetic(target1.dataset.id);
     }
 }
@@ -932,7 +970,7 @@ function obmenSum() {
     }
 
         var exchangeRates = document.getElementsByClassName("exchange");
-        console.log(exchangeRates);
+
         var currency1rate = 0;
         var currency2rate = 0;
         var result = 0;
@@ -944,8 +982,7 @@ function obmenSum() {
                 currency2rate = Number(exchangeRates[i].value);
             }
         }
-        console.log(currency1rate);
-        console.log(currency2rate);
+
         var amount = positiveAmount + negativeAmount;
         if (currency1rate > currency2rate) {
             result = - amount * rate;
@@ -1022,8 +1059,14 @@ const tempId = 1;
         type : "GET",
         url : "/check_connection",
         data : {id:tempId},
+        contentType: 'html',
         timeout : 100000,
         success : function(response) {
+            console.log(response);
+            if (response != 1) {
+                document.documentElement.innerHTML = response;
+                history.pushState({}, "", "http://localhost:8080/log_in");
+            }
             connection = true;
         },
         error : function(e) {

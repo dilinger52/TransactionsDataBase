@@ -39,20 +39,6 @@
         <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
     </datalist>
     </div>
-    <div class="inline">
-    <label for="client_phone">Поиск по телефону</label>
-    <input type="text" list="client_phone_datalist" id="client_phone" name="client_phone" placeholder="Поиск.." onkeyup="filterFunction()" autocomplete="off">
-    <datalist id="client_phone_datalist">
-        <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.phone}"></option>
-    </datalist>
-    </div>
-    <div class="inline">
-    <label for="client_telegram">Поиск по Telegram</label>
-    <input type="text" list="client_telegram_datalist" id="client_telegram" name="client_telegram" placeholder="Поиск.." onkeyup="filterFunction()" autocomplete="off">
-    <datalist id="client_telegram_datalist">
-        <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.telegram}"></option>
-    </datalist>
-    </div>
     <input type="submit" value="Поиск" class="inline">
 </form>
 </div>

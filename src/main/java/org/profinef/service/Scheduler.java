@@ -14,12 +14,9 @@ import java.util.Date;
 public class Scheduler {
     @Autowired
     private final NBUManager nbuManager;
-    @Autowired
-    private final DatabaseUtil databaseUtil;
     private Logger logger = LoggerFactory.getLogger(Scheduler.class);
-    public Scheduler(NBUManager nbuManager, DatabaseUtil databaseUtil) {
+    public Scheduler(NBUManager nbuManager) {
         this.nbuManager = nbuManager;
-        this.databaseUtil = databaseUtil;
     }
 
     @Scheduled(cron = "0 0 16 * * *")
@@ -28,11 +25,11 @@ public class Scheduler {
         nbuManager.getTodayCurrencyExchange();
     }
     @PostConstruct
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 0 8,14 * * *")
     public void makeBackUp() throws Exception {
         logger.info("Making backup");
-        String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        boolean doneLocal = databaseUtil.backup("root", "2223334456", "transactions", "backup\\" + date + ".sql");
+        String date = new SimpleDateFormat("dd-MM-yyyy_HH-mm").format(new Date());
+        boolean doneLocal = DatabaseUtil.backup("root", "2223334456", "transactions", "backup\\" + date + ".sql");
         if (doneLocal) {
             logger.info("Local backup made");
         } else {

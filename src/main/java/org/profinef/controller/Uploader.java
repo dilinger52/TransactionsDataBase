@@ -273,7 +273,9 @@ public class Uploader {
         try {
             //writing transaction to database
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId(), 0.0);
+                    currencyId, rate, commission, amount, transportation, null, amountColor, user.getId(),
+                    0.0, null, null, null, null, null,
+                    null);
         } catch (RuntimeException e) {
             e.printStackTrace();
             //if currency did not exist create it and try again
@@ -284,7 +286,9 @@ public class Uploader {
                 ex.printStackTrace();
             }
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId(), 0.0);
+                    currencyId, rate, commission, amount, transportation, null, amountColor,
+                    user.getId(), 0.0, null, null, null, null, null,
+                    null);
         }
         //setting parameters to default
         amount = 0;

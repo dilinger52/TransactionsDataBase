@@ -16,14 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.*;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -52,16 +50,19 @@ public class AppController {
     private final CurrencyManager currencyManager;
     @Autowired
     private final UserManager userManager;
+    @Autowired
+    private final Scheduler scheduler;
 
     private static final Logger logger = LoggerFactory.getLogger(AppController.class);
 
     public AppController(ClientManager clientManager, AccountManager accountManager, TransManager transManager,
-                         CurrencyManager currencyManager, UserManager userManager) {
+                         CurrencyManager currencyManager, UserManager userManager, Scheduler scheduler) {
         this.clientManager = clientManager;
         this.accountManager = accountManager;
         this.transManager = transManager;
         this.currencyManager = currencyManager;
         this.userManager = userManager;
+        this.scheduler = scheduler;
     }
 
     /**
@@ -518,9 +519,15 @@ public class AppController {
                 TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate(), transactionId.get(0));
                 Double balance = 0.0;
                 if (previous != null) balance = previous.getBalance();
+                int finalI = i;
+                Transaction tran = transactionList.stream()
+                        .filter(t -> Objects.equals(t.getCurrency().getId(), currencyId.get(finalI))
+                                && Objects.equals(t.getClient().getId(), clientId.get(finalI))).findFirst().orElse(new Transaction());
                 Double b = transManager.update(tr.getId(), tr.getDate(), clientName.get(i), comment.get(i),
                         currencyId.get(i), rate.get(i), commission.get(i), amount.get(i),
-                        transportation.get(i), tr.getPibColor(), tr.getAmountColor(), tr.getBalanceColor(), tr.getUser().getId(), balance);
+                        transportation.get(i), tran.getCommentColor(), tran.getAmountColor(), tr.getUser().getId(), balance,
+                        tran.getInputColor(), tran.getOutputColor(), tran.getTarifColor(), tran.getCommissionColor(), tran.getRateColor(),
+                        tran.getTransportationColor());
                 Map<Currency, Double> newBalance = new TreeMap<>();
                 if (newBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
                     newBalance = newBalances.get(clientManager.getClient(clientName.get(i)));
@@ -735,7 +742,8 @@ public class AppController {
                         logger.trace("oldBalance: " + oldBalance);
                         Double newBalance = transManager.remittance(transactionId, new Timestamp(date.getTime()), clientName.get(i), comment.get(i),
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
-                                null, null, null, user.getId(), trBalance);
+                                null, null, user.getId(), trBalance, null, null, null, null,
+                                null, null);
                         logger.trace("newBalance: " + newBalance);
                         List<Integer> list = new ArrayList<>();
                         list.add(currencyId.get(i));
@@ -745,7 +753,8 @@ public class AppController {
                         logger.debug("Date is today");
                         transManager.remittance(transactionId, null, clientName.get(i), comment.get(i),
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
-                                null, null, null, user.getId(), 0.0);
+                                null, null, user.getId(), 0.0, null,
+                                null,null, null, null, null);
                     }
                 } catch (Exception e) {
                     logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));
@@ -925,13 +934,28 @@ public class AppController {
     public String saveColors(@RequestBody String colors, HttpSession session) throws JsonProcessingException {
         logger.info("Saving colors...");
         List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {});
-
+        System.out.println(entryList);
         for (List<String> list : entryList) {
-            int id = Integer.parseInt(list.get(0).substring(3));
-            int clientId = ((Client) session.getAttribute("client")).getId();
-            int currencyId = Integer.parseInt(list.get(0).substring(0, 3));
+            String[] arr = list.get(0).split("_");
+            int id = Integer.parseInt(arr[0]);
+            System.out.println("id " + id);
+            int clientId = Integer.parseInt(arr[2]);
+            System.out.println("clientId " + clientId);
+            int currencyId = Integer.parseInt(arr[1]);
+            System.out.println("currencyId " + currencyId);
             Transaction transaction = transManager.getTransactionByClientAndByIdAndByCurrencyId(id, clientId, currencyId);
-            transaction.setPibColor(list.get(1));
+            System.out.println("component " + arr[3]);
+            switch (arr[3]) {
+                case "comment" -> transaction.setCommentColor(list.get(1));
+                case "pAmount" -> transaction.setInputColor(list.get(1));
+                case "nAmount" -> transaction.setOutputColor(list.get(1));
+                case "commission" -> transaction.setTarifColor(list.get(1));
+                case "com" -> transaction.setCommissionColor(list.get(1));
+                case "rate" -> transaction.setRateColor(list.get(1));
+                case "transportation" -> transaction.setTransportationColor(list.get(1));
+                case "total" -> transaction.setAmountColor(list.get(1));
+            }
+
 
             transManager.save(transaction);
         }
@@ -1003,6 +1027,19 @@ public class AppController {
         }
 
         List<User> users = userManager.getAllUsers();
+        Map<User, Integer> active = new HashMap<>();
+        for (User user : users) {
+            active.put(user, 0);
+        }
+        List<HttpSession> sessions = new HttpSessionConfig().getActiveSessions();
+        for (HttpSession ses : sessions) {
+            System.out.println(ses);
+            System.out.println(active);
+            User user = (User) ses.getAttribute("user");
+            active.put(user, active.get(user) + 1);
+            System.out.println(active);
+        }
+        session.setAttribute("active", active);
         session.setAttribute("users", users);
         logger.info("Users page loaded");
         return "users";
@@ -1186,7 +1223,7 @@ public class AppController {
     }
 
     @GetMapping("/database")
-    public String makeBackUp(HttpSession session, HttpServletResponse response) throws IOException {
+    public String makeBackUp(HttpSession session, HttpServletResponse response) throws Exception {
         User currentUser = (User) session.getAttribute("user");
         if (currentUser.getRole() != Role.Admin) {
             logger.info("Redirecting to error page with error: Отказано в доступе");
@@ -1194,43 +1231,7 @@ public class AppController {
             return "error";
         }
 
-        File dir = new File("C:\\Users\\O.Hryhorenko\\Documents\\Data\\transactions"); //path указывает на директорию
-        //File dir = new File("pom.xml"); //path указывает на директорию
-        /*for (File file :
-                lst) {*/
-            try {
-                ZipOutputStream zout = new ZipOutputStream(new FileOutputStream("output.zip"));
-                getZip(dir, zout);
-                zout.close();
-                // закрываем текущую запись для новой записи
-
-            }
-            catch(Exception ex){
-                ex.printStackTrace();
-            }
-        File file = new File("output.zip");
-        logger.debug("File exist");
-        //get the mimetype
-        String mimeType = URLConnection.guessContentTypeFromName(file.getName());
-        if (mimeType == null) {
-            //unknown mimetype so set the mimetype to application/octet-stream
-            mimeType = "application/octet-stream";
-        }
-
-        response.setContentType(mimeType);
-        logger.debug("Content type set");
-
-
-        response.setHeader("Content-Disposition", String.format("inline; filename=\"" + file.getName() + "\""));
-
-        //Here we have mentioned it to show as attachment
-        //response.setHeader("Content-Disposition", String.format("attachment; filename=\"" + file.getName() + "\""));
-
-        response.setContentLength((int) file.length());
-
-        InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-
-        FileCopyUtils.copy(inputStream, response.getOutputStream());
+        scheduler.makeBackUp();
         /*}*/
         return "redirect:/users";
     }
@@ -1314,7 +1315,8 @@ public class AppController {
             }
             for (Transaction t : transactions) {
                 transManager.remittance(t.getId(), t.getDate(), t.getClient().getPib(), t.getComment(), t.getCurrency().getId(), t.getRate(), t.getCommission(),
-                        t.getAmount(), t.getTransportation(), t.getPibColor(), t.getAmountColor(), t.getBalanceColor(), t.getUser().getId(), 0.0);
+                        t.getAmount(), t.getTransportation(), t.getCommentColor(), t.getAmountColor(), t.getUser().getId(), 0.0,
+                        t.getInputColor(), t.getOutputColor(), t.getTarifColor(), t.getCommissionColor(), t.getRateColor(), t.getTransportationColor());
             }
 
         }

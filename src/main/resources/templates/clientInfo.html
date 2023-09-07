@@ -96,7 +96,7 @@
             </form>
         </th>
         <th th:if="${session.user.role.name == 'Admin'}" th:text="${transaction.user.login}"></th>
-        <th th:style="|color: ${transaction.pibColor}|" th:text="${transaction.client.pib}" th:onclick="|changeColor(pib_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|pib_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:style="|color: ${transaction.commentColor}|" th:text="${transaction.client.pib}" th:onclick="|changeColor(pib_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|pib_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:text="${transaction.comment}" th:onclick="|changeColor(comment_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|comment_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}" th:onclick="|changeColor(date_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|date_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
         <th th:text="${transaction.currency.name}" th:onclick="|changeColor(currency_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|currency_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>

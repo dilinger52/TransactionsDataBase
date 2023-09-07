@@ -49,8 +49,9 @@ public class TransManager {
 
 
     public double remittance(int transactionId, Timestamp date, String clientName, String comment, int currencyId, double rate,
-                                 double commission, double amount, double transportation, String pibColor,
-                                 String amountColor, String balanceColor, int userId, Double trBalance) throws RuntimeException {
+                                 double commission, double amount, double transportation, String commentColor,
+                                 String amountColor, int userId, Double trBalance, String inputColor,
+                             String outputColor, String tarifColor, String commissionColor, String rateColor, String transportationColor) throws RuntimeException {
         logger.debug("Saving transaction");
         //if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
@@ -68,7 +69,8 @@ public class TransManager {
         }
         double balance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
         TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
-                transportation, client, comment,  trBalance + balance - oldBalance, pibColor, amountColor, balanceColor, userId);
+                transportation, client, comment,  trBalance + balance - oldBalance, commentColor, amountColor,
+                userId, inputColor, outputColor, tarifColor, commissionColor, rateColor, transportationColor);
         transactionRepository.save(transactionDto);
         logger.debug("Transaction saved");
         return balance;
@@ -76,7 +78,8 @@ public class TransManager {
 
     public double update(int transactionId, Timestamp date, String clientName, String comment, int currencyId, double rate,
                              double commission, double amount, double transportation, String pibColor,
-                             String amountColor, String balanceColor, int userId, Double trBalance) throws RuntimeException {
+                             String amountColor, int userId, Double trBalance, String inputColor,
+                         String outputColor, String tarifColor, String commissionColor, String rateColor, String transportationColor) throws RuntimeException {
         logger.debug("Saving transaction");
         //if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
@@ -86,7 +89,8 @@ public class TransManager {
         double newBalance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
         double result = trBalance + newBalance - oldBalance;
         TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
-                transportation, client, comment, result, pibColor, amountColor, balanceColor, userId);
+                transportation, client, comment, result, pibColor, amountColor, userId, inputColor,
+                outputColor, tarifColor, commissionColor, rateColor, transportationColor);
         transactionRepository.save(transactionDto);
         logger.debug("Transaction saved");
         return result;
@@ -147,8 +151,9 @@ public class TransManager {
             double newBalance = undoTransaction(t.getId(), t.getClient().getPib(), t.getCurrency().getId());
             logger.trace("New balance: " + newBalance);
             TransactionDto transactionDto = formatToDto(t.getId(), t.getDate(), t.getCurrency().getId(), t.getRate(),
-                    t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getComment(), t.getBalance(), t.getPibColor(),
-            t.getAmountColor(), t.getBalanceColor(), t.getUser().getId());
+                    t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getComment(), t.getBalance(), t.getCommentColor(),
+            t.getAmountColor(), t.getUser().getId(), t.getInputColor(), t.getOutputColor(), t.getTarifColor(),
+                    t.getCommissionColor(), t.getRateColor(), t.getTransportationColor());
             List<Integer> currencyId = new ArrayList<>();
             currencyId.add(t.getCurrency().getId());
             updateNext(t.getClient().getPib(), currencyId, newBalance - oldBalance, transactionDto.getDate());
@@ -164,8 +169,9 @@ public class TransManager {
         List<TransactionDto> transactionDtoList = new ArrayList<>();
         for (Transaction t : transaction) {
             TransactionDto transactionDto = formatToDto(t.getId(), t.getDate(), t.getCurrency().getId(), t.getRate(),
-                    t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getComment(), t.getBalance(), t.getPibColor(),
-                    t.getAmountColor(), t.getBalanceColor(), t.getUser().getId());
+                    t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getComment(), t.getBalance(), t.getCommentColor(),
+                    t.getAmountColor(), t.getUser().getId(), t.getInputColor(), t.getOutputColor(), t.getTarifColor(),
+                    t.getCommissionColor(), t.getRateColor(), t.getTransportationColor());
             transactionDtoList.add(transactionDto);
         }
         transactionRepository.deleteAll(transactionDtoList);
@@ -215,8 +221,9 @@ public class TransManager {
 
     private TransactionDto formatToDto(int transactionId, Timestamp date, int currencyId, double rate,
                                        double commission, double amount, double transportation, Client client,
-                                       String comment, double balance, String pibColor, String amountColor,
-                                       String balanceColor, int userId) {
+                                       String comment, double balance, String commentColor, String amountColor,
+                                       int userId, String inputColor, String outputColor,
+                                       String tarifColor, String commissionColor, String rateColor, String transportationColor) {
         logger.debug("Formatting transaction from entity to dto");
         TransactionDto transactionDto = new TransactionDto();
         if (transactionId != 0) transactionDto.setId(transactionId);
@@ -229,9 +236,14 @@ public class TransManager {
         transactionDto.setAmount(amount);
         transactionDto.setBalance(balance);
         transactionDto.setTransportation(transportation);
-        transactionDto.setPibColor(pibColor);
+        transactionDto.setCommentColor(commentColor);
         transactionDto.setAmountColor(amountColor);
-        transactionDto.setBalanceColor(balanceColor);
+        transactionDto.setInputColor(inputColor);
+        transactionDto.setOutputColor(outputColor);
+        transactionDto.setTarifColor(tarifColor);
+        transactionDto.setCommissionColor(commissionColor);
+        transactionDto.setRateColor(rateColor);
+        transactionDto.setTransportationColor(transportationColor);
         transactionDto.setUserId(userId);
         logger.trace("TransactionDTO: " + transactionDto);
         return transactionDto;
@@ -251,10 +263,15 @@ public class TransManager {
         transaction.setCommission(transactionDto.getCommission());
         transaction.setAmount(transactionDto.getAmount());
         transaction.setTransportation(transactionDto.getTransportation());
-        transaction.setPibColor(transactionDto.getPibColor());
+        transaction.setCommentColor(transactionDto.getCommentColor());
         transaction.setAmountColor(transactionDto.getAmountColor());
-        transaction.setBalanceColor(transactionDto.getBalanceColor());
         transaction.setUser(userManager.getUser(transactionDto.getUserId()));
+        transaction.setInputColor(transactionDto.getInputColor());
+        transaction.setOutputColor(transactionDto.getOutputColor());
+        transaction.setTarifColor(transactionDto.getTarifColor());
+        transaction.setCommissionColor(transactionDto.getCommissionColor());
+        transaction.setRateColor(transactionDto.getRateColor());
+        transaction.setTransportationColor(transactionDto.getTransportationColor());
         logger.trace("Transaction: " + transaction);
         return transaction;
     }
@@ -312,8 +329,10 @@ public class TransManager {
         transactionRepository.save(formatToDto(transaction.getId(), transaction.getDate(),
                 transaction.getCurrency().getId(), transaction.getRate(), transaction.getCommission(),
                 transaction.getAmount(), transaction.getTransportation(), transaction.getClient(),
-                transaction.getComment(), transaction.getBalance(), transaction.getPibColor(),
-                transaction.getAmountColor(), transaction.getBalanceColor(), transaction.getUser().getId()));
+                transaction.getComment(), transaction.getBalance(), transaction.getCommentColor(),
+                transaction.getAmountColor(), transaction.getUser().getId(),
+                transaction.getInputColor(), transaction.getOutputColor(), transaction.getTarifColor(),
+                transaction.getCommissionColor(), transaction.getRateColor(), transaction.getTransportationColor()));
         logger.debug("Transaction saved");
     }
 

@@ -247,10 +247,10 @@ public class Downloader {
                         sheet.autoSizeColumn(1 + columnPerCurrency * initial);
                         logger.trace("Created clients cell with value = " + anotherClients);
 
-                        if (transaction.getPibColor() != null && transaction.getPibColor().length() > 0) {
+                        if (transaction.getCommentColor() != null && transaction.getCommentColor().length() > 0) {
                             CellStyle clientsStyle = book.createCellStyle();
                             XSSFFont clientsFont = (XSSFFont) book.createFont();
-                            String[] s = transaction.getPibColor().substring(4).split(",");
+                            String[] s = transaction.getCommentColor().substring(4).split(",");
                             byte[] color = {(byte) Integer.parseInt(s[0].trim()), (byte) Integer.parseInt(s[1].trim()),
                                     (byte) Integer.parseInt(s[2].substring(0, s[2].length() - 1).trim())};
                             clientsFont.setColor(new XSSFColor(color, null));
@@ -302,7 +302,7 @@ public class Downloader {
                         balanceCell.setCellValue(transaction.getBalance());
                         logger.trace("Created balance cell with value = " + transaction.getBalance());
 
-                        if (transaction.getBalanceColor() != null  && transaction.getBalanceColor().length() > 0) {
+                        /*if (transaction.getBalanceColor() != null  && transaction.getBalanceColor().length() > 0) {
                             CellStyle balanceStyle = book.createCellStyle();
                             XSSFFont balanceFont = (XSSFFont) book.createFont();
                             String[] sb = transaction.getBalanceColor().substring(4).split(",");
@@ -312,7 +312,7 @@ public class Downloader {
                             balanceFont.setColor(new XSSFColor(colorb, null));
                             balanceStyle.setFont(balanceFont);
                             balanceCell.setCellStyle(balanceStyle);
-                        }
+                        }*/
                     }
                 }
                 //sheet.shiftRows(0,0,0); //magick string that do nothing, but needed to program work

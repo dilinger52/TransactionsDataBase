@@ -17,9 +17,14 @@ public class Transaction implements Serializable {
     Double amount;
     Double balance;
     Double transportation;
-    String pibColor;
+    String commentColor;
     String amountColor;
-    String balanceColor;
+    String inputColor;
+    String outputColor;
+    String tarifColor;
+    String commissionColor;
+    String rateColor;
+    String transportationColor;
     User user;
 
 
@@ -106,12 +111,12 @@ public class Transaction implements Serializable {
         this.transportation = transportation;
     }
 
-    public String getPibColor() {
-        return pibColor;
+    public String getCommentColor() {
+        return commentColor;
     }
 
-    public void setPibColor(String pibColor) {
-        this.pibColor = pibColor;
+    public void setCommentColor(String commentColor) {
+        this.commentColor = commentColor;
     }
 
     public String getAmountColor() {
@@ -122,13 +127,6 @@ public class Transaction implements Serializable {
         this.amountColor = amountColor;
     }
 
-    public String getBalanceColor() {
-        return balanceColor;
-    }
-
-    public void setBalanceColor(String balanceColor) {
-        this.balanceColor = balanceColor;
-    }
 
     public User getUser() {
         return user;
@@ -138,6 +136,54 @@ public class Transaction implements Serializable {
         this.user = user;
     }
 
+    public String getInputColor() {
+        return inputColor;
+    }
+
+    public void setInputColor(String inputColor) {
+        this.inputColor = inputColor;
+    }
+
+    public String getOutputColor() {
+        return outputColor;
+    }
+
+    public void setOutputColor(String outputColor) {
+        this.outputColor = outputColor;
+    }
+
+    public String getTarifColor() {
+        return tarifColor;
+    }
+
+    public void setTarifColor(String tarifColor) {
+        this.tarifColor = tarifColor;
+    }
+
+    public String getCommissionColor() {
+        return commissionColor;
+    }
+
+    public void setCommissionColor(String commissionColor) {
+        this.commissionColor = commissionColor;
+    }
+
+    public String getRateColor() {
+        return rateColor;
+    }
+
+    public void setRateColor(String rateColor) {
+        this.rateColor = rateColor;
+    }
+
+    public String getTransportationColor() {
+        return transportationColor;
+    }
+
+    public void setTransportationColor(String transportationColor) {
+        this.transportationColor = transportationColor;
+    }
+
     @Override
     public String toString() {
         return "Transaction{" +
@@ -145,16 +191,21 @@ public class Transaction implements Serializable {
                 ", date=" + date +
                 ", client=" + client +
                 ", currency=" + currency +
-                ", comment=" + comment +
+                ", comment='" + comment + '\'' +
                 ", rate=" + rate +
                 ", commission=" + commission +
                 ", amount=" + amount +
                 ", balance=" + balance +
                 ", transportation=" + transportation +
-                ", pibColor='" + pibColor + '\'' +
+                ", commentColor='" + commentColor + '\'' +
                 ", amountColor='" + amountColor + '\'' +
-                ", balanceColor='" + balanceColor + '\'' +
-                ", user='" + user + '\'' +
+                ", inputColor='" + inputColor + '\'' +
+                ", outputColor='" + outputColor + '\'' +
+                ", tarifColor='" + tarifColor + '\'' +
+                ", commissionColor='" + commissionColor + '\'' +
+                ", rateColor='" + rateColor + '\'' +
+                ", transportationColor='" + transportationColor + '\'' +
+                ", user=" + user +
                 '}';
     }
 

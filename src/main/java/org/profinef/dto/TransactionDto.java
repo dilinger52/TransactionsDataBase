@@ -3,7 +3,6 @@ package org.profinef.dto;
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 
 @Entity
@@ -33,12 +32,22 @@ public class TransactionDto {
     Double balance;
     @Column
     Double transportation;
-    @Column(name = "pib_color")
-    String pibColor;
+    @Column(name = "comment_color")
+    String commentColor;
     @Column(name = "amount_color")
     String amountColor;
-    @Column(name = "balance_color")
-    String balanceColor;
+    @Column(name = "input_color")
+    String inputColor;
+    @Column(name = "output_color")
+    String outputColor;
+    @Column(name = "tarif_color")
+    String tarifColor;
+    @Column(name = "commission_color")
+    String commisionColor;
+    @Column(name = "rate_color")
+    String rateColor;
+    @Column(name = "transportation_color")
+    String transportationColor;
 
     @Column(name = "user_id")
     int userId;
@@ -127,12 +136,12 @@ public class TransactionDto {
         this.transportation = transportation;
     }
 
-    public String getPibColor() {
-        return pibColor;
+    public String getCommentColor() {
+        return commentColor;
     }
 
-    public void setPibColor(String pibColor) {
-        this.pibColor = pibColor;
+    public void setCommentColor(String commentColor) {
+        this.commentColor = commentColor;
     }
 
     public String getAmountColor() {
@@ -143,20 +152,60 @@ public class TransactionDto {
         this.amountColor = amountColor;
     }
 
-    public String getBalanceColor() {
-        return balanceColor;
-    }
-
-    public void setBalanceColor(String balanceColor) {
-        this.balanceColor = balanceColor;
-    }
-
     public int getUserId() {
         return userId;
     }
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public String getInputColor() {
+        return inputColor;
+    }
+
+    public void setInputColor(String inputColor) {
+        this.inputColor = inputColor;
+    }
+
+    public String getOutputColor() {
+        return outputColor;
+    }
+
+    public void setOutputColor(String outputColor) {
+        this.outputColor = outputColor;
+    }
+
+    public String getTarifColor() {
+        return tarifColor;
+    }
+
+    public void setTarifColor(String tarifColor) {
+        this.tarifColor = tarifColor;
+    }
+
+    public String getCommissionColor() {
+        return commisionColor;
+    }
+
+    public void setCommissionColor(String commisionColor) {
+        this.commisionColor = commisionColor;
+    }
+
+    public String getRateColor() {
+        return rateColor;
+    }
+
+    public void setRateColor(String rateColor) {
+        this.rateColor = rateColor;
+    }
+
+    public String getTransportationColor() {
+        return transportationColor;
+    }
+
+    public void setTransportationColor(String transportationColor) {
+        this.transportationColor = transportationColor;
     }
 
     @Override
@@ -166,16 +215,21 @@ public class TransactionDto {
                 ", date=" + date +
                 ", clientId=" + clientId +
                 ", currencyId=" + currencyId +
-                ", comment=" + comment +
+                ", comment='" + comment + '\'' +
                 ", rate=" + rate +
                 ", commission=" + commission +
                 ", amount=" + amount +
                 ", balance=" + balance +
                 ", transportation=" + transportation +
-                ", pibColor='" + pibColor + '\'' +
+                ", commentColor='" + commentColor + '\'' +
                 ", amountColor='" + amountColor + '\'' +
-                ", balanceColor='" + balanceColor + '\'' +
-                ", userId='" + userId + '\'' +
+                ", inputColor='" + inputColor + '\'' +
+                ", outputColor='" + outputColor + '\'' +
+                ", tarifColor='" + tarifColor + '\'' +
+                ", commisionColor='" + commisionColor + '\'' +
+                ", rateColor='" + rateColor + '\'' +
+                ", transportationColor='" + transportationColor + '\'' +
+                ", userId=" + userId +
                 '}';
     }
 }

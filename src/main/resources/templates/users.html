@@ -31,6 +31,7 @@
         <th>История</th>
         <th>Сброс пароля</th>
         <th>Удаление пользователя</th>
+        <th>Сеансы</th>
     </tr>
     <tr th:each="user : ${session.users}">
         <th th:text="${user.login}"></th>
@@ -57,6 +58,7 @@
                 <input type="submit" value="Удалить">
             </form>
         </th>
+        <th th:text="${session.active.get(user)}"></th>
     </tr>
 </table>
 

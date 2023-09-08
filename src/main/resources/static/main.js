@@ -7,7 +7,7 @@
      for (var i = 0; i < elements.length; i++) {
          elements[i].style.color = color;
      }*/
-     saveColors();
+     saveColors(id);
  }
 
 
@@ -56,7 +56,9 @@ document.addEventListener("DOMContentLoaded", function(e) {
 inputs = document.getElementsByTagName('input');
 
 for (var z = 0; z < inputs.length; z++) {
-    inputs[z].addEventListener('focus', (element) => {autosave(element)});
+    if (inputs[z].type != 'button' || inputs[z].type != 'submit' || element.srcElement.type == 'date') {
+        inputs[z].addEventListener('focus', (element) => {autosave(element)});
+    }
     if (localStorage[inputs[z].id] != null && inputs[z].type != 'button') {
         inputs[z].value = localStorage[inputs[z].id];
     }
@@ -79,13 +81,14 @@ for (var z = 0; z < inputs.length; z++) {
 });*/
 
 async function autosave(element){
-    saveColors();
-        if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button') return;
+    saveColors(element.srcElement.id);
+        if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button' || element.srcElement.type == 'submit'  || element.srcElement.type == 'date') return;
         var form;
 
             var oldRow = currentRow;
             currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
             localStorage[focus] = element.srcElement.id;
+            document.getElementById("pointer").value = element.srcElement.id;
             form = document.getElementById(oldRow.substring(3));
             if (form != null) {
                 form.submit();
@@ -148,7 +151,8 @@ window.addEventListener('load', e => {
 inputs = document.getElementsByTagName('input');
     for (d = 0; d < inputs.length; d++) {
      // если в localStorage имеются данные
-     if (localStorage[focus] == inputs[d].id) {
+     if (localStorage[focus] == inputs[d].id && !/.{3}tr.+/.test(inputs[d].id)) {
+     console.log(/.{3}tr.+/.test(inputs[d].id));
         const end = inputs[d].value.length;
 
         inputs[d].setSelectionRange(end, end);
@@ -331,16 +335,16 @@ $.ajax({
 
 
 
-async function saveColors() {
-    var elements = document.querySelectorAll("*");
+async function saveColors(id) {
+    var elements = document.getElementById(id);
     const colors = new Map();
-    for (var i = 0; i < elements.length; i++) {
 
-        if (elements[i].style.color.length > 0 && elements[i].id.length > 0) {
-        console.log(elements[i].id);
-            colors.set(elements[i].getAttribute("id"), elements[i].style.color);
+
+        if (elements.style.color.length > 0 && elements.id.length > 0) {
+        console.log(elements.id);
+            colors.set(elements.getAttribute("id"), elements.style.color);
         }
-    }
+
     console.log(colors);
     const colorsTemp = JSON.stringify(colors, mapAwareReplacer);
     $.ajax({
@@ -440,8 +444,8 @@ function addRow(id) {
 
  var sum = 0;
      for (var i = 0; i < num; i++) {
-         var pAmount = document.getElementById(id + "tr" + i + "pAmount");
-         var nAmount = document.getElementById(id + "tr" + i + "nAmount");
+         var pAmount = document.getElementById(id + "tr" + i + "_pAmount");
+         var nAmount = document.getElementById(id + "tr" + i + "_nAmount");
 
          sum -= Number(pAmount.value.replace(/ /g,'').replace(',','.'));
          sum -= Number(nAmount.value.replace(/ /g,'').replace(',','.'));
@@ -713,21 +717,21 @@ var form = element.querySelector("[id$='pAmount'").form.id;
 }
 
 function arithmetic(id) {
-    var positiveAmount = Number(document.getElementById(id + 'pAmount').value.replace(/ /g,'').replace(',','.'));
+    var positiveAmount = Number(document.getElementById(id + '_pAmount').value.replace(/ /g,'').replace(',','.'));
 
-    var negativeAmount = Number(document.getElementById(id + 'nAmount').value.replace(/ /g,'').replace(',','.'));
-    var commission = Number(document.getElementById(id + 'commission').value.replace(/ /g,'').replace(',','.'));
+    var negativeAmount = Number(document.getElementById(id + '_nAmount').value.replace(/ /g,'').replace(',','.'));
+    var commission = Number(document.getElementById(id + '_commission').value.replace(/ /g,'').replace(',','.'));
 
-    var trans = Number(document.getElementById(id + 'trans').value.replace(/ /g,'').replace(',','.'));
-    var total = Number(document.getElementById(id + 'total').textContent.replace(/ /g,'').replace(',','.'));
-    document.getElementById(id + 'com').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) * commission / 100).toFixed(0));
-    document.getElementById(id + 'total').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(0));
+    var trans = Number(document.getElementById(id + '_transportation').value.replace(/ /g,'').replace(',','.'));
+    var total = Number(document.getElementById(id + '_total').textContent.replace(/ /g,'').replace(',','.'));
+    document.getElementById(id + '_com').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) * commission / 100).toFixed(0));
+    document.getElementById(id + '_total').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(0));
 }
 
 function changeAssociated(id) {
     arithmetic(id);
-    var form = document.getElementById(id + 'pAmount').form.id;
-        var i = document.getElementById(id + 'pAmount').parentElement.parentElement.id.substring(0, 3);
+    var form = document.getElementById(id + '_pAmount').form.id;
+        var i = document.getElementById(id + '_pAmount').parentElement.parentElement.id.substring(0, 3);
 var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][name='positiveAmount']"));
     var nAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']"));
 

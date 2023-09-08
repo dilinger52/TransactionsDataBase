@@ -597,6 +597,7 @@ public class AppController {
                                 @RequestParam(name = "negativeAmount") List<String> negativeAmountS,
                                 @RequestParam(name = "transportation") List<String> transportationS,
                                 @RequestParam(name = "date", required = false) Date date,
+                                @RequestParam(name = "pointer") String pointer,
                                 HttpSession session) {
         logger.info("Creating new transaction...");
 
@@ -762,12 +763,16 @@ public class AppController {
                     return "error";
                 }
             }
+            String[] pp = pointer.split("_");
+            pointer = transactionId + "_" + currencyManager.getCurrency(pp[0].substring(0, 3)).getId() + "_" + clientId.get(0) + "_" + pp[1];
         } catch (Exception e) {
             logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));
             session.setAttribute("error", e.getMessage());
             return "error";
         }
+
         logger.info("Transaction created");
+        session.setAttribute("pointer", pointer);
         return "redirect:/client_info";
     }
 
@@ -934,17 +939,12 @@ public class AppController {
     public String saveColors(@RequestBody String colors, HttpSession session) throws JsonProcessingException {
         logger.info("Saving colors...");
         List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {});
-        System.out.println(entryList);
         for (List<String> list : entryList) {
             String[] arr = list.get(0).split("_");
             int id = Integer.parseInt(arr[0]);
-            System.out.println("id " + id);
             int clientId = Integer.parseInt(arr[2]);
-            System.out.println("clientId " + clientId);
             int currencyId = Integer.parseInt(arr[1]);
-            System.out.println("currencyId " + currencyId);
             Transaction transaction = transManager.getTransactionByClientAndByIdAndByCurrencyId(id, clientId, currencyId);
-            System.out.println("component " + arr[3]);
             switch (arr[3]) {
                 case "comment" -> transaction.setCommentColor(list.get(1));
                 case "pAmount" -> transaction.setInputColor(list.get(1));
@@ -1032,8 +1032,9 @@ public class AppController {
             active.put(user, 0);
         }
         List<HttpSession> sessions = new HttpSessionConfig().getActiveSessions();
+        System.out.println(sessions);
         for (HttpSession ses : sessions) {
-            System.out.println(ses);
+            System.out.println(ses.toString());
             System.out.println(active);
             User user = (User) ses.getAttribute("user");
             active.put(user, active.get(user) + 1);

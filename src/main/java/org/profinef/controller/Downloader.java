@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
 import org.profinef.entity.Transaction;
@@ -381,12 +382,12 @@ public class Downloader {
                 nameCell.setCellValue(client.getPib());
                 logger.trace("Created client cell with value = " + client.getPib());
                 int cellNum = 0;
-                Set<Map.Entry<Currency, Double>> currencySet = accountManager.getAccount(client.getPib())
+                Set<Map.Entry<Currency, Account.Properties>> currencySet = accountManager.getAccounts(client.getPib()).get(0)
                         .getCurrencies().entrySet();
-                for (Map.Entry<Currency, Double> currency : currencySet) {
+                for (Map.Entry<Currency, Account.Properties> currency : currencySet) {
                     Cell cell = row.createCell(++cellNum);
                     cell.setCellStyle(boldStyle);
-                    cell.setCellValue(currency.getValue());
+                    cell.setCellValue(currency.getValue().getAmount());
                     logger.trace("Created currency cell with value = " + currency.getValue());
                 }
             }
@@ -398,17 +399,17 @@ public class Downloader {
             nameTotalCell.setCellValue("Итог");
             logger.trace("Created cell total names");
 
-            List<Map.Entry<Currency, Double>> currencyList = accountManager.getAllAccounts()
+            List<Map.Entry<Currency, Account.Properties>> currencyList = accountManager.getAllAccounts()
                     .stream()
                     .map(account -> account.getCurrencies().entrySet())
                     .flatMap(Collection::stream)
                     .toList();
             Map<Integer, Double> totalMap = new HashMap<>();
-            for (Map.Entry<Currency, Double> entry : currencyList) {
+            for (Map.Entry<Currency, Account.Properties> entry : currencyList) {
                 if (totalMap.containsKey(entry.getKey().getId())) {
-                    totalMap.put(entry.getKey().getId(), totalMap.get(entry.getKey().getId()) + entry.getValue());
+                    totalMap.put(entry.getKey().getId(), totalMap.get(entry.getKey().getId()) + entry.getValue().getAmount());
                 } else {
-                    totalMap.put(entry.getKey().getId(), entry.getValue());
+                    totalMap.put(entry.getKey().getId(), entry.getValue().getAmount());
                 }
             }
             int totalCellNum = 0;

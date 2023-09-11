@@ -26,9 +26,9 @@
         <form method="get" action="convertation" class="inline">
             <input type="submit" value="Обмен валют">
         </form>
-        <form method="post" action="download/client_info" class="inline">
+        <!--/*<form method="post" action="download/client_info" class="inline">
             <input type="submit" value="Скачать таблицу">
-        </form>
+        </form>*/-->
         <form method="get" action="edit_client" class="inline">
             <input type="hidden" name="client_id" th:value="${session.client.id}">
             <input type="submit" value="Изменить данные пользователя">
@@ -37,8 +37,8 @@
     </div>
 <div>
 <form method="get" action="client_info" class="inline">
-    <input type="date" name="startDate" th:value="${#dates.format(session.startDate, 'yyyy-MM-dd')}" class="inline">
-    <input type="date" name="endDate" th:value="${#dates.format(session.endDate1, 'yyyy-MM-dd')}" class="inline">
+    <input type="date" name="startDate" th:value="${#dates.format(session[startDate__${session.client.id}__], 'yyyy-MM-dd')}" class="inline">
+    <input type="date" name="endDate" th:value="${#dates.format(session[endDate1__${session.client.id}__], 'yyyy-MM-dd')}" class="inline">
     <th:block th:each="currency : ${session.currencies}" th:if="${currency.name != 'RUB'}">
     <input type="checkbox" th:id="|currency_id${currency.id}|" name="currency_id" th:value="${currency.id}" th:checked="${#lists.contains(session.currency_name, currency.name)}" class="inline">
     <label th:for="|currency_id${currency.id}|" class="inline" th:text="${currency.name}"></label>
@@ -65,9 +65,6 @@
         <input type="radio" name="color" id="none" class="inline check-with-label" checked>
         <label for="none" class="inline sphere none label-for-check"></label>
     </form>
-    <button onclick="saveColors()" class="inline">Сохранить расцветку</button>
-    <!--/*<button onclick="capture()" class="inline">Скриншот</button>*/-->
-    <input class="inline" id="obm" type="button" value="Обмен" onclick="obmen()">
 </div>
 </div>
 <input type="hidden" name="pointer" id="pointer" form="form">
@@ -75,9 +72,8 @@
     <div th:each="currency : ${session.currencies}" th:if="${#lists.contains(session.currency_name, currency.name) && currency.name != 'RUB'}" class="inline">
         <div name="thead" style="position: sticky;background-color: white;">
         <h3 th:text="${currency.name}" class="inline">HRN</h3>
-        <h3 class="inline" th:text="|Баланс на начало ${#dates.format(session.startDate, 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['amount' + currency.id], 1, 'WHITESPACE')}|"></h3>
-        <h3 class="inline" th:text="|Баланс в конце ${#dates.format(session.endDate, 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['balance' + currency.id], 1, 'WHITESPACE')}|"></h3>
-        <input class="inline" th:id="|per${currency.name}|" type="button" value="Перевод" th:data-1="${currency.name}" th:onclick="perevod(this.getAttribute('data-1'))">
+        <h3 class="inline" th:text="|Баланс на начало ${#dates.format(session[startDate__${session.client.id}__], 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['amount' + currency.id], 1, 'WHITESPACE')}|"></h3>
+        <h3 class="inline" th:text="|Баланс в конце ${#dates.format(session[endDate__${session.client.id}__], 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['balance' + currency.id], 1, 'WHITESPACE')}|"></h3>
         <input type="hidden" class="exchange" th:name="${currency.name}" th:value="${currency.averageExchange}">
         </div>
         <table th:style="${currency.name == 'RUB' ? 'background-color: mistyrose;' : currency.name == 'USD' ? 'background-color: honeydew;' : currency.name == 'EUR' ? 'background-color: lavender;' : currency.name == 'PLN' ? 'background-color: lightcyan;' : currency.name == 'UAH' ? 'background-color: white;' : ''}">
@@ -99,7 +95,9 @@
             </thead>
             <tbody th:id="${currency.name}">
             <th:block th:each="id : ${session.transactionIds[currency.id]}">
-                <form method="post" action="edit_transaction" th:id="${id}"></form>
+                <form method="post" action="edit_transaction" th:id="${id}">
+                    <input type="hidden" name="pointer" th:id="|pointer${id}|">
+                </form>
                 <form method="post" action="delete_transaction" th:id="|del${id}|">
                     <input type="hidden" name="transaction_id" th:value="${id}">
                 </form>
@@ -117,7 +115,7 @@
                     <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                         <input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Показать" th:onclick="|showAgents(${currency.id}${transaction.id})|" th:id="|${currency.id}${transaction.id}|">
                         <input th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${currency.id}${iter.index}|" th:data-3="${id}" th:onclick="addRowInside(this.getAttribute('data-2'), this.getAttribute('data-1'), this.getAttribute('data-3'))">
-                        <input th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" type="text" th:value="${transaction.client.pib}" name="client_name" list="client_datalist" autocomplete="off">
+                        <input th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" type="text" th:value="${transaction.client.pib}" name="client_name" list="client_datalist" autocomplete="off" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_client|">
                     </th>
                     <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_comment')|">
                         <input th:style="|color: ${transaction.commentColor}|" th:form="${id}" type="text" th:value="${transaction.comment}" name="comment" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_comment|">
@@ -143,7 +141,7 @@
                     <input th:style="|width: 50px; color: ${transaction.transportationColor}|" th:form="${id}" type="text" name="transportation" th:value="${transaction.transportation != 0 ? #numbers.formatInteger(transaction.transportation, 1,'WHITESPACE') : ''}"  th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_transportation|" th:data-id="|${transaction.id}_${currency.id}_${transaction.client.id}|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))">
                 </th>
                 <th th:style="|${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}; color: ${transaction.amountColor}|" th:text="${#numbers.formatInteger(transaction.amount + transaction.commission * transaction.amount / 100 + transaction.transportation, 1,'WHITESPACE')}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_total|" th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_total')|"></th>
-                    <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:if="${session.user.role.name == 'Admin'}"></th>
+                    <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:if="${session.user.role.name == 'Admin'}" th:text="${transaction.user.login}"></th>
             </tr>
             </th:block>
             <form method="post" action="transaction" id="form">
@@ -198,7 +196,7 @@
     console.log("script works");
     var target = document.getElementById(/*[[${session.pointer}]]*/);
     const end = target.value.length;
-
+    console.log(end);
         target.setSelectionRange(end, end);
 
         if (target.parentElement.parentElement.id.substring(3, 6) != 'tr0') {

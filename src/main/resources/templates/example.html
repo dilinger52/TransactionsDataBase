@@ -41,25 +41,41 @@
     </div>
     <input type="submit" value="Поиск" class="inline">
 </form>
+    <form id="color" class="inline">
+        <input type="radio" name="color" id="white" value="rgb(255,255,255)" class="inline check-with-label">
+        <label for="white" class="inline sphere white label-for-check"></label>
+        <input type="radio" name="color" id="red" value="rgb(255,0,0)" class="inline check-with-label">
+        <label for="red" class="inline sphere red label-for-check"></label>
+        <input type="radio" name="color" id="yellow" value="rgb(255,255,0)" class="inline check-with-label">
+        <label for="yellow" class="inline sphere yellow label-for-check"></label>
+        <input type="radio" name="color" id="blue" value="rgb(0,0,255)" class="inline check-with-label">
+        <label for="blue" class="inline sphere blue label-for-check"></label>
+        <input type="radio" name="color" id="orange" value="rgb(255,165,0)" class="inline check-with-label">
+        <label for="orange" class="inline sphere orange label-for-check"></label>
+        <input type="radio" name="color" id="green" value="rgb(0,128,0)" class="inline check-with-label">
+        <label for="green" class="inline sphere green label-for-check"></label>
+        <input type="radio" name="color" id="violet" value="rgb(238,130,238)" class="inline check-with-label">
+        <label for="violet" class="inline sphere violet label-for-check"></label>
+        <input type="radio" name="color" id="black" value="rgb(0,0,0)" class="inline check-with-label">
+        <label for="black" class="inline sphere black label-for-check"></label>
+        <input type="radio" name="color" id="none" class="inline check-with-label" checked>
+        <label for="none" class="inline sphere none label-for-check"></label>
+    </form>
 </div>
 </div>
     <table class="under-header-main" id="capture">
         <thead class="main" name="thead">
         <tr>
             <th>ФИО</th>
-            <th>Номер телефона</th>
-            <th>Telegram</th>
             <th th:each="currency : ${session.currencies}" th:if="${currency.name != 'RUB'}" th:text="${currency.name}"></th>
             <th>Детали</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="client : ${session.clients}">
-            <th th:text="${client.client.pib}"></th>
-            <th th:text="${client.client.phone}"></th>
-            <th th:text="${client.client.telegram}"></th>
+            <th th:text="${client.client.pib}" th:id="|${client.client.id}_name|" th:onclick="|changeMainColor('${client.client.id}_name')|" th:style="|color: ${client.client.color}|"></th>
             <th:block th:each="currency : ${client.currencies}" th:if="${currency.key.name != 'RUB'}" >
-                <th th:text="${#numbers.formatInteger(currency.value, 1, 'WHITESPACE')}"></th>
+                <th th:text="${#numbers.formatInteger(currency.value.amount, 1, 'WHITESPACE')}" th:id="|${client.client.id}_${currency.key.id}|" th:onclick="|changeMainColor('${client.client.id}_${currency.key.id}')|" th:style="|color: ${currency.value.color}|"></th>
             </th:block>
             <th th:if="${client.client.pib != 'Всего'}">
                 <form method="get" action="client_info">

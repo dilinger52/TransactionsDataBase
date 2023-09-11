@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +30,7 @@ public class ClientManager {
         client.setId(clientDto.getId());
         client.setPhone(clientDto.getPhone());
         client.setTelegram(clientDto.getTelegram());
+        client.setColor(clientDto.getColor());
         logger.trace("Client: " + client);
         return client;
     }
@@ -42,12 +42,16 @@ public class ClientManager {
         ClientDto clientDto = clientOpt.get();
         return formatFromDbo(clientDto);
     }
-    public Client getClient(String name) {
+    public List<Client> getClient(String name) {
         logger.debug("Getting client by names");
         if (name == null) return null;
-        ClientDto clientDto = clientRepository.findByPibIgnoreCaseOrderByPib(name);
-        if (clientDto == null) throw new RuntimeException("Клиент не найден");
-        return formatFromDbo(clientDto);
+        List<ClientDto> clientDtoList = clientRepository.findAllByPibContainsIgnoreCaseOrderByPib(name);
+        if (clientDtoList == null) throw new RuntimeException("Клиент не найден");
+        List<Client> clients = new ArrayList<>();
+        for (ClientDto clientDto : clientDtoList) {
+            clients.add(formatFromDbo(clientDto));
+        }
+        return clients;
     }
 
     public int addClient(Client client) {
@@ -67,20 +71,28 @@ public class ClientManager {
         clientRepository.deleteById(client.getId());
     }
 
-    public Client getClientByPhone(String phone) {
+    public List<Client> getClientByPhone(String phone) {
         logger.debug("Getting client by phone");
         if (phone == null) return null;
-        ClientDto clientDto = clientRepository.findByPhoneOrderByPib(phone);
-        if (clientDto == null) throw new RuntimeException("Клиент не найден");
-        return formatFromDbo(clientDto);
+        List<ClientDto> clientDtoList = clientRepository.findAllByPhoneContainsOrderByPib(phone);
+        if (clientDtoList == null) throw new RuntimeException("Клиент не найден");
+        List<Client> clients = new ArrayList<>();
+        for (ClientDto clientDto : clientDtoList) {
+            clients.add(formatFromDbo(clientDto));
+        }
+        return clients;
     }
 
-    public Client getClientByTelegram(String telegram) {
+    public List<Client> getClientByTelegram(String telegram) {
         logger.debug("Getting client by telegram");
         if (telegram == null) return null;
-        ClientDto clientDto = clientRepository.findByTelegramOrderByPib(telegram);
-        if (clientDto == null) throw new RuntimeException("Клиент не найден");
-        return formatFromDbo(clientDto);
+        List<ClientDto> clientDtoList = clientRepository.findAllByTelegramContainsOrderByPib(telegram);
+        if (clientDtoList == null) throw new RuntimeException("Клиент не найден");
+        List<Client> clients = new ArrayList<>();
+        for (ClientDto clientDto : clientDtoList) {
+            clients.add(formatFromDbo(clientDto));
+        }
+        return clients;
     }
 
     public void deleteAll() {
@@ -110,4 +122,17 @@ public class ClientManager {
         logger.debug("Client updated");
     }
 
+    public void save(Client client) {
+        clientRepository.save(formatToDbo(client));
+    }
+
+    private ClientDto formatToDbo(Client client) {
+        ClientDto clientDto = new ClientDto();
+        clientDto.setId(client.getId());
+        clientDto.setPib(client.getPib());
+        clientDto.setPhone(client.getPhone());
+        clientDto.setTelegram(client.getTelegram());
+        clientDto.setColor(client.getColor());
+        return clientDto;
+    }
 }

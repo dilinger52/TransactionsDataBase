@@ -11,6 +11,18 @@
  }
 
 
+function changeMainColor(id) {
+
+     var color = document.querySelector('input[name="color"]:checked').value;
+     document.getElementById(id).style.color = color;
+     /*var color = document.querySelector('input[name="color"]:checked').value;
+     const elements = document.getElementsByName(id);
+     for (var i = 0; i < elements.length; i++) {
+         elements[i].style.color = color;
+     }*/
+     saveMainColors(id);
+ }
+
  let cords = ['scrollX','scrollY'];
  // сохраняем позицию скролла в localStorage
  window.addEventListener('unload', e => cords.forEach(cord => localStorage[cord] = window[cord]));
@@ -51,7 +63,7 @@ document.addEventListener('keydown',
 );
 
 var timerId;
-var currentRow = '';
+var currentRow;
 document.addEventListener("DOMContentLoaded", function(e) {
 inputs = document.getElementsByTagName('input');
 
@@ -59,7 +71,7 @@ for (var z = 0; z < inputs.length; z++) {
     if (inputs[z].type != 'button' || inputs[z].type != 'submit' || element.srcElement.type == 'date') {
         inputs[z].addEventListener('focus', (element) => {autosave(element)});
     }
-    if (localStorage[inputs[z].id] != null && inputs[z].type != 'button') {
+    if (localStorage[inputs[z].id] != null && (inputs[z].type != 'button' || inputs[z].type != 'submit' || element.srcElement.type == 'date')) {
         inputs[z].value = localStorage[inputs[z].id];
     }
 
@@ -88,23 +100,35 @@ async function autosave(element){
             var oldRow = currentRow;
             currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
             localStorage[focus] = element.srcElement.id;
-            document.getElementById("pointer").value = element.srcElement.id;
-            form = document.getElementById(oldRow.substring(3));
-            if (form != null) {
-                form.submit();
+            for (var pointer of document.getElementsByName("pointer")) {
+                pointer.value = element.srcElement.id;
             }
 
-        if (timerId != null) {
-            clearInterval(timerId);
-        }
-        form = document.getElementById(currentRow.substring(3));
-        var positiveAmount = Number(document.querySelector("input[form='" + form.id + "'][name='positiveAmount']").value.replace(/ /g,'').replace(',','.'));
-        var negativeAmount = Number(document.querySelector("input[form='" + form.id + "'][name='negativeAmount']").value.replace(/ /g,'').replace(',','.'));
-        if (form != null && positiveAmount + negativeAmount != 0) {
-            timerId = setInterval(function() {
-        	    form.submit();
-            }, 600000); //10 min
-        }
+            console.log(element.srcElement.id);
+            if (oldRow != null) {
+                form = document.getElementById(oldRow.substring(3));
+                var positiveAmount = document.querySelectorAll("input[form='" + form.id + "'][name='positiveAmount']");
+                var negativeAmount = document.querySelectorAll("input[form='" + form.id + "'][name='negativeAmount']");
+                var client = document.querySelectorAll("input[form='" + form.id + "'][name='client_name']");
+                for (var i = 0; i < positiveAmount.length; i++) {
+                    if (Number(positiveAmount[i].value.replace(/ /g,'').replace(',','.')) + Number(negativeAmount[i].value.replace(/ /g,'').replace(',','.')) != 0 && client[i] != '') {
+                        form.submit();
+                    }
+                }
+
+                if (timerId != null) {
+                    clearInterval(timerId);
+                }
+
+                if (form != null && Number(positiveAmount[i].value.replace(/ /g,'').replace(',','.')) + Number(negativeAmount[i].value.replace(/ /g,'').replace(',','.')) != 0) {
+                    timerId = setInterval(function() {
+                	    form.submit();
+                    }, 600000); //10 min
+                }
+            }
+
+
+
     }
 
     /*async function autosave(element){
@@ -151,8 +175,8 @@ window.addEventListener('load', e => {
 inputs = document.getElementsByTagName('input');
     for (d = 0; d < inputs.length; d++) {
      // если в localStorage имеются данные
-     if (localStorage[focus] == inputs[d].id && !/.{3}tr.+/.test(inputs[d].id)) {
-     console.log(/.{3}tr.+/.test(inputs[d].id));
+     if (localStorage[focus] == inputs[d].id && !/[a-zA-Z]{3}tr[0-9].+/.test(inputs[d].id)) {
+     console.log(/[a-zA-Z]{3}tr[0-9].+/.test(inputs[d].id));
         const end = inputs[d].value.length;
 
         inputs[d].setSelectionRange(end, end);
@@ -162,7 +186,7 @@ inputs = document.getElementsByTagName('input');
         }
 
         inputs[d].focus();
-
+        currentRow = inputs[d].parentElement.parentElement.getAttribute("name");
         break;
      }
      }
@@ -339,6 +363,38 @@ async function saveColors(id) {
     var elements = document.getElementById(id);
     const colors = new Map();
 
+    if (elements != null){
+        if(elements.style.color.length > 0 && elements.id.length > 0) {
+        console.log(elements.id);
+            colors.set(elements.getAttribute("id"), elements.style.color);
+        }
+
+    console.log(colors);
+    const colorsTemp = JSON.stringify(colors, mapAwareReplacer);
+    $.ajax({
+        type : "POST",
+        url : "/save_colors",
+        contentType : "application/json",
+        data : colorsTemp,
+        timeout : 100000,
+        success : function() {
+            console.log("SUCCESS: ");
+        },
+        error : function(e) {
+            console.log("ERROR: ", e);
+        },
+        done : function(e) {
+            console.log("DONE");
+        }
+    });
+    }
+
+}
+
+async function saveMainColors(id) {
+    var elements = document.getElementById(id);
+    const colors = new Map();
+
 
         if (elements.style.color.length > 0 && elements.id.length > 0) {
         console.log(elements.id);
@@ -349,7 +405,7 @@ async function saveColors(id) {
     const colorsTemp = JSON.stringify(colors, mapAwareReplacer);
     $.ajax({
         type : "POST",
-        url : "/save_colors",
+        url : "/save_main_colors",
         contentType : "application/json",
         data : colorsTemp,
         timeout : 100000,
@@ -473,10 +529,11 @@ function addRow(id) {
         const input3 = document.createElement('input');
             input3.type = "text";
             input3.name = "client_name";
+            input3.id = id + "tr" + num + "_client";
             input3.setAttribute("autocomplete", "off");
             input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", 'form');
-            input3.addEventListener('change', (element) => {autosave(element)});
+            //input3.addEventListener('blur', (element) => {autosave(element)});
         th3.appendChild(input3);
     tr.appendChild(th3);
     const th4 = document.createElement('th');
@@ -491,7 +548,7 @@ function addRow(id) {
             const input5 = document.createElement('input');
                 input5.type = "text";
                 input5.name = "positiveAmount";
-                input5.id = id + "tr" + num + "pAmount";
+                input5.id = id + "tr" + num + "_pAmount";
                 if (sum > 0) {
                      input5.value = numberWithSpaces(sum);
                 }
@@ -509,7 +566,7 @@ function addRow(id) {
                 if (sum < 0) {
                     input6.value = numberWithSpaces(sum);
                 }
-                input6.id = id + "tr" + num + "nAmount";
+                input6.id = id + "tr" + num + "_nAmount";
                 input6.setAttribute("autocomplete", "off");
                 input6.setAttribute("Form", 'form');
                 input6.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
@@ -521,7 +578,7 @@ function addRow(id) {
             const input7 = document.createElement('input');
                 input7.type = "text";
                 input7.name = "commission";
-                input7.id = id + "tr" + num + "commission";
+                input7.id = id + "tr" + num + "_commission";
                 input7.setAttribute("Form", 'form');
                 input7.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 input7.dataset.id = id + "tr" + num;
@@ -530,7 +587,7 @@ function addRow(id) {
             th7.appendChild(input7);
         tr.appendChild(th7);
     const th8 = document.createElement('th');
-    th8.id = id + "tr" + num + "com";
+    th8.id = id + "tr" + num + "_com";
     tr.appendChild(th8);
     const th9 = document.createElement('th');
             const input9 = document.createElement('input');
@@ -545,7 +602,7 @@ function addRow(id) {
                 const input10 = document.createElement('input');
                     input10.type = "text";
                     input10.name = "transportation";
-                    input10.id = id + "tr" + num + "trans";
+                    input10.id = id + "tr" + num + "_transportation";
                     input10.style.width = "50px";
                     input10.setAttribute("Form", 'form');
                     input10.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
@@ -553,7 +610,7 @@ function addRow(id) {
                 th10.appendChild(input10);
             tr.appendChild(th10);
     const th11 = document.createElement('th');
-        th11.id = id + "tr" + num + "total";
+        th11.id = id + "tr" + num + "_total";
     tr.appendChild(th11);
            var tbody = document.getElementById(id);
     tbody.appendChild(tr);
@@ -605,7 +662,7 @@ var sum = 0;
             input3.setAttribute("autocomplete", "off");
             input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", form);
-
+            input3.id = id + "tr" + num + "_client";
         th3.appendChild(input3);
     tr.appendChild(th3);
     const th4 = document.createElement('th');
@@ -623,7 +680,7 @@ var sum = 0;
                 input5.type = "text";
                 input5.name = "positiveAmount";
                 input5.setAttribute("autocomplete", "off");
-                input5.id = num + "pAmount";
+                input5.id = num + "_pAmount";
                 if (sum > 0) {
                     input5.value = numberWithSpaces(sum);
                 }
@@ -642,7 +699,7 @@ var sum = 0;
                 if (sum < 0) {
                     input6.value = numberWithSpaces(sum);
                 }
-                input6.id = num + "nAmount";
+                input6.id = num + "_nAmount";
                 input6.dataset.id = num;
                 input6.setAttribute("Form", form);
                 input6.setAttribute("onkeyup", "changeAssociated('" + num + "')");
@@ -654,7 +711,7 @@ var sum = 0;
             const input7 = document.createElement('input');
                 input7.type = "text";
                 input7.name = "commission";
-                input7.id = num + "commission";
+                input7.id = num + "_commission";
                 input7.style.width = "50px";
                 input7.setAttribute("Form", form);
                 input7.setAttribute("onkeyup", "changeAssociated('" + num + "')");
@@ -663,7 +720,7 @@ var sum = 0;
         tr.appendChild(th7);
     const th8 = document.createElement('th');
         th8.style.borderTop = "none";
-    th8.id = num + "com";
+    th8.id = num + "_com";
     tr.appendChild(th8);
     const th9 = document.createElement('th');
         th9.style.borderTop = "none";
@@ -680,7 +737,7 @@ var sum = 0;
                 const input10 = document.createElement('input');
                     input10.type = "text";
                     input10.name = "transportation";
-                    input10.id = num + "trans";
+                    input10.id = num + "_transportation";
                     input10.style.width = "50px";
                     input10.setAttribute("Form", form);
                     input10.setAttribute("onkeyup", "changeAssociated('" + num + "')");
@@ -689,7 +746,7 @@ var sum = 0;
             tr.appendChild(th10);
     const th11 = document.createElement('th');
         th11.style.borderTop = "none";
-        th11.id = num + "total";
+        th11.id = num + "_total";
     tr.appendChild(th11);
     var tbody = document.getElementById(table);
 
@@ -1068,8 +1125,7 @@ const tempId = 1;
         success : function(response) {
             console.log(response);
             if (response != 1) {
-                document.documentElement.innerHTML = response;
-                history.pushState({}, "", "http://localhost:8080/log_in");
+               connection = false;
             }
             connection = true;
         },

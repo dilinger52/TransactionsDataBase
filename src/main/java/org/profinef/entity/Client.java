@@ -10,6 +10,7 @@ public class Client implements Serializable, Comparable<Client>{
     String pib;
     String phone;
     String telegram;
+    String color;
 
 
     public Client(String pib) {
@@ -47,6 +48,14 @@ public class Client implements Serializable, Comparable<Client>{
         this.telegram = telegram;
     }
 
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
     @Override
     public String toString() {
         return "Client{" +
@@ -54,6 +63,7 @@ public class Client implements Serializable, Comparable<Client>{
                 ", pib='" + pib + '\'' +
                 ", phone='" + phone + '\'' +
                 ", telegram='" + telegram + '\'' +
+                ", color='" + color + '\'' +
                 '}';
     }
 

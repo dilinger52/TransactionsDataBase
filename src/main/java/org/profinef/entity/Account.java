@@ -5,7 +5,8 @@ import java.util.Map;
 
 public class Account implements Serializable {
     Client client;
-    Map<Currency, Double> currencies;
+    Map<Currency, Properties> currencies;
+
 
     public Account() {
     }
@@ -18,11 +19,11 @@ public class Account implements Serializable {
         this.client = client;
     }
 
-    public Map<Currency, Double> getCurrencies() {
+    public Map<Currency, Properties> getCurrencies() {
         return currencies;
     }
 
-    public void setCurrencies(Map<Currency, Double> currencies) {
+    public void setCurrencies(Map<Currency, Properties> currencies) {
         this.currencies = currencies;
     }
 
@@ -32,6 +33,40 @@ public class Account implements Serializable {
                 "client=" + client +
                 ", currencies=" + currencies +
                 '}';
+    }
+
+    public static class Properties {
+        Double amount;
+        String color;
+
+        public Properties(double amount, String amountColor) {
+            this.amount = amount;
+            this.color = amountColor;
+        }
+
+        public Double getAmount() {
+            return amount;
+        }
+
+        public void setAmount(Double amount) {
+            this.amount = amount;
+        }
+
+        public String getColor() {
+            return color;
+        }
+
+        public void setColor(String color) {
+            this.color = color;
+        }
+
+        @Override
+        public String toString() {
+            return "Properties{" +
+                    "amount=" + amount +
+                    ", color='" + color + '\'' +
+                    '}';
+        }
     }
 }
 

@@ -32,13 +32,17 @@ public class AccountManager {
         this.currencyManager = currencyManager;
     }
 
-    public Account getAccount(String name) {
+    public List<Account> getAccounts(String name) {
         logger.debug("Getting account");
         if (name == null) return null;
-        Client client = clientManager.getClient(name);
-        if (client == null) throw new RuntimeException("Клиент не найден");
-        List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
-        return formatFromDbo(currencyDtoList, client.getId());
+        List<Client> clients = clientManager.getClient(name);
+        if (clients == null) throw new RuntimeException("Клиент не найден");
+        List<Account> accounts = new ArrayList<>();
+        for (Client client : clients) {
+            List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
+            accounts.add(formatFromDbo(currencyDtoList, client.getId()));
+        }
+        return accounts;
     }
 
 
@@ -46,7 +50,7 @@ public class AccountManager {
         logger.debug("Formatting account from dto to entity");
         Account account = new Account();
         account.setClient(clientManager.getClient(id));
-        Map<Currency, Double> currencies = new TreeMap<>((o1, o2) -> {
+        Map<Currency, Account.Properties> currencies = new TreeMap<>((o1, o2) -> {
             if (Objects.equals(o1.getName(), o2.getName())) return 0;
             if (Objects.equals(o1.getName(), "UAH") || Objects.equals(o2.getName(), "PLN")) return -1;
             if (Objects.equals(o2.getName(), "UAH") || Objects.equals(o1.getName(), "PLN")) return 1;
@@ -57,12 +61,12 @@ public class AccountManager {
         accountDtoList = accountDtoList.stream().filter(c -> c.getClientId() == id).collect(Collectors.toList());
         for (AccountDto accountDto : accountDtoList) {
             Currency currency = currencyManager.getCurrency(accountDto.getCurrencyId());
-            currencies.put(currency, accountDto.getAmount());
+            currencies.put(currency, new Account.Properties(accountDto.getAmount(), accountDto.getAmountColor()));
         }
         List<Currency> currencyList = currencyManager.getAllCurrencies();
         for (Currency currency : currencyList) {
             if (currencies.keySet().stream().noneMatch(c -> Objects.equals(c.getId(), currency.getId()))) {
-                currencies.put(new Currency(currency.getId(), currency.getName()), 0.0);
+                currencies.put(new Currency(currency.getId(), currency.getName()), new Account.Properties(0.0, null));
             }
         }
         account.setCurrencies(currencies);
@@ -88,22 +92,32 @@ public class AccountManager {
         return clientsCurrencies;
     }
 
-    public Account getAccountByPhone(String phone) {
+    public List<Account> getAccountsByPhone(String phone) {
         logger.debug("Getting account by phone");
         if (phone == null) return null;
-        Client client = clientManager.getClientByPhone(phone);
-        if (client == null) throw new RuntimeException("Клиент не найден");
-        List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
-        return formatFromDbo(currencyDtoList, client.getId());
+        List<Client> clients = clientManager.getClientByPhone(phone);
+        if (clients == null) throw new RuntimeException("Клиент не найден");
+        List<Account> accounts = new ArrayList<>();
+        for (Client client : clients) {
+            List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
+            accounts.add(formatFromDbo(currencyDtoList, client.getId()));
+
+        }
+
+        return accounts;
     }
 
-    public Account getAccountByTelegram(String telegram) {
+    public List<Account> getAccountsByTelegram(String telegram) {
         logger.debug("Getting account by telegram");
         if (telegram == null) return null;
-        Client client = clientManager.getClientByTelegram(telegram);
-        if (client == null) throw new RuntimeException("Клиент не найден");
-        List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
-        return formatFromDbo(currencyDtoList, client.getId());
+        List<Client> clients = clientManager.getClientByTelegram(telegram);
+        if (clients == null) throw new RuntimeException("Клиент не найден");
+        List<Account> accounts = new ArrayList<>();
+        for (Client client : clients) {
+            List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
+            accounts.add(formatFromDbo(currencyDtoList, client.getId()));
+        }
+        return accounts;
     }
 
     @Transactional
@@ -130,12 +144,13 @@ public class AccountManager {
 
     private List<AccountDto> formatToDto(Account account) {
         List<AccountDto> result = new ArrayList<>();
-        Map<Currency, Double> currencies = account.getCurrencies();
+        Map<Currency, Account.Properties> currencies = account.getCurrencies();
         for (Currency currency : currencies.keySet()) {
             AccountDto accountDto = new AccountDto();
             accountDto.setClientId(account.getClient().getId());
             accountDto.setCurrencyId(currency.getId());
-            accountDto.setAmount(currencies.get(currency));
+            accountDto.setAmount(currencies.get(currency).getAmount());
+            accountDto.setAmountColor(currencies.get(currency).getColor());
             result.add(accountDto);
         }
         return result;

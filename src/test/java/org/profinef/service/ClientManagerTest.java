@@ -33,7 +33,7 @@ public class ClientManagerTest {
         client2.setTelegram("@vasil");
         ClientRepository clientRepository = mock(ClientRepository.class);
         when(clientRepository.findByIdOrderByPib(1)).thenReturn(Optional.of(client1));
-        when(clientRepository.findByPibIgnoreCaseOrderByPib("Ivan")).thenReturn(client1);
+        when(clientRepository.findAllByPibContainsIgnoreCaseOrderByPib("Ivan")).thenReturn(client1);
         when(clientRepository.save(mock(ClientDto.class)).getId()).thenReturn(7);
         clientManager = new ClientManager(clientRepository);
 

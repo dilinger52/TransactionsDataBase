@@ -16,6 +16,8 @@ public class ClientDto implements Serializable {
     String phone;
     @Column
     String telegram;
+    @Column
+    String color;
 
     public ClientDto() {
     }
@@ -57,6 +59,14 @@ public class ClientDto implements Serializable {
         this.telegram = telegram;
     }
 
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
     @Override
     public String toString() {
         return "ClientDto{" +
@@ -64,6 +74,7 @@ public class ClientDto implements Serializable {
                 ", pib='" + pib + '\'' +
                 ", phone='" + phone + '\'' +
                 ", telegram='" + telegram + '\'' +
+                ", color='" + color + '\'' +
                 '}';
     }
 }

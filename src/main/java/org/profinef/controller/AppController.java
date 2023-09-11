@@ -28,11 +28,13 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.time.ZoneId.systemDefault;
+import static org.apache.tomcat.util.file.Matcher.match;
 
 
 /**
@@ -113,7 +115,7 @@ public class AppController {
         if (clientId == 0) {
             logger.debug("clientId = 0");
             if (clientName != null) {
-                clientId = clientManager.getClient(clientName).getId();
+                clientId = clientManager.getClient(clientName).get(0).getId();
             } else if (session.getAttribute("client") == null) {
                 logger.debug("client = null");
                 logger.info("Redirecting to main page");
@@ -145,20 +147,20 @@ public class AppController {
         }
         if (startDate == null) {
             logger.debug("requested start date is null");
-            if (session.getAttribute("startDate") == null) {
+            if (session.getAttribute("startDate" + clientId) == null) {
                 logger.debug("session start date is null");
                 startDate = Date.valueOf(LocalDate.now());
             } else {
-                startDate = new Date(((Timestamp) session.getAttribute("startDate")).getTime());
+                startDate = new Date(((Timestamp) session.getAttribute("startDate" + clientId)).getTime());
             }
         }
         if (endDate == null) {
             logger.debug("requested end date is null");
-            if (session.getAttribute("endDate1") == null) {
+            if (session.getAttribute("endDate1" + clientId) == null) {
                 logger.debug("requested end date is null");
                 endDate = new Date(startDate.getTime() + 86400000);
             } else {
-                endDate = new Date(((Timestamp) session.getAttribute("endDate1")).getTime());
+                endDate = new Date(((Timestamp) session.getAttribute("endDate1" + clientId)).getTime());
             }
         }
         logger.trace("startDate = " + startDate);
@@ -214,8 +216,10 @@ public class AppController {
         logger.trace("transactions: " + transactions);
         List<HttpSession> sessions = new HttpSessionConfig().getActiveSessions();
         for (HttpSession ses : sessions) {
-            if (ses.getAttribute("path") == "/client_info" && ses.getAttribute("client").equals(client) && ses.getAttribute("user") != session.getAttribute("user")) {
-               session.setAttribute("client_alert", "Другой пользователь просматривает и/или редактирует данного клиента. Для получения актуальных данных дождитесь окончания работы данного пользователя");
+            if (ses != null) {
+                if (ses.getAttribute("path") == "/client_info" && ses.getAttribute("client").equals(client) && ses.getAttribute("user") != session.getAttribute("user")) {
+                    session.setAttribute("client_alert", "Другой пользователь просматривает и/или редактирует данного клиента. Для получения актуальных данных дождитесь окончания работы данного пользователя");
+                }
             }
         }
         List<Client> clients = clientManager.findAll();
@@ -227,9 +231,9 @@ public class AppController {
         session.setAttribute("path", "/client_info");
         session.setAttribute("currencies", currencies);
         session.setAttribute("total", total);
-        session.setAttribute("startDate", new Timestamp(startDate.getTime()));
-        session.setAttribute("endDate", new Timestamp(endDate.getTime() - 1));
-        session.setAttribute("endDate1", new Timestamp(endDate.getTime()));
+        session.setAttribute("startDate" + clientId, new Timestamp(startDate.getTime()));
+        session.setAttribute("endDate" + clientId, new Timestamp(endDate.getTime() - 1));
+        session.setAttribute("endDate1" + clientId, new Timestamp(endDate.getTime()));
         session.setAttribute("client", client);
         session.setAttribute("transactions", transactions);
         session.setAttribute("transactionIds", transactionIds);
@@ -284,7 +288,7 @@ public class AppController {
             logger.debug("Filtering clients by names");
             clients = new ArrayList<>();
             try {
-                clients.add(accountManager.getAccount(clientName));
+                clients.addAll(accountManager.getAccounts(clientName));
             } catch (Exception e) {
                 session.setAttribute("error", e.getMessage());
                 logger.info("Redirected to error page with error: " + e.getMessage());
@@ -294,7 +298,7 @@ public class AppController {
             logger.debug("Filtering clients by phone");
             clients = new ArrayList<>();
             try {
-                clients.add(accountManager.getAccountByPhone(clientPhone));
+                clients.addAll(accountManager.getAccountsByPhone(clientPhone));
             } catch (Exception e) {
                 session.setAttribute("error", e.getMessage());
                 logger.info("Redirected to error page with error: " + e.getMessage());
@@ -304,7 +308,7 @@ public class AppController {
             logger.debug("Filtering clients by telegram");
             clients = new ArrayList<>();
             try {
-                clients.add(accountManager.getAccountByTelegram(clientTelegram));
+                clients.addAll(accountManager.getAccountsByTelegram(clientTelegram));
             } catch (Exception e) {
                 session.setAttribute("error", e.getMessage());
                 logger.info("Redirected to error page with error: " + e.getMessage());
@@ -382,6 +386,7 @@ public class AppController {
                                   @RequestParam(name = "positiveAmount") List<String> positiveAmountS,
                                   @RequestParam(name = "negativeAmount") List<String> negativeAmountS,
                                   @RequestParam(name = "transportation") List<String> transportationS,
+                                  @RequestParam(name = "pointer", required = false) String pointer,
                                   HttpSession session) {
         logger.info("Saving transaction after editing...");
 
@@ -474,7 +479,7 @@ public class AppController {
                 currencyId.add(currencyManager.getCurrency(name).getId());
             }
             for (String name : clientName) {
-                clientId.add(clientManager.getClient(name).getId());
+                clientId.add(clientManager.getClient(name).get(0).getId());
             }
             List<Transaction> transactionList = transManager.getTransaction(transactionId.get(0));
             Map<Client, Map<Currency, Double>> oldBalances = new TreeMap<>();
@@ -506,14 +511,14 @@ public class AppController {
 
 
                 Map<Currency, Double> oldBalance = new TreeMap<>();
-                if (oldBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
-                    oldBalance = oldBalances.get(clientManager.getClient(clientName.get(i)));
+                if (oldBalances.containsKey(clientManager.getClient(clientName.get(i)).get(0))) {
+                    oldBalance = oldBalances.get(clientManager.getClient(clientName.get(i)).get(0));
                 }
                 TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate(), transactionId.get(0));
                 Double b = 0.0;
                 if (previous != null) b = previous.getBalance();
                 oldBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
-                oldBalances.put(clientManager.getClient(clientName.get(i)), oldBalance);
+                oldBalances.put(clientManager.getClient(clientName.get(i)).get(0), oldBalance);
             }
             for (int i = 0; i < clientName.size(); i++) {
                 TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate(), transactionId.get(0));
@@ -529,11 +534,11 @@ public class AppController {
                         tran.getInputColor(), tran.getOutputColor(), tran.getTarifColor(), tran.getCommissionColor(), tran.getRateColor(),
                         tran.getTransportationColor());
                 Map<Currency, Double> newBalance = new TreeMap<>();
-                if (newBalances.containsKey(clientManager.getClient(clientName.get(i)))) {
-                    newBalance = newBalances.get(clientManager.getClient(clientName.get(i)));
+                if (newBalances.containsKey(clientManager.getClient(clientName.get(i)).get(0))) {
+                    newBalance = newBalances.get(clientManager.getClient(clientName.get(i)).get(0));
                 }
                 newBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
-                newBalances.put(clientManager.getClient(clientName.get(i)), newBalance);
+                newBalances.put(clientManager.getClient(clientName.get(i)).get(0), newBalance);
             }
             logger.trace("oldBalances: " + oldBalances);
             logger.trace("newBalances: " + newBalances);
@@ -550,12 +555,17 @@ public class AppController {
                     transManager.updateNext(key.getPib(), o, newBalances.get(key).get(k) - v, tr.getDate());
                 }
             }
+            /*String[] pp = pointer.split("_");
+            pointer = transactionId + "_" + currencyManager.getCurrency(pp[0].substring(0, 3)).getId() + "_" + clientId.get(0) + "_" + pp[1];*/
         } catch (Exception e) {
             logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));
+
             session.setAttribute("error", e.getMessage());
             return "error";
         }
+        System.out.println(pointer);
         logger.info("Transaction saved");
+        session.setAttribute("pointer", pointer);
         return "redirect:/client_info";
     }
 
@@ -597,7 +607,7 @@ public class AppController {
                                 @RequestParam(name = "negativeAmount") List<String> negativeAmountS,
                                 @RequestParam(name = "transportation") List<String> transportationS,
                                 @RequestParam(name = "date", required = false) Date date,
-                                @RequestParam(name = "pointer") String pointer,
+                                @RequestParam(name = "pointer", required = false, defaultValue = "UAHtr0_pAmount") String pointer,
                                 HttpSession session) {
         logger.info("Creating new transaction...");
 
@@ -704,7 +714,7 @@ public class AppController {
             }
             List<Integer> clientId = new ArrayList<>();
             for (String name : clientName) {
-                clientId.add(clientManager.getClient(name).getId());
+                clientId.add(clientManager.getClient(name).get(0).getId());
             }
             for (int i = 0; i < clientName.size(); i++) {
                 if (commission.size() < clientName.size()) {
@@ -739,7 +749,7 @@ public class AppController {
                             trBalance = previousTransaction.getBalance();
                         }
                         logger.trace("trBalance: " + trBalance);
-                        Double oldBalance = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i)));
+                        Double oldBalance = accountManager.getAccounts(clientName.get(i)).get(0).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i))).getAmount();
                         logger.trace("oldBalance: " + oldBalance);
                         Double newBalance = transManager.remittance(transactionId, new Timestamp(date.getTime()), clientName.get(i), comment.get(i),
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
@@ -763,8 +773,10 @@ public class AppController {
                     return "error";
                 }
             }
+            clientId = clientId.stream().distinct().collect(Collectors.toList());
             String[] pp = pointer.split("_");
-            pointer = transactionId + "_" + currencyManager.getCurrency(pp[0].substring(0, 3)).getId() + "_" + clientId.get(0) + "_" + pp[1];
+            System.out.println(clientId);
+            pointer = transactionId + "_" + currencyManager.getCurrency(pp[0].substring(0, 3)).getId() + "_" + clientId.get(Integer.parseInt(pp[0].substring(5))) + "_" + pp[1];
         } catch (Exception e) {
             logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));
             session.setAttribute("error", e.getMessage());
@@ -963,6 +975,38 @@ public class AppController {
         return "redirect:/client_info";
     }
 
+    @Transactional
+    @PostMapping(path = "/save_main_colors", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public String saveMainColors(@RequestBody String colors, HttpSession session) throws JsonProcessingException {
+        logger.info("Saving colors...");
+        List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {});
+        for (List<String> list : entryList) {
+            String[] arr = list.get(0).split("_");
+            int clientId = Integer.parseInt(arr[0]);
+            Client client = clientManager.getClient(clientId);
+            int currencyId = -1;
+            if (arr[1].matches("[0-9]{3}")) {
+                currencyId = Integer.parseInt(arr[1]);
+                Account account = accountManager.getAccounts(client.getPib()).get(0);
+                Currency currency = currencyManager.getCurrency(currencyId);
+                Map<Currency, Account.Properties> currencies = account.getCurrencies();
+                Account.Properties prop = currencies.get(currency);
+                prop.setColor(list.get(1));
+                currencies.put(currency, prop);
+                account.setCurrencies(currencies);
+                accountManager.save(account);
+            }
+            if (currencyId == -1) {
+                client.setColor(list.get(1));
+                clientManager.save(client);
+            }
+
+
+        }
+        logger.info("Colors saved");
+        return "redirect:/client_info";
+    }
+
     @GetMapping("/convertation")
     public String convertation(HttpSession session) {
         logger.info("Loading convertation page");
@@ -1034,11 +1078,15 @@ public class AppController {
         List<HttpSession> sessions = new HttpSessionConfig().getActiveSessions();
         System.out.println(sessions);
         for (HttpSession ses : sessions) {
-            System.out.println(ses.toString());
-            System.out.println(active);
-            User user = (User) ses.getAttribute("user");
-            active.put(user, active.get(user) + 1);
-            System.out.println(active);
+            if (ses != null) {
+                System.out.println(ses.toString());
+                System.out.println(active);
+                User user = (User) ses.getAttribute("user");
+                if (user != null) {
+                    active.put(user, active.get(user) + 1);
+                    System.out.println(active);
+                }
+            }
         }
         session.setAttribute("active", active);
         session.setAttribute("users", users);
@@ -1288,12 +1336,12 @@ public class AppController {
             accounts = accountManager.getAllAccounts();
         } else {
             logger.debug("client name found");
-            accounts.add(accountManager.getAccount(clientName));
+            accounts.add(accountManager.getAccounts(clientName).get(0));
         }
         logger.info("Found " + accounts.size() + " accounts");
         for (Account account : accounts) {
             logger.info("Updating " + account.getClient().getPib());
-            Map<Currency, Double> currencies = account.getCurrencies();
+            Map<Currency, Account.Properties> currencies = account.getCurrencies();
 
             List<Integer> currenciesId = currencies.keySet().stream().map(Currency::getId).toList();
             List<Transaction> transactions = transManager.findByClientForDate(account.getClient().getId(), currenciesId, new Timestamp(date.getTime()), new Timestamp(System.currentTimeMillis()));
@@ -1310,7 +1358,7 @@ public class AppController {
                     previousBalance = previous.getBalance();
                 }
                 logger.trace("previousBalance: " + previousBalance);
-                currencies.put(currency, previousBalance);
+                currencies.put(currency, new Account.Properties(previousBalance, null));
                 account.setCurrencies(currencies);
                 accountManager.save(account);
             }

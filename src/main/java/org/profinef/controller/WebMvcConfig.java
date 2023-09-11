@@ -19,6 +19,7 @@ import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 
 @Configuration
@@ -46,6 +47,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
                 Role[] authorizedRoles = Role.values();
                 HttpSession session = request.getSession();
+                session.removeAttribute("error");
+                //session.removeAttribute("pointer");
                 User user = (User) session.getAttribute("user");
                 for (Role role : authorizedRoles) {
                     if (user != null && user.getRole() == role) {
@@ -56,7 +59,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         }
                         List<HttpSession> sessions = new HttpSessionConfig().getActiveSessions();
                         for (HttpSession ses : sessions) {
-                            if (!ses.getId().equals(session.getId()) && user.equals(ses.getAttribute("user"))) {
+                            if (!Objects.equals(ses.getId(), session.getId()) && Objects.equals(user, ses.getAttribute("user"))) {
                                 mes += "Обнаружен вход с другого устройства. За детальной информацией обратитесь к администратору \n";
                                 break;
                             }

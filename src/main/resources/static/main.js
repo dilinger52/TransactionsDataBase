@@ -1,27 +1,58 @@
  function changeColor(id) {
+     var elem = document.querySelector('input[name="color"]:checked');
+     var target = document.getElementById(id);
+     if (elem.id != 'bold' && elem.id != 'italic' && elem.id != 'nobold' && elem.id != 'noitalic' && elem.id != 'none') {
+        target.style.color = '';
+     }
+     if (elem.id == 'bold' || elem.id == 'nobold') {
+        target.style.fontWeight = '';
+     }
+     if (elem.id == 'italic' || elem.id == 'noitalic') {
+        target.style.fontStyle = '';
+     }
+     if (elem.id != 'none') {
+          var color = elem.value;
+          console.log(document.getElementById(id).getAttribute("style"));
+          console.log(document.getElementById(id).getAttribute("style") + color);
+          var style = document.getElementById(id).getAttribute("style");
+          if (style == null) {
+            style = '';
+          }
+          document.getElementById(id).setAttribute("style", style + color);
+          saveColors(id);
+     }
 
-     var color = document.querySelector('input[name="color"]:checked').value;
-     document.getElementById(id).style.color = color;
-     /*var color = document.querySelector('input[name="color"]:checked').value;
-     const elements = document.getElementsByName(id);
-     for (var i = 0; i < elements.length; i++) {
-         elements[i].style.color = color;
-     }*/
-     saveColors(id);
  }
 
 
 function changeMainColor(id) {
 
-     var color = document.querySelector('input[name="color"]:checked').value;
-     document.getElementById(id).style.color = color;
-     /*var color = document.querySelector('input[name="color"]:checked').value;
-     const elements = document.getElementsByName(id);
-     for (var i = 0; i < elements.length; i++) {
-         elements[i].style.color = color;
-     }*/
-     saveMainColors(id);
+     var elem = document.querySelector('input[name="color"]:checked');
+          var target = document.getElementById(id);
+          if (elem.id != 'bold' && elem.id != 'italic' && elem.id != 'nobold' && elem.id != 'noitalic' && elem.id != 'none') {
+             target.style.color = '';
+          }
+          if (elem.id == 'bold' || elem.id == 'nobold') {
+             target.style.fontWeight = '';
+          }
+          if (elem.id == 'italic' || elem.id == 'noitalic') {
+             target.style.fontStyle = '';
+          }
+          if (elem.id != 'none') {
+               var color = elem.value;
+               console.log(document.getElementById(id).getAttribute("style"));
+               console.log(document.getElementById(id).getAttribute("style") + color);
+               var style = document.getElementById(id).getAttribute("style");
+                         if (style == null) {
+                           style = '';
+                         }
+                         document.getElementById(id).setAttribute("style", style + color);
+               saveMainColors(id);
+          }
+
  }
+
+
 
  let cords = ['scrollX','scrollY'];
  // сохраняем позицию скролла в localStorage
@@ -96,7 +127,7 @@ async function autosave(element){
     saveColors(element.srcElement.id);
         if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button' || element.srcElement.type == 'submit'  || element.srcElement.type == 'date') return;
         var form;
-
+            element.srcElement.setAttribute('readonly', true);
             var oldRow = currentRow;
             currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
             localStorage[focus] = element.srcElement.id;
@@ -184,7 +215,7 @@ inputs = document.getElementsByTagName('input');
         if (inputs[d].parentElement.parentElement.id.substring(3, 6) != 'tr0') {
             showAgents(inputs[d].parentElement.parentElement.getAttribute('name'));
         }
-
+        inputs[d].removeAttribute('readonly');
         inputs[d].focus();
         currentRow = inputs[d].parentElement.parentElement.getAttribute("name");
         break;
@@ -364,9 +395,9 @@ async function saveColors(id) {
     const colors = new Map();
 
     if (elements != null){
-        if(elements.style.color.length > 0 && elements.id.length > 0) {
+        if(elements.getAttribute('style').length > 0 && elements.id.length > 0) {
         console.log(elements.id);
-            colors.set(elements.getAttribute("id"), elements.style.color);
+            colors.set(elements.getAttribute("id"), elements.getAttribute('style'));
         }
 
     console.log(colors);
@@ -396,9 +427,9 @@ async function saveMainColors(id) {
     const colors = new Map();
 
 
-        if (elements.style.color.length > 0 && elements.id.length > 0) {
+        if (elements.getAttribute('style').length > 0 && elements.id.length > 0) {
         console.log(elements.id);
-            colors.set(elements.getAttribute("id"), elements.style.color);
+            colors.set(elements.getAttribute("id"), elements.getAttribute('style'));
         }
 
     console.log(colors);
@@ -540,6 +571,7 @@ function addRow(id) {
         const input4 = document.createElement('input');
             input4.type = "text";
             input4.name = "comment";
+            input4.id = id + "tr" + num + "_comment";
             input4.setAttribute("Form", 'form');
             input4.addEventListener('focus', (element) => {autosave(element)});
         th4.appendChild(input4);
@@ -670,6 +702,7 @@ var sum = 0;
         const input4 = document.createElement('input');
             input4.type = "text";
             input4.name = "comment";
+            input4.id = id + "tr" + num + "_comment";
             input4.setAttribute("Form", form);
             input4.addEventListener('focus', (element) => {autosave(element)});
         th4.appendChild(input4);

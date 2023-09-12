@@ -968,7 +968,6 @@ public class AppController {
                 case "total" -> transaction.setAmountColor(list.get(1));
             }
 
-
             transManager.save(transaction);
         }
         logger.info("Colors saved");

@@ -1,3 +1,72 @@
+/*const table = document.querySelector('table');
+    const cells = table.querySelectorAll('th');
+    let startCell = null;
+    let isMouseDown = false;
+
+    table.addEventListener('mousedown', (e) => {
+        isMouseDown = true;
+        startCell = e.target;
+        startCell.classList.add('highlight');
+    });
+
+    table.addEventListener('mouseup', () => {
+        isMouseDown = false;
+        startCell = null;
+    });
+
+    cells.forEach((cell) => {
+        cell.addEventListener('mouseenter', () => {
+        if (isMouseDown) {
+                        // Удаляем класс "highlight" у всех ячеек
+                        cells.forEach((c) => {
+                            c.classList.remove('highlight');
+                        });
+
+                        // Находим индексы начальной и конечной ячеек
+                        const startIndex = Array.from(startCell.parentElement.children).indexOf(startCell);
+                        console.log(cell);
+                        console.log(cell.parentElement);
+                        console.log(cell.parentElement.children);
+                        const endIndex = Array.from(cell.parentElement.children).indexOf(cell);
+                        const startRow = Array.from(table.rows).indexOf(startCell.parentElement);
+                        const endRow = Array.from(table.rows).indexOf(cell.parentElement);
+
+                        // Выделяем прямоугольную область
+                        for (let row = Math.min(startRow, endRow); row <= Math.max(startRow, endRow); row++) {
+                            for (let col = Math.min(startIndex, endIndex); col <= Math.max(startIndex, endIndex); col++) {
+                                console.log(row);
+                                console.log(col);
+                                table.rows[row].cells[col].classList.add('highlight');
+                            }
+                        }
+                    }
+
+            /*if (isMouseDown) {
+            console.log(3);
+            if (cell.classList.contains('highlight')) {
+                cell.classList.remove('highlight');
+            } else {
+                cell.classList.add('highlight');
+            }
+                // Добавляем класс "highlight" при наведении мыши с зажатой ЛКМ
+
+            }*/
+        //});
+
+        /*cell.addEventListener('mouseleave', () => {
+
+            if (isMouseDown) {
+             console.log(4);
+                // Удаляем класс "highlight" при повторном наведении
+                cell.classList.remove('highlight');
+            }
+        });*/
+   // });
+
+
+
+
+
  function changeColor(id) {
      var elem = document.querySelector('input[name="color"]:checked');
      var target = document.getElementById(id);
@@ -127,7 +196,7 @@ async function autosave(element){
     saveColors(element.srcElement.id);
         if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button' || element.srcElement.type == 'submit'  || element.srcElement.type == 'date') return;
         var form;
-            element.srcElement.setAttribute('readonly', true);
+
             var oldRow = currentRow;
             currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
             localStorage[focus] = element.srcElement.id;
@@ -137,6 +206,7 @@ async function autosave(element){
 
             console.log(element.srcElement.id);
             if (oldRow != null) {
+            console.log(1);
                 form = document.getElementById(oldRow.substring(3));
                 var positiveAmount = document.querySelectorAll("input[form='" + form.id + "'][name='positiveAmount']");
                 var negativeAmount = document.querySelectorAll("input[form='" + form.id + "'][name='negativeAmount']");
@@ -144,6 +214,7 @@ async function autosave(element){
                 for (var i = 0; i < positiveAmount.length; i++) {
                     if (Number(positiveAmount[i].value.replace(/ /g,'').replace(',','.')) + Number(negativeAmount[i].value.replace(/ /g,'').replace(',','.')) != 0 && client[i] != '') {
                         form.submit();
+                        element.srcElement.setAttribute('readonly', true);
                     }
                 }
 
@@ -154,6 +225,7 @@ async function autosave(element){
                 if (form != null && Number(positiveAmount[i].value.replace(/ /g,'').replace(',','.')) + Number(negativeAmount[i].value.replace(/ /g,'').replace(',','.')) != 0) {
                     timerId = setInterval(function() {
                 	    form.submit();
+                	    element.srcElement.setAttribute('readonly', true);
                     }, 600000); //10 min
                 }
             }
@@ -395,7 +467,7 @@ async function saveColors(id) {
     const colors = new Map();
 
     if (elements != null){
-        if(elements.getAttribute('style').length > 0 && elements.id.length > 0) {
+        if(elements.getAttribute('style') != null && elements.getAttribute('style').length > 0 && elements.id.length > 0) {
         console.log(elements.id);
             colors.set(elements.getAttribute("id"), elements.getAttribute('style'));
         }
@@ -460,12 +532,20 @@ function mapAwareReplacer(key, value) {
     return value
 }
 
-function capture() {
+/*function capture() {
 window.scrollTo(0,0);
-
-html2canvas(document.querySelector("#capture")/*, {
-ignoreElements: document.querySelector(".ignore")
-}*/).then(canvas => {
+html2canvas(document.querySelector("table"), {
+    ignoreElements: (element) => {element.classList.contains(".highlight")
+        var includs = document.querySelectorAll(".highlight");
+        for (var include of includs) {
+            if (element.contains(include)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+}).then(canvas => {
  canvas.toBlob((blob) => {
           let data = [new ClipboardItem({ [blob.type]: blob })];
 
@@ -480,7 +560,7 @@ ignoreElements: document.querySelector(".ignore")
         });
 });
 
-}
+}*/
 
 /*document.addEventListener('mouseup', () => {
 
@@ -501,12 +581,13 @@ ignoreElements: document.querySelector(".ignore")
 
 function showAgents(id) {
     var rows = document.getElementsByName(id);
-    var color = rows[0].style.color;
+    /*var color = rows[0].style.color;
 
     for (var i = 0; i < rows.length; i++) {
         rows[i].style.display = "";
         rows[i].style.color = color;
-    }
+    }*/
+    console.log(id);
     var button = document.querySelector('input[id="' + id + '"');
 
     button.setAttribute('onclick', 'hideAgents(id)');
@@ -1187,3 +1268,5 @@ function displayConnection() {
         indicator.classList.add("lime");
     }
 }
+
+

@@ -73,6 +73,7 @@
         <input type="radio" name="color" id="noitalic" value="" class="inline check-with-label">
         <label for="noitalic" class="inline italic sphere none label-for-check">i</label>
     </form>
+    <button onclick="capture()" class="inline">Скриншот</button>
 </div>
 </div>
 <input type="hidden" name="pointer" id="pointer" form="form">
@@ -109,11 +110,12 @@
                 <form method="post" action="delete_transaction" th:id="|del${id}|">
                     <input type="hidden" name="transaction_id" th:value="${id}">
                 </form>
-            <tr th:each="transaction, iter : ${session.transactions}" th:if="${transaction.id == id && transaction.currency.id == currency.id}" th:style="|${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? '' : 'display:none;'}|" th:id="|${currency.id}${iter.index}|" th:name="|${currency.id}${transaction.id}|">
 
-                    <input th:form="${id}" th:if="${transaction.client.id == session.client.id}" type="hidden" name="client_name" th:value="${session.client.pib}">
-                    <input th:form="${id}" type="hidden" name="currency_name" th:value="${currency.name}">
-                    <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
+            <th:block th:each="transaction, iter : ${session.transactions}" th:if="${transaction.id == id && transaction.currency.id == currency.id}" th:style="|${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? '' : 'display:none;'}|">
+                <input th:form="${id}" th:if="${transaction.client.id == session.client.id}" type="hidden" name="client_name" th:value="${session.client.pib}">
+                <input th:form="${id}" type="hidden" name="currency_name" th:value="${currency.name}">
+                <tr  th:id="|${currency.id}${iter.index}|" th:name="|${currency.id}${transaction.id}|">
+                <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                         <input th:form="${id}" type="hidden" name="transaction_id" th:value="${transaction.id}">
                         <input th:form="${id}" type="submit" value="Сохранить" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}">
                         <input th:form="|del${id}|" type="submit" value="Удалить" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}">
@@ -150,7 +152,8 @@
                 </th>
                 <th th:style="|${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''} ${transaction.amountColor};|" th:text="${#numbers.formatInteger(transaction.amount + transaction.commission * transaction.amount / 100 + transaction.transportation, 1,'WHITESPACE')}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_total|" th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_total')|"></th>
                     <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:if="${session.user.role.name == 'Admin'}" th:text="${transaction.user.login}"></th>
-            </tr>
+            </th:block>
+                </tr>
             </th:block>
             <form method="post" action="transaction" id="form">
 
@@ -195,7 +198,6 @@
     </div>
 </div>
 <div style="width: 100%; height: 40px;"></div>
-
 </body>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="main.js"></script>

@@ -1,67 +1,51 @@
-/*const table = document.querySelector('table');
-    const cells = table.querySelectorAll('th');
+const tables = document.querySelectorAll('table');
+
     let startCell = null;
     let isMouseDown = false;
-
+    tables.forEach((table) => {
+    const cells = table.querySelectorAll('th');
     table.addEventListener('mousedown', (e) => {
-        isMouseDown = true;
-        startCell = e.target;
-        startCell.classList.add('highlight');
-    });
+            isMouseDown = true;
+            startCell = e.target;
+            document.querySelectorAll('th').forEach((c) => {
+                                                c.classList.remove('highlight');
+                                            });
+        });
 
-    table.addEventListener('mouseup', () => {
-        isMouseDown = false;
-        startCell = null;
-    });
+        table.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            startCell = null;
+        });
+        cells.forEach((cell) => {
+                cell.addEventListener('mouseenter', () => {
+                if (isMouseDown) {
+                                // Удаляем класс "highlight" у всех ячеек
+                                document.querySelectorAll('th').forEach((c) => {
+                                    c.classList.remove('highlight');
+                                });
 
-    cells.forEach((cell) => {
-        cell.addEventListener('mouseenter', () => {
-        if (isMouseDown) {
-                        // Удаляем класс "highlight" у всех ячеек
-                        cells.forEach((c) => {
-                            c.classList.remove('highlight');
-                        });
+                                // Находим индексы начальной и конечной ячеек
+                                const startIndex = Array.from(startCell.parentElement.children).indexOf(startCell);
+                                const endIndex = Array.from(cell.parentElement.children).indexOf(cell);
+                                const startRow = Array.from(table.rows).indexOf(startCell.parentElement);
+                                const endRow = Array.from(table.rows).indexOf(cell.parentElement);
 
-                        // Находим индексы начальной и конечной ячеек
-                        const startIndex = Array.from(startCell.parentElement.children).indexOf(startCell);
-                        console.log(cell);
-                        console.log(cell.parentElement);
-                        console.log(cell.parentElement.children);
-                        const endIndex = Array.from(cell.parentElement.children).indexOf(cell);
-                        const startRow = Array.from(table.rows).indexOf(startCell.parentElement);
-                        const endRow = Array.from(table.rows).indexOf(cell.parentElement);
-
-                        // Выделяем прямоугольную область
-                        for (let row = Math.min(startRow, endRow); row <= Math.max(startRow, endRow); row++) {
-                            for (let col = Math.min(startIndex, endIndex); col <= Math.max(startIndex, endIndex); col++) {
-                                console.log(row);
-                                console.log(col);
-                                table.rows[row].cells[col].classList.add('highlight');
+                                // Выделяем прямоугольную область
+                                for (let row = Math.min(startRow, endRow); row <= Math.max(startRow, endRow); row++) {
+                                    for (let col = Math.min(startIndex, endIndex); col <= Math.max(startIndex, endIndex); col++) {
+                                        table.rows[row].cells[col].classList.add('highlight');
+                                    }
+                                }
                             }
-                        }
-                    }
+                });
 
-            /*if (isMouseDown) {
-            console.log(3);
-            if (cell.classList.contains('highlight')) {
-                cell.classList.remove('highlight');
-            } else {
-                cell.classList.add('highlight');
-            }
-                // Добавляем класс "highlight" при наведении мыши с зажатой ЛКМ
 
-            }*/
-        //});
+    });
 
-        /*cell.addEventListener('mouseleave', () => {
 
-            if (isMouseDown) {
-             console.log(4);
-                // Удаляем класс "highlight" при повторном наведении
-                cell.classList.remove('highlight');
-            }
-        });*/
-   // });
+
+
+    });
 
 
 
@@ -88,6 +72,7 @@
             style = '';
           }
           document.getElementById(id).setAttribute("style", style + color);
+          console.log(document.getElementById(id).style);
           saveColors(id);
      }
 
@@ -203,7 +188,7 @@ async function autosave(element){
             for (var pointer of document.getElementsByName("pointer")) {
                 pointer.value = element.srcElement.id;
             }
-
+            console.log(oldRow);
             console.log(element.srcElement.id);
             if (oldRow != null) {
             console.log(1);
@@ -467,7 +452,7 @@ async function saveColors(id) {
     const colors = new Map();
 
     if (elements != null){
-        if(elements.getAttribute('style') != null && elements.getAttribute('style').length > 0 && elements.id.length > 0) {
+        if(/*elements.getAttribute('style') != null && elements.getAttribute('style').length > 0 && */elements.id.length > 0) {
         console.log(elements.id);
             colors.set(elements.getAttribute("id"), elements.getAttribute('style'));
         }
@@ -499,7 +484,7 @@ async function saveMainColors(id) {
     const colors = new Map();
 
 
-        if (elements.getAttribute('style').length > 0 && elements.id.length > 0) {
+        if (/*elements.getAttribute('style').length > 0 && */elements.id.length > 0) {
         console.log(elements.id);
             colors.set(elements.getAttribute("id"), elements.getAttribute('style'));
         }
@@ -532,19 +517,21 @@ function mapAwareReplacer(key, value) {
     return value
 }
 
-/*function capture() {
-window.scrollTo(0,0);
-html2canvas(document.querySelector("table"), {
-    ignoreElements: (element) => {element.classList.contains(".highlight")
-        var includs = document.querySelectorAll(".highlight");
-        for (var include of includs) {
-            if (element.contains(include)) {
-                return false;
-            } else {
-                return true;
-            }
+function capture() {
+//window.scrollTo(0,0);
+html2canvas(document.querySelector("table th.highlight").parentElement.parentElement.parentElement, {
+    ignoreElements: (element) => {
+        element.style.position = 'unset';
+        if (element.classList.contains("highlight") || element.parentElement.classList.contains("highlight") || element.querySelectorAll(".highlight").length > 0 || element.tagName == 'HEAD' || element.parentElement.tagName == 'HEAD') {
+            return false;
+        } else {
+            return true;
         }
-    }
+
+    },
+    allowTaint: true,
+    useCORS: true,
+    backgroundColor: null
 }).then(canvas => {
  canvas.toBlob((blob) => {
           let data = [new ClipboardItem({ [blob.type]: blob })];
@@ -560,7 +547,7 @@ html2canvas(document.querySelector("table"), {
         });
 });
 
-}*/
+}
 
 /*document.addEventListener('mouseup', () => {
 
@@ -581,12 +568,12 @@ html2canvas(document.querySelector("table"), {
 
 function showAgents(id) {
     var rows = document.getElementsByName(id);
-    /*var color = rows[0].style.color;
+    //var color = rows[0].style.color;
 
     for (var i = 0; i < rows.length; i++) {
         rows[i].style.display = "";
-        rows[i].style.color = color;
-    }*/
+        //rows[i].style.color = color;
+    }
     console.log(id);
     var button = document.querySelector('input[id="' + id + '"');
 

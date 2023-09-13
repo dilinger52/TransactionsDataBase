@@ -45,6 +45,14 @@ public class AccountManager {
         return accounts;
     }
 
+    public Account getAccount(String name) {
+        logger.debug("Getting account");
+        if (name == null) return null;
+        Client client = clientManager.getClientExactly(name);
+        if (client == null) throw new RuntimeException("Клиент не найден");
+        List<AccountDto> currencyDtoList = accountRepository.findByClientId(client.getId());
+        return formatFromDbo(currencyDtoList, client.getId());
+    }
 
     private Account formatFromDbo(List<AccountDto> accountDtoList, int id) {
         logger.debug("Formatting account from dto to entity");
@@ -124,7 +132,7 @@ public class AccountManager {
     public void addClient(Client newClient) {
         logger.debug("Adding client");
         try {
-            clientManager.getClient(newClient.getPib());
+            clientManager.getClientExactly(newClient.getPib());
         } catch (Exception e) {
         int clientId = clientManager.addClient(newClient);
         AccountDto accountDto = new AccountDto();

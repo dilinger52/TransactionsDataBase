@@ -32,14 +32,21 @@
     </div>
 <div>
 <form method="get" action="client" class="inline">
+
     <div class="inline">
-    <label for="client_name">Поиск по ФИО</label>
+
+        <label for="client_name">Поиск по ФИО</label>
     <input type="text" list="client_name_datalist" id="client_name" name="client_name" placeholder="Поиск.." onkeyup="filterFunction()" autocomplete="off">
     <datalist id="client_name_datalist">
         <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
     </datalist>
     </div>
     <input type="submit" value="Поиск" class="inline">
+    <div>
+        <input type="checkbox" name="search_exactly" class="inline" id="checkbox">
+        <label for="checkbox" class="inline">Точное совпадение</label>
+    </div>
+
 </form>
     <form id="color" class="inline">
         <input type="radio" name="color" id="white" value="color: rgb(255,255,255);" class="inline check-with-label">

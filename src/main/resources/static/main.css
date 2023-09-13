@@ -32,16 +32,16 @@ padding: 0px;
 width: fit-content;
 }
 
-td, th, thead, tbody {
+td, th, thead, tbody, tr {
 border: 1px solid black;
 padding: 5px;
 max-width: 120px;
-font-weight: normal;
+font-weight: inherit;
 }
 
-th {
+thead {
+    font-weight: bold;
 }
-
 table {
     border-spacing: 0px;
 }
@@ -134,7 +134,7 @@ background:
   text-align: center;
   vertical-align: middle;
   font-size: 120%;
-  box-shadow: inset -1px -1px 10px #000, 1px 1px 2px black, inset 0px 0px 1px black;
+  box-shadow: inset -1px -1px 5px #000, 1px 1px 2px black, inset 0px 0px 1px black;
   position: relative;
   display: inline-block;
 }

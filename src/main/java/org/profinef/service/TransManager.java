@@ -56,7 +56,7 @@ public class TransManager {
         //if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
                 "Введите значение от -100 до 100 включительно");
-        Client client = clientManager.getClient(clientName).get(0);
+        Client client = clientManager.getClientExactly(clientName);
         if (date == null) date = new Timestamp(System.currentTimeMillis());
         double oldBalance = 0.0;
         if (trBalance != null) {
@@ -84,7 +84,7 @@ public class TransManager {
         //if (rate <= 0) throw new RuntimeException("Неверное значение курса. Введите положительное значение");
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
                 "Введите значение от -100 до 100 включительно");
-        Client client = clientManager.getClient(clientName).get(0);
+        Client client = clientManager.getClientExactly(clientName);
         double oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
         double newBalance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
         double result = trBalance + newBalance - oldBalance;
@@ -117,7 +117,7 @@ public class TransManager {
 
     public double undoTransaction(int transactionId, String clientName, int currencyId) {
         logger.debug("Undoing transaction");
-        Client client = clientManager.getClient(clientName).get(0);
+        Client client = clientManager.getClientExactly(clientName);
         TransactionDto transactionDto = transactionRepository
                 .findByIdAndClientIdAndCurrencyIdOrderByDate(transactionId, client.getId(), currencyId);
         logger.trace("Found transaction by id=" + transactionId + " and clientId=" + client.getId());
@@ -127,7 +127,7 @@ public class TransManager {
 
     public void updateNext(String clientName, List<Integer> currencyId, Double balanceDif, Timestamp date) {
         logger.debug("Updating amount of next transactions");
-        Client client = clientManager.getClient(clientName).get(0);
+        Client client = clientManager.getClientExactly(clientName);
         List<TransactionDto> transactionDtoList = transactionRepository
                 .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAscIdAsc(
                         client.getId(), currencyId, new Timestamp(date.getTime() + 1),
@@ -383,7 +383,7 @@ public class TransManager {
         logger.debug("finding by user");
         Client client;
         try {
-            client = clientManager.getClient(clientName).get(0);
+            client = clientManager.getClientExactly(clientName);
         } catch (RuntimeException e) {
             client = null;
         }

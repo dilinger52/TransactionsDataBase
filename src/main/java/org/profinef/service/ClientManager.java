@@ -54,6 +54,13 @@ public class ClientManager {
         return clients;
     }
 
+    public Client getClientExactly(String name) {
+        logger.debug("Getting client by names");
+        if (name == null) return null;
+        ClientDto clientDto = clientRepository.findByPibIgnoreCaseOrderByPib(name);
+        return formatFromDbo(clientDto);
+    }
+
     public int addClient(Client client) {
         logger.debug("Adding client");
         ClientDto clientDto = new ClientDto(client.getPib());

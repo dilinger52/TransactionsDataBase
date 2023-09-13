@@ -13,6 +13,7 @@ public interface ClientRepository extends CrudRepository<ClientDto, Integer> {
     void deleteById(Integer integer);
 
     Optional<ClientDto> findByIdOrderByPib(Integer integer);
+    ClientDto findByPibIgnoreCaseOrderByPib(String name);
 
     List<ClientDto> findAllByPibContainsIgnoreCaseOrderByPib(String name);
 

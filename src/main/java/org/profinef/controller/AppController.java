@@ -115,7 +115,7 @@ public class AppController {
         if (clientId == 0) {
             logger.debug("clientId = 0");
             if (clientName != null) {
-                clientId = clientManager.getClient(clientName).get(0).getId();
+                clientId = clientManager.getClientExactly(clientName).getId();
             } else if (session.getAttribute("client") == null) {
                 logger.debug("client = null");
                 logger.info("Redirecting to main page");
@@ -279,6 +279,7 @@ public class AppController {
     public String getClientsInfo(@RequestParam(name = "client_name", required = false) String clientName,
                                  @RequestParam(name = "client_phone", required = false) String clientPhone,
                                  @RequestParam(name = "client_telegram", required = false) String clientTelegram,
+                                 @RequestParam(name = "search_exactly", required = false) boolean searchExactly,
                                  HttpSession session) {
         logger.info("Loading main page...");
         session.removeAttribute("error");
@@ -288,7 +289,11 @@ public class AppController {
             logger.debug("Filtering clients by names");
             clients = new ArrayList<>();
             try {
-                clients.addAll(accountManager.getAccounts(clientName));
+                if (searchExactly) {
+                    clients.add(accountManager.getAccount(clientName));
+                } else {
+                    clients.addAll(accountManager.getAccounts(clientName));
+                }
             } catch (Exception e) {
                 session.setAttribute("error", e.getMessage());
                 logger.info("Redirected to error page with error: " + e.getMessage());
@@ -479,7 +484,7 @@ public class AppController {
                 currencyId.add(currencyManager.getCurrency(name).getId());
             }
             for (String name : clientName) {
-                clientId.add(clientManager.getClient(name).get(0).getId());
+                clientId.add(clientManager.getClientExactly(name).getId());
             }
             List<Transaction> transactionList = transManager.getTransaction(transactionId.get(0));
             Map<Client, Map<Currency, Double>> oldBalances = new TreeMap<>();
@@ -511,14 +516,14 @@ public class AppController {
 
 
                 Map<Currency, Double> oldBalance = new TreeMap<>();
-                if (oldBalances.containsKey(clientManager.getClient(clientName.get(i)).get(0))) {
-                    oldBalance = oldBalances.get(clientManager.getClient(clientName.get(i)).get(0));
+                if (oldBalances.containsKey(clientManager.getClientExactly(clientName.get(i)))) {
+                    oldBalance = oldBalances.get(clientManager.getClientExactly(clientName.get(i)));
                 }
                 TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate(), transactionId.get(0));
                 Double b = 0.0;
                 if (previous != null) b = previous.getBalance();
                 oldBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
-                oldBalances.put(clientManager.getClient(clientName.get(i)).get(0), oldBalance);
+                oldBalances.put(clientManager.getClientExactly(clientName.get(i)), oldBalance);
             }
             for (int i = 0; i < clientName.size(); i++) {
                 TransactionDto previous = transManager.findPrevious(clientId.get(i), currencyId.get(i), tr.getDate(), transactionId.get(0));
@@ -534,11 +539,11 @@ public class AppController {
                         tran.getInputColor(), tran.getOutputColor(), tran.getTarifColor(), tran.getCommissionColor(), tran.getRateColor(),
                         tran.getTransportationColor());
                 Map<Currency, Double> newBalance = new TreeMap<>();
-                if (newBalances.containsKey(clientManager.getClient(clientName.get(i)).get(0))) {
-                    newBalance = newBalances.get(clientManager.getClient(clientName.get(i)).get(0));
+                if (newBalances.containsKey(clientManager.getClientExactly(clientName.get(i)))) {
+                    newBalance = newBalances.get(clientManager.getClientExactly(clientName.get(i)));
                 }
                 newBalance.put(currencyManager.getCurrency(currencyId.get(i)), b);
-                newBalances.put(clientManager.getClient(clientName.get(i)).get(0), newBalance);
+                newBalances.put(clientManager.getClientExactly(clientName.get(i)), newBalance);
             }
             logger.trace("oldBalances: " + oldBalances);
             logger.trace("newBalances: " + newBalances);
@@ -714,7 +719,7 @@ public class AppController {
             }
             List<Integer> clientId = new ArrayList<>();
             for (String name : clientName) {
-                clientId.add(clientManager.getClient(name).get(0).getId());
+                clientId.add(clientManager.getClientExactly(name).getId());
             }
             for (int i = 0; i < clientName.size(); i++) {
                 if (commission.size() < clientName.size()) {
@@ -951,12 +956,15 @@ public class AppController {
     public String saveColors(@RequestBody String colors, HttpSession session) throws JsonProcessingException {
         logger.info("Saving colors...");
         List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {});
+        System.out.println(entryList);
         for (List<String> list : entryList) {
             String[] arr = list.get(0).split("_");
             int id = Integer.parseInt(arr[0]);
             int clientId = Integer.parseInt(arr[2]);
             int currencyId = Integer.parseInt(arr[1]);
             Transaction transaction = transManager.getTransactionByClientAndByIdAndByCurrencyId(id, clientId, currencyId);
+            System.out.println(list.get(1));
+            System.out.println(arr[3]);
             switch (arr[3]) {
                 case "comment" -> transaction.setCommentColor(list.get(1));
                 case "pAmount" -> transaction.setInputColor(list.get(1));

@@ -533,6 +533,8 @@ html2canvas(document.querySelector("table th.highlight").parentElement.parentEle
     useCORS: true,
     backgroundColor: null
 }).then(canvas => {
+console.log(canvas);
+console.log(canvas.childList);
  canvas.toBlob((blob) => {
           let data = [new ClipboardItem({ [blob.type]: blob })];
 

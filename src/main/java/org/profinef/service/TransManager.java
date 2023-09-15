@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 
@@ -58,6 +60,7 @@ public class TransManager {
                 "Введите значение от -100 до 100 включительно");
         Client client = clientManager.getClientExactly(clientName);
         if (date == null) date = new Timestamp(System.currentTimeMillis());
+
         double oldBalance = 0.0;
         if (trBalance != null) {
             if (trBalance != 0) {
@@ -125,13 +128,13 @@ public class TransManager {
                 transactionDto.getCommission(), -transactionDto.getAmount(), -transactionDto.getTransportation());
     }
 
-    public void updateNext(String clientName, List<Integer> currencyId, Double balanceDif, Timestamp date) {
+    public void updateNext(String clientName, List<Integer> currencyId, Double balanceDif, Timestamp date, int id) {
         logger.debug("Updating amount of next transactions");
         Client client = clientManager.getClientExactly(clientName);
         List<TransactionDto> transactionDtoList = transactionRepository
                 .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAscIdAsc(
                         client.getId(), currencyId, new Timestamp(date.getTime() + 1),
-                        new Timestamp(System.currentTimeMillis()));
+                        new Timestamp(System.currentTimeMillis()), id);
         logger.trace("Found transactions by clientId=" + client.getId() + " currencyId=" + currencyId +
                 " and date after: " + date);
         for (TransactionDto transactionDto : transactionDtoList) {
@@ -156,7 +159,7 @@ public class TransManager {
                     t.getCommissionColor(), t.getRateColor(), t.getTransportationColor());
             List<Integer> currencyId = new ArrayList<>();
             currencyId.add(t.getCurrency().getId());
-            updateNext(t.getClient().getPib(), currencyId, newBalance - oldBalance, transactionDto.getDate());
+            updateNext(t.getClient().getPib(), currencyId, newBalance - oldBalance, transactionDto.getDate(), transactionDto.getId());
             transactionDtoList.add(transactionDto);
         }
         transactionRepository.deleteAll(transactionDtoList);
@@ -305,11 +308,11 @@ public class TransManager {
     }
 
 
-    public List<Transaction> findByClientForDate(int clientId, List<Integer> currencyId, Timestamp startDate, Timestamp endDate) {
+    public List<Transaction> findByClientForDate(int clientId, List<Integer> currencyId, Timestamp startDate, Timestamp endDate, int id) {
         logger.debug("getting transactions by clientId for date");
         List<TransactionDto> transactionDtoList = transactionRepository
                 .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAscIdAsc(
-                        clientId, currencyId, startDate, endDate);
+                        clientId, currencyId, startDate, endDate, id);
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto : transactionDtoList) {
             transactions.add(formatFromDto(transactionDto));
@@ -341,7 +344,7 @@ public class TransManager {
         logger.debug("Getting transaction by client and currency");
         List<Transaction> transactions = new ArrayList<>();
         List<TransactionDto> transactionDtoList = transactionRepository
-                .findAllByClientIdAndCurrencyIdOrderByCurrencyIdAscDateAsc(client.getId(), currency.getId());
+                .findAllByClientIdAndCurrencyIdOrderByCurrencyIdAscDateAscIdAsc(client.getId(), currency.getId());
         for (TransactionDto transactionDto : transactionDtoList) {
             transactions.add(formatFromDto(transactionDto));
         }
@@ -409,5 +412,14 @@ public class TransManager {
             transactions.add(formatFromDto(transactionDto));
         }
         return transactions;
+    }
+
+    public Timestamp getAvailableDate(Timestamp date) {
+        Timestamp nextDate = Timestamp.valueOf(LocalDate.ofInstant(new Date(date.getTime() + 86400000).toInstant(), ZoneId.systemDefault()).atStartOfDay());
+        Timestamp max = transactionRepository.getMaxDateForDay(date, nextDate);
+        if (max == null) {
+            return Timestamp.valueOf(LocalDate.ofInstant(new Date(date.getTime()).toInstant(), ZoneId.systemDefault()).atStartOfDay());
+        }
+        return new Timestamp(max.getTime() + 1000);
     }
 }

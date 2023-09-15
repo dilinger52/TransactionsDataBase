@@ -167,7 +167,7 @@ public class AppController {
         logger.trace("endDate = " + endDate);
         Client client = clientManager.getClient(clientId);
         List<Transaction> transactions = transManager.findByClientForDate(clientId, currencyId,
-                new Timestamp(startDate.getTime()), new Timestamp(endDate.getTime() - 1));
+                new Timestamp(startDate.getTime()), new Timestamp(endDate.getTime()), 0);
         Set<String> comments = transManager.getAllComments();
         Map<String, Double> total = new HashMap<>();
         List<Currency> currencies = currencyManager.getAllCurrencies();
@@ -180,7 +180,7 @@ public class AppController {
             transactionIds.put(currency.getId(), list);
             List<Transaction> transactionList = transactions.stream().filter(transaction -> transaction.getCurrency()
                     .getId().equals(currency.getId())).toList();
-            TransactionDto transactionDto = transManager.findPrevious(clientId, currency.getId(), new Timestamp(startDate.getTime() - 1), 0);
+            TransactionDto transactionDto = transManager.findPrevious(clientId, currency.getId(), new Timestamp(startDate.getTime()), 0);
             if (transactionDto == null) {
                 total.put("amount" + currency.getId(), 0.0);
             } else {
@@ -557,7 +557,7 @@ public class AppController {
                     Double v = e.getValue();
                     List<Integer> o = new ArrayList<>();
                     o.add(k.getId());
-                    transManager.updateNext(key.getPib(), o, newBalances.get(key).get(k) - v, tr.getDate());
+                    transManager.updateNext(key.getPib(), o, newBalances.get(key).get(k) - v, tr.getDate(), tr.getId());
                 }
             }
             /*String[] pp = pointer.split("_");
@@ -568,7 +568,6 @@ public class AppController {
             session.setAttribute("error", e.getMessage());
             return "error";
         }
-        System.out.println(pointer);
         logger.info("Transaction saved");
         session.setAttribute("pointer", pointer);
         return "redirect:/client_info";
@@ -747,8 +746,8 @@ public class AppController {
                 try {
                     if (date != null && date.before(new Date(LocalDate.now().atStartOfDay(systemDefault()).toInstant().toEpochMilli()))) {
                         logger.debug("Date before today date");
-                        date = new Date(date.getTime() + 86400000 - 1000);
-                        TransactionDto previousTransaction = transManager.findPrevious(clientId.get(i), currencyId.get(i), new Timestamp(date.getTime()), 0);
+                        Timestamp dt = transManager.getAvailableDate(new Timestamp(date.getTime()));
+                        TransactionDto previousTransaction = transManager.findPrevious(clientId.get(i), currencyId.get(i), dt, 0);
                         Double trBalance = null;
                         if (previousTransaction != null) {
                             trBalance = previousTransaction.getBalance();
@@ -756,7 +755,7 @@ public class AppController {
                         logger.trace("trBalance: " + trBalance);
                         Double oldBalance = accountManager.getAccounts(clientName.get(i)).get(0).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i))).getAmount();
                         logger.trace("oldBalance: " + oldBalance);
-                        Double newBalance = transManager.remittance(transactionId, new Timestamp(date.getTime()), clientName.get(i), comment.get(i),
+                        Double newBalance = transManager.remittance(transactionId, dt, clientName.get(i), comment.get(i),
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
                                 null, null, user.getId(), trBalance, null, null, null, null,
                                 null, null);
@@ -764,7 +763,7 @@ public class AppController {
                         List<Integer> list = new ArrayList<>();
                         list.add(currencyId.get(i));
                         logger.trace("list: " + list);
-                        transManager.updateNext(clientName.get(i), list, newBalance - oldBalance, new Timestamp(date.getTime()));
+                        transManager.updateNext(clientName.get(i), list, newBalance - oldBalance, dt, transactionId);
                     } else {
                         logger.debug("Date is today");
                         transManager.remittance(transactionId, null, clientName.get(i), comment.get(i),
@@ -1351,7 +1350,7 @@ public class AppController {
             Map<Currency, Account.Properties> currencies = account.getCurrencies();
 
             List<Integer> currenciesId = currencies.keySet().stream().map(Currency::getId).toList();
-            List<Transaction> transactions = transManager.findByClientForDate(account.getClient().getId(), currenciesId, new Timestamp(date.getTime()), new Timestamp(System.currentTimeMillis()));
+            List<Transaction> transactions = transManager.findByClientForDate(account.getClient().getId(), currenciesId, new Timestamp(date.getTime()), new Timestamp(System.currentTimeMillis()), 0);
             logger.trace("transactions: " + transactions);
             for (Currency currency : currencies.keySet()) {
                 Optional<Transaction> trOpt = transactions.stream().filter(t -> Objects.equals(t.getCurrency().getId(), currency.getId())).findFirst();

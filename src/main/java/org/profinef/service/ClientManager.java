@@ -58,6 +58,7 @@ public class ClientManager {
         logger.debug("Getting client by names");
         if (name == null) return null;
         ClientDto clientDto = clientRepository.findByPibIgnoreCaseOrderByPib(name);
+        if (clientDto == null) throw new RuntimeException("Клиент не найден");
         return formatFromDbo(clientDto);
     }
 

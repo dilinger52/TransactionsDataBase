@@ -104,7 +104,6 @@ public class Uploader {
             try {
                 accountManager.addClient(client);
             } catch (RuntimeException ignored) {}
-
             //first row contains information about currencies
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) {
@@ -188,7 +187,6 @@ public class Uploader {
                                 }
                             logger.trace("Found amountColor: " + amountColor);*/
                             isTransaction = true;
-                            //if (date.after(new Date(123, Calendar.JULY, 19))) isTransaction = true; //TODO change date to variable
                             continue;
                         }
                         //getting commission
@@ -272,6 +270,7 @@ public class Uploader {
         }
         try {
             //writing transaction to database
+            date = transManager.getAvailableDate(new Timestamp(date.getTime()));
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
                     currencyId, rate, commission, amount, transportation, null, amountColor, user.getId(),
                     0.0, null, null, null, null, null,

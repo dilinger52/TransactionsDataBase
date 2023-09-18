@@ -128,15 +128,16 @@ public class TransManager {
                 transactionDto.getCommission(), -transactionDto.getAmount(), -transactionDto.getTransportation());
     }
 
-    public void updateNext(String clientName, List<Integer> currencyId, Double balanceDif, Timestamp date, int id) {
+    public void updateNext(String clientName, List<Integer> currencyId, Double balanceDif, Timestamp date) {
         logger.debug("Updating amount of next transactions");
         Client client = clientManager.getClientExactly(clientName);
         List<TransactionDto> transactionDtoList = transactionRepository
                 .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAscIdAsc(
-                        client.getId(), currencyId, new Timestamp(date.getTime() + 1),
-                        new Timestamp(System.currentTimeMillis()), id);
+                        client.getId(), currencyId, new Timestamp(date.getTime()),
+                        new Timestamp(System.currentTimeMillis()));
         logger.trace("Found transactions by clientId=" + client.getId() + " currencyId=" + currencyId +
                 " and date after: " + date);
+        logger.trace("next transactions: " + transactionDtoList);
         for (TransactionDto transactionDto : transactionDtoList) {
             transactionDto.setBalance(transactionDto.getBalance() + balanceDif);
             transactionRepository.save(transactionDto);
@@ -159,7 +160,7 @@ public class TransManager {
                     t.getCommissionColor(), t.getRateColor(), t.getTransportationColor());
             List<Integer> currencyId = new ArrayList<>();
             currencyId.add(t.getCurrency().getId());
-            updateNext(t.getClient().getPib(), currencyId, newBalance - oldBalance, transactionDto.getDate(), transactionDto.getId());
+            updateNext(t.getClient().getPib(), currencyId, newBalance - oldBalance, transactionDto.getDate());
             transactionDtoList.add(transactionDto);
         }
         transactionRepository.deleteAll(transactionDtoList);
@@ -308,11 +309,11 @@ public class TransManager {
     }
 
 
-    public List<Transaction> findByClientForDate(int clientId, List<Integer> currencyId, Timestamp startDate, Timestamp endDate, int id) {
+    public List<Transaction> findByClientForDate(int clientId, List<Integer> currencyId, Timestamp startDate, Timestamp endDate) {
         logger.debug("getting transactions by clientId for date");
         List<TransactionDto> transactionDtoList = transactionRepository
                 .findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAscIdAsc(
-                        clientId, currencyId, startDate, endDate, id);
+                        clientId, currencyId, new Timestamp(startDate.getTime() - 1), endDate);
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto : transactionDtoList) {
             transactions.add(formatFromDto(transactionDto));

@@ -65,14 +65,11 @@ const tables = document.querySelectorAll('table');
      }
      if (elem.id != 'none') {
           var color = elem.value;
-          console.log(document.getElementById(id).getAttribute("style"));
-          console.log(document.getElementById(id).getAttribute("style") + color);
           var style = document.getElementById(id).getAttribute("style");
           if (style == null) {
             style = '';
           }
           document.getElementById(id).setAttribute("style", style + color);
-          console.log(document.getElementById(id).style);
           saveColors(id);
      }
 
@@ -156,9 +153,9 @@ for (var z = 0; z < inputs.length; z++) {
     if (inputs[z].type != 'button' || inputs[z].type != 'submit' || element.srcElement.type == 'date') {
         inputs[z].addEventListener('focus', (element) => {autosave(element)});
     }
-    if (localStorage[inputs[z].id] != null && (inputs[z].type != 'button' || inputs[z].type != 'submit' || element.srcElement.type == 'date')) {
+    /*if (localStorage[inputs[z].id] != null && localStorage[inputs[z].id].length > 0 && (inputs[z].type != 'button' || inputs[z].type != 'submit' || element.srcElement.type == 'date')) {
         inputs[z].value = localStorage[inputs[z].id];
-    }
+    }*/
 
 }
 //localStorage.clear();
@@ -178,13 +175,20 @@ for (var z = 0; z < inputs.length; z++) {
 });*/
 
 async function autosave(element){
-    saveColors(element.srcElement.id);
+    if (!element.srcElement.id.match(/.+tr[0-9].+/)) {
+        saveColors(element.srcElement.id);
+    }
+
         if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button' || element.srcElement.type == 'submit'  || element.srcElement.type == 'date') return;
         var form;
 
             var oldRow = currentRow;
             currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
             localStorage[focus] = element.srcElement.id;
+            var inputs = document.querySelectorAll("input[type='text']");
+            /*for (var p = 0; p < inputs.length; p++) {
+                localStorage[inputs[p].id] = inputs[p].value;
+            }*/
             for (var pointer of document.getElementsByName("pointer")) {
                 pointer.value = element.srcElement.id;
             }
@@ -193,6 +197,7 @@ async function autosave(element){
             if (oldRow != null) {
             console.log(1);
                 form = document.getElementById(oldRow.substring(3));
+
                 var positiveAmount = document.querySelectorAll("input[form='" + form.id + "'][name='positiveAmount']");
                 var negativeAmount = document.querySelectorAll("input[form='" + form.id + "'][name='negativeAmount']");
                 var client = document.querySelectorAll("input[form='" + form.id + "'][name='client_name']");
@@ -452,7 +457,7 @@ async function saveColors(id) {
     const colors = new Map();
 
     if (elements != null){
-        if(/*elements.getAttribute('style') != null && elements.getAttribute('style').length > 0 && */elements.id.length > 0) {
+        if(elements.getAttribute('style') != null /*&& elements.getAttribute('style').length > 0*/ && elements.id.length > 0) {
         console.log(elements.id);
             colors.set(elements.getAttribute("id"), elements.getAttribute('style'));
         }
@@ -533,12 +538,12 @@ html2canvas(document.querySelector("table th.highlight").parentElement.parentEle
     useCORS: true,
     backgroundColor: null
 }).then(canvas => {
-console.log(canvas);
-console.log(canvas.childList);
  canvas.toBlob((blob) => {
+          console.log(window.isSecureContext);
+          //document.clipboardData.setData([blob.type], blob).then(
           let data = [new ClipboardItem({ [blob.type]: blob })];
 
-          navigator.clipboard.write(data).then(
+          navigator.clipboard.write(data).then(*/
             () => {
                 alert("Скопировано");
             },
@@ -685,7 +690,7 @@ function addRow(id) {
                 input7.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 input7.dataset.id = id + "tr" + num;
                 input7.addEventListener('focus', (element) => {autosave(element)});
-                input7.style.width = "50px";
+                input7.class = "commission";
             th7.appendChild(input7);
         tr.appendChild(th7);
     const th8 = document.createElement('th');
@@ -696,7 +701,7 @@ function addRow(id) {
                 input9.type = "text";
                 input9.name = "rate";
                 input9.setAttribute("Form", 'form');
-                input9.style.width = "50px";
+                input9.class = "rate";
                 input9.addEventListener('focus', (element) => {autosave(element)});
             th9.appendChild(input9);
         tr.appendChild(th9);
@@ -705,7 +710,7 @@ function addRow(id) {
                     input10.type = "text";
                     input10.name = "transportation";
                     input10.id = id + "tr" + num + "_transportation";
-                    input10.style.width = "50px";
+                    input10.class = "transportation";
                     input10.setAttribute("Form", 'form');
                     input10.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                     input10.addEventListener('focus', (element) => {autosave(element)});
@@ -815,7 +820,7 @@ var sum = 0;
                 input7.type = "text";
                 input7.name = "commission";
                 input7.id = num + "_commission";
-                input7.style.width = "50px";
+                input7.class = "commission";
                 input7.setAttribute("Form", form);
                 input7.setAttribute("onkeyup", "changeAssociated('" + num + "')");
                 input7.addEventListener('focus', (element) => {autosave(element)});
@@ -830,7 +835,7 @@ var sum = 0;
             const input9 = document.createElement('input');
                 input9.type = "text";
                 input9.name = "rate";
-                input9.style.width = "50px";
+                input9.class = "rate";
                 input9.setAttribute("Form", form);
                 input9.addEventListener('focus', (element) => {autosave(element)});
             th9.appendChild(input9);
@@ -841,7 +846,7 @@ var sum = 0;
                     input10.type = "text";
                     input10.name = "transportation";
                     input10.id = num + "_transportation";
-                    input10.style.width = "50px";
+                    input10.class = "transportation";
                     input10.setAttribute("Form", form);
                     input10.setAttribute("onkeyup", "changeAssociated('" + num + "')");
                     input10.addEventListener('focus', (element) => {autosave(element)});

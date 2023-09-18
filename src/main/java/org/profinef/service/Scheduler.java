@@ -35,7 +35,7 @@ public class Scheduler {
         } else {
             logger.info("some errors with local backup");
         }
-        /*boolean doneNetwork = databaseUtil.backup("root", "2223334456", "transactions", "\\\\192.168.2.169\\D:\\backup\\" + date + ".sql");
+        /*boolean doneNetwork = DatabaseUtil.backup("root", "2223334456", "transactions", "S:\\backup\\" + date + ".sql");
         if (doneNetwork) {
             logger.info("Network backup made");
         } else {

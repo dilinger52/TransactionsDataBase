@@ -167,7 +167,7 @@ public class AppController {
         logger.trace("endDate = " + endDate);
         Client client = clientManager.getClient(clientId);
         List<Transaction> transactions = transManager.findByClientForDate(clientId, currencyId,
-                new Timestamp(startDate.getTime()), new Timestamp(endDate.getTime()), 0);
+                new Timestamp(startDate.getTime()), new Timestamp(endDate.getTime()));
         Set<String> comments = transManager.getAllComments();
         Map<String, Double> total = new HashMap<>();
         List<Currency> currencies = currencyManager.getAllCurrencies();
@@ -557,7 +557,7 @@ public class AppController {
                     Double v = e.getValue();
                     List<Integer> o = new ArrayList<>();
                     o.add(k.getId());
-                    transManager.updateNext(key.getPib(), o, newBalances.get(key).get(k) - v, tr.getDate(), tr.getId());
+                    transManager.updateNext(key.getPib(), o, newBalances.get(key).get(k) - v, tr.getDate());
                 }
             }
             /*String[] pp = pointer.split("_");
@@ -763,7 +763,7 @@ public class AppController {
                         List<Integer> list = new ArrayList<>();
                         list.add(currencyId.get(i));
                         logger.trace("list: " + list);
-                        transManager.updateNext(clientName.get(i), list, newBalance - oldBalance, dt, transactionId);
+                        transManager.updateNext(clientName.get(i), list, newBalance - oldBalance, dt);
                     } else {
                         logger.debug("Date is today");
                         transManager.remittance(transactionId, null, clientName.get(i), comment.get(i),
@@ -1350,7 +1350,7 @@ public class AppController {
             Map<Currency, Account.Properties> currencies = account.getCurrencies();
 
             List<Integer> currenciesId = currencies.keySet().stream().map(Currency::getId).toList();
-            List<Transaction> transactions = transManager.findByClientForDate(account.getClient().getId(), currenciesId, new Timestamp(date.getTime()), new Timestamp(System.currentTimeMillis()), 0);
+            List<Transaction> transactions = transManager.findByClientForDate(account.getClient().getId(), currenciesId, new Timestamp(date.getTime()), new Timestamp(System.currentTimeMillis()));
             logger.trace("transactions: " + transactions);
             for (Currency currency : currencies.keySet()) {
                 Optional<Transaction> trOpt = transactions.stream().filter(t -> Objects.equals(t.getCurrency().getId(), currency.getId())).findFirst();

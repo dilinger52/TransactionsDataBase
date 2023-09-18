@@ -20,6 +20,7 @@ font-size: 16px;
 max-width: 120px;
 border: none;
 padding: 0px;
+padding-left: 3px;
 }
 
 th input[type="text"]:focus {
@@ -189,3 +190,19 @@ width: max-content;
 .highlight {
             background-color: lightblue; /* Цвет выделения */
         }
+
+.transportation {
+    width: 50px;
+}
+
+.rate {
+    width: 50px;
+}
+
+.commission {
+    width: 50px;
+}
+
+.date {
+    width: 60px;
+}

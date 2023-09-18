@@ -16,9 +16,9 @@ public interface TransactionRepository extends CrudRepository<TransactionDto, In
     @Override
     void deleteById(Integer integer);
 
-    @Query(nativeQuery = true, value = "SELECT * FROM transaction WHERE client_id=?1 AND currency_id in ?2 AND id>?5 AND date>?3 AND date<?4 ORDER BY date ASC")
+    @Query(nativeQuery = true, value = "SELECT * FROM transaction WHERE client_id=?1 AND currency_id in ?2 AND date>?3 AND date<?4 ORDER BY date ASC")
     List<TransactionDto> findAllByClientIdAndCurrencyIdInAndDateBetweenOrderByDateAscIdAsc
-    (int clientId, List<Integer> currencyIds, Timestamp dateStart, Timestamp dateEnd, int id);
+    (int clientId, List<Integer> currencyIds, Timestamp dateStart, Timestamp dateEnd);
 
 
     TransactionDto findByIdAndClientIdOrderByDate(int id, int clientId);

@@ -76,9 +76,10 @@
     <button onclick="capture()" class="inline">Скриншот</button>
 </div>
 </div>
-<input type="hidden" name="pointer" id="pointer" form="form">
+<input type="hidden" class="exchange" th:each="currency : ${session.currencies}" th:name="${currency.name}" th:value="${currency.averageExchange}">
 <div class="currencies">
     <div th:each="currency : ${session.currencies}" th:if="${#lists.contains(session.currency_name, currency.name) && currency.name != 'RUB'}" class="inline">
+        <input type="hidden" name="pointer" id="pointer" th:form="|form${currency.id}|">
         <div name="thead" style="background-color: white; position: sticky;">
         <h3 th:text="${currency.name}" class="inline">HRN</h3>
         <h3 class="inline" th:text="|Баланс на начало ${#dates.format(session[startDate__${session.client.id}__], 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['amount' + currency.id], 1, 'WHITESPACE')}|"></h3>
@@ -112,9 +113,11 @@
                 </form>
 
             <th:block th:each="transaction, iter : ${session.transactions}" th:if="${transaction.id == id && transaction.currency.id == currency.id}">
+
                 <input th:form="${id}" th:if="${transaction.client.id == session.client.id}" type="hidden" name="client_name" th:value="${session.client.pib}">
                 <input th:form="${id}" type="hidden" name="currency_name" th:value="${currency.name}">
                 <tr th:style="|${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? '' : 'display:none;'}|" th:id="|${currency.id}${iter.index}|" th:name="|${currency.id}${transaction.id}|">
+                    <input type="hidden" th:value="${transaction.date}" name="dateh">
                 <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                         <input th:form="${id}" type="hidden" name="transaction_id" th:value="${transaction.id}">
                         <input th:form="${id}" type="submit" value="Сохранить" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}">
@@ -124,7 +127,7 @@
                     <th th:text="${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? #dates.format(transaction.date, 'dd-MM-yyyy') : ''}" th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}"></th>
                     <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                         <input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Показать" th:onclick="|showAgents(${currency.id}${transaction.id})|" th:id="|${currency.id}${transaction.id}|">
-                        <input th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${currency.id}${iter.index}|" th:data-3="${id}" th:onclick="addRowInside(this.getAttribute('data-2'), this.getAttribute('data-1'), this.getAttribute('data-3'))">
+                        <input th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="button" value="Добавить" th:data-1="${currency.name}" th:data-2="|${currency.id}${iter.index}|" th:data-3="${id}" th:data-4="${transaction.date}" th:onclick="addRowInside(this.getAttribute('data-2'), this.getAttribute('data-1'), this.getAttribute('data-3'), this.getAttribute('data-4'))">
                         <input th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" type="text" th:value="${transaction.client.pib}" name="client_name" list="client_datalist" autocomplete="off" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_client|">
                     </th>
                     <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_comment')|">
@@ -155,39 +158,39 @@
             </th:block>
                 </tr>
             </th:block>
-            <form method="post" action="transaction" th:id="form">
+            <form method="post" action="transaction" th:id="|form${currency.id}|">
 
-                <input type="hidden" name="currency_name" th:value="${currency.name}" form="form">
-                <input type="hidden" name="client_name" th:value="${session.client.pib}" form="form">
-            <tr th:id="|${currency.name}tr0|" th:name="|${currency.name}form|">
+                <input type="hidden" name="currency_name" th:value="${currency.name}" th:form="|form${currency.id}|">
+                <input type="hidden" name="client_name" th:value="${session.client.pib}" th:form="|form${currency.id}|">
+            <tr th:id="|${currency.name}tr0|" th:name="|${currency.name}form${currency.id}|">
                     <th>
-                        <input class="inline" type="submit" value="Сохранить" form="form">
+                        <input class="inline" type="submit" value="Сохранить" th:form="|form${currency.id}|">
                     </th>
                 <th>
-                    <input class="date" type="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" name="date" form="form">
+                    <input class="date" type="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" name="date" th:form="|form${currency.id}|">
                 </th>
                     <th>
-                        <input type="button" value="Добавить" th:data-id="|${currency.name}|" th:onclick="addRow(this.getAttribute('data-id'))">
+                        <input type="button" value="Добавить" th:data-id="|${currency.name}|" th:data-form="|${currency.id}|" th:onclick="addRow(this.getAttribute('data-id'), this.getAttribute('data-form'))">
                     </th>
                     <th>
-                        <input type="text" name="comment" form="form" th:id="|${currency.name}tr0_comment|">
+                        <input type="text" name="comment" th:form="|form${currency.id}|" th:id="|${currency.name}tr0_comment|">
                     </th>
                 <th>
-                    <input type="text" name="positiveAmount" form="form" th:id="|${currency.name}tr0_pAmount|" th:data-id="|${currency.name}tr0|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))" autocomplete="off">
+                    <input type="text" name="positiveAmount" th:form="|form${currency.id}|" th:id="|${currency.name}tr0_pAmount|" th:data-id="|${currency.name}tr0|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))" autocomplete="off">
                 </th>
                 <th>
-                    <input type="text" name="negativeAmount" form="form" th:id="|${currency.name}tr0_nAmount|" th:data-id="|${currency.name}tr0|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))" autocomplete="off">
+                    <input type="text" name="negativeAmount" th:form="|form${currency.id}|" th:id="|${currency.name}tr0_nAmount|" th:data-id="|${currency.name}tr0|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))" autocomplete="off">
                 </th>
                 <th>
-                    <input class="commission" type="text" name="commission" form="form" th:id="|${currency.name}tr0_commission|" th:data-id="|${currency.name}tr0|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))">
+                    <input class="commission" type="text" name="commission" th:form="|form${currency.id}|" th:id="|${currency.name}tr0_commission|" th:data-id="|${currency.name}tr0|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))">
                 </th>
                     <th th:id="|${currency.name}tr0_com|"></th>
 
                     <th>
-                        <input class="rate" type="text" name="rate" form="form" th:id="|${currency.name}tr0_rate|">
+                        <input class="rate" type="text" name="rate" th:form="|form${currency.id}|" th:id="|${currency.name}tr0_rate|">
                     </th>
                 <th>
-                    <input class="transportation" type="text" name="transportation" form="form" th:id="|${currency.name}tr0_transportation|" th:data-id="|${currency.name}tr0|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))">
+                    <input class="transportation" type="text" name="transportation" th:form="|form${currency.id}|" th:id="|${currency.name}tr0_transportation|" th:data-id="|${currency.name}tr0|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))">
                 </th>
                 <th th:id="|${currency.name}tr0_total|"></th>
 

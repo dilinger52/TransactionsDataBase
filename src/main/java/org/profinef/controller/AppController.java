@@ -1291,6 +1291,20 @@ public class AppController {
         return "redirect:/users";
     }
 
+    @PostMapping("/database")
+    public String restoreBackUp(HttpSession session, HttpServletResponse response) throws Exception {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser.getRole() != Role.Admin) {
+            logger.info("Redirecting to error page with error: Отказано в доступе");
+            session.setAttribute("error", "Отказано в доступе");
+            return "error";
+        }
+
+        scheduler.restoreFromBackUp();
+        /*}*/
+        return "redirect:/users";
+    }
+
     private void getZip(File file, ZipOutputStream zout) throws IOException {
         ZipEntry entry1 = new ZipEntry(file.getName());
         zout.putNextEntry(entry1);

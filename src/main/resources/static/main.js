@@ -64,7 +64,15 @@ const tables = document.querySelectorAll('table');
         target.style.fontStyle = '';
      }
      if (elem.id != 'none') {
-          var color = elem.value;
+     console.log(elem.value);
+     console.log(target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor);
+     var color;
+        if (elem.value == 'color: rgb(255,255,255);') {
+            color = 'color:  lightblue;';
+        } else {
+            color = elem.value;
+        }
+
           var style = document.getElementById(id).getAttribute("style");
           if (style == null) {
             style = '';
@@ -365,23 +373,23 @@ function convert() {
     var result = 0;
     for (var i = 0; i < exchangeRates.length; i++) {
         if (currency1.value == exchangeRates[i].name) {
-            currency1rate = Number(exchangeRates[i].value);
+            currency1rate = Number(exchangeRates[i].value.replace(/ /g,'').replace(',','.'));
         }
         if (currency2.value == exchangeRates[i].name) {
-            currency2rate = Number(exchangeRates[i].value);
+            currency2rate = Number(exchangeRates[i].value.replace(/ /g,'').replace(',','.'));
         }
     }
 
     if (currency1rate > currency2rate) {
-        result = - Number(amount.value) * Number(rate.value);
+        result = - Number(amount.value.replace(/ /g,'').replace(',','.')) * Number(rate.value.replace(/ /g,'').replace(',','.'));
     }
 
     if (currency1rate <= currency2rate) {
-        result = - Number(amount.value) / Number(rate.value);
+        result = - Number(amount.value.replace(/ /g,'').replace(',','.')) / Number(rate.value.replace(/ /g,'').replace(',','.'));
     }
 
-    document.getElementById("changeDiv").value = result;
-    document.getElementById("changeInput").value = result;
+    document.getElementById("changeDiv").value = result.toFixed(2);
+    document.getElementById("changeInput").value = result.toFixed(2);
     document.getElementById("rate2").value = (Number(rate.value));
 }
 
@@ -543,7 +551,7 @@ html2canvas(document.querySelector("table th.highlight").parentElement.parentEle
           //document.clipboardData.setData([blob.type], blob).then(
           let data = [new ClipboardItem({ [blob.type]: blob })];
 
-          navigator.clipboard.write(data).then(*/
+          navigator.clipboard.write(data).then(
             () => {
                 alert("Скопировано");
             },
@@ -600,10 +608,10 @@ var rows = document.getElementsByName(id);
     button.value = "Показать";
 }
 
-function addRow(id) {
+function addRow(id, form) {
  var $TR = $('tr[id^="' + id + 'tr"]:last');
  var num = parseInt( $TR.prop("id").match(/\d+/g), 10 ) +1;
-
+ console.log(form);
  var sum = 0;
      for (var i = 0; i < num; i++) {
          var pAmount = document.getElementById(id + "tr" + i + "_pAmount");
@@ -620,7 +628,7 @@ function addRow(id) {
         input0.type = "hidden";
         input0.name = "currency_name";
         input0.value = id;
-        input0.setAttribute("Form", 'form');
+        input0.setAttribute("Form", 'form' + form);
     tr.appendChild(input0);
     const th1 = document.createElement('th');
         const input1 = document.createElement('input');
@@ -638,7 +646,7 @@ function addRow(id) {
             input3.id = id + "tr" + num + "_client";
             input3.setAttribute("autocomplete", "off");
             input3.setAttribute("list", "client_datalist");
-            input3.setAttribute("Form", 'form');
+            input3.setAttribute("Form", 'form' + form);
             //input3.addEventListener('blur', (element) => {autosave(element)});
         th3.appendChild(input3);
     tr.appendChild(th3);
@@ -647,7 +655,7 @@ function addRow(id) {
             input4.type = "text";
             input4.name = "comment";
             input4.id = id + "tr" + num + "_comment";
-            input4.setAttribute("Form", 'form');
+            input4.setAttribute("Form", 'form' + form);
             input4.addEventListener('focus', (element) => {autosave(element)});
         th4.appendChild(input4);
     tr.appendChild(th4);
@@ -659,7 +667,7 @@ function addRow(id) {
                 if (sum > 0) {
                      input5.value = numberWithSpaces(sum);
                 }
-                input5.setAttribute("Form", 'form');
+                input5.setAttribute("Form", 'form' + form);
                 input5.setAttribute("autocomplete", "off");
                 input5.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 input5.dataset.id = id + "tr" + num;
@@ -675,7 +683,7 @@ function addRow(id) {
                 }
                 input6.id = id + "tr" + num + "_nAmount";
                 input6.setAttribute("autocomplete", "off");
-                input6.setAttribute("Form", 'form');
+                input6.setAttribute("Form", 'form' + form);
                 input6.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 input6.dataset.id = id + "tr" + num;
                 input6.addEventListener('focus', (element) => {autosave(element)});
@@ -686,7 +694,7 @@ function addRow(id) {
                 input7.type = "text";
                 input7.name = "commission";
                 input7.id = id + "tr" + num + "_commission";
-                input7.setAttribute("Form", 'form');
+                input7.setAttribute("Form", 'form' + form);
                 input7.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 input7.dataset.id = id + "tr" + num;
                 input7.addEventListener('focus', (element) => {autosave(element)});
@@ -700,7 +708,7 @@ function addRow(id) {
             const input9 = document.createElement('input');
                 input9.type = "text";
                 input9.name = "rate";
-                input9.setAttribute("Form", 'form');
+                input9.setAttribute("Form", 'form' + form);
                 input9.class = "rate";
                 input9.addEventListener('focus', (element) => {autosave(element)});
             th9.appendChild(input9);
@@ -711,7 +719,7 @@ function addRow(id) {
                     input10.name = "transportation";
                     input10.id = id + "tr" + num + "_transportation";
                     input10.class = "transportation";
-                    input10.setAttribute("Form", 'form');
+                    input10.setAttribute("Form", 'form' + form);
                     input10.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                     input10.addEventListener('focus', (element) => {autosave(element)});
                 th10.appendChild(input10);
@@ -724,7 +732,7 @@ function addRow(id) {
     arithmetic(tr.id);
 }
 
-function addRowInside(id, table, form) {
+function addRowInside(id, table, form, date) {
  var i = id.substring(0, 3);
  var $TR = $('tr[id^="' + id + '"]:last');
  var num = $TR.prop("id") + 1;
@@ -864,7 +872,16 @@ var sum = 0;
         temp = Number(id.substring(0, id.length - 1) + '10')
     }
 
-    var nextTR = document.getElementsByName(Number(i + form) + 1)[0];
+    //var nextTR = document.getElementsByName(Number(i + form) + 1)[0];
+    var nextTR = null;
+    var candidats = document.querySelectorAll("input[type='hidden'][name='dateh']");
+    for (var candidate of candidats) {
+        if (candidate.value > date && candidate.parentElement.parentElement == tbody) {
+            console.log(candidate.parentElement);
+            nextTR = candidate.parentElement;
+            break;
+        }
+    }
     if (nextTR == null) {
         nextTR = document.getElementById(table + "tr0");
     }
@@ -899,8 +916,8 @@ function changeAssociated(id) {
         var i = document.getElementById(id + '_pAmount').parentElement.parentElement.id.substring(0, 3);
 var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][name='positiveAmount']"));
     var nAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']"));
-
-    for (var k = 0; k < pAmount.length; ) {
+console.log(pAmount);
+    /*for (var k = 0; k < pAmount.length; ) {
 
         if (pAmount[k].parentElement.parentElement.id.substring(0, 3) != i) {
             pAmount.splice(k, 1);
@@ -908,19 +925,50 @@ var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][n
             continue;
         }
         k++;
+    }*/
+var exchangeRates = document.getElementsByClassName("exchange");
+
+    var currencyrate = new Array(0);
+    var result = 0;
+    for (var i = 0; i < exchangeRates.length; i++) {
+        for (var k = 0; k < pAmount.length; ) {
+            console.log(pAmount[k].parentElement.parentElement.parentElement.id);
+            console.log(exchangeRates[i].name);
+            if (pAmount[k].parentElement.parentElement.parentElement.id == exchangeRates[i].name) {
+                currencyrate[exchangeRates[i].name] = Number(exchangeRates[i].value.replace(/ /g,'').replace(',','.'));
+            }
+            k++;
+        }
     }
 
+    console.log(currencyrate);
     var target = null;
     var sum = 0;
          for (var j = 0; j < pAmount.length; j++) {
-         if (pAmount[j].parentElement.parentElement.id.substring(0, 3) != i) continue;
+
 
             if (j == 1) {
                 target = pAmount[j].parentElement.parentElement;
                 continue;
             }
-             sum -= Number(pAmount[j].value.replace(/ /g,'').replace(',','.'));
-             sum -= Number(nAmount[j].value.replace(/ /g,'').replace(',','.'));
+            console.log(pAmount[j]);
+            var rate = document.querySelector("input[form='" + form + "'][name='rate']").value;
+            if (rate == '') rate = '1';
+             if (currencyrate[pAmount[j].parentElement.parentElement.parentElement.id] > 1) {
+                     sum -= Number(pAmount[j].value.replace(/ /g,'').replace(',','.')) * Number(rate.replace(/ /g,'').replace(',','.'));
+                     sum -= Number(nAmount[j].value.replace(/ /g,'').replace(',','.')) * Number(rate.replace(/ /g,'').replace(',','.'));
+                }
+
+                if (currencyrate[pAmount[j].parentElement.parentElement.parentElement.id] <= 1) {
+                     sum -= Number(pAmount[j].value.replace(/ /g,'').replace(',','.')) / Number(rate.replace(/ /g,'').replace(',','.'));
+                     sum -= Number(nAmount[j].value.replace(/ /g,'').replace(',','.')) / Number(rate.replace(/ /g,'').replace(',','.'));
+                }
+            //if (pAmount[j].parentElement.parentElement.id.substring(0, 3) != i) {
+
+
+            //}
+            // sum -= Number(pAmount[j].value.replace(/ /g,'').replace(',','.'));
+            // sum -= Number(nAmount[j].value.replace(/ /g,'').replace(',','.'));
          }
 
     var target1;
@@ -933,6 +981,8 @@ var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][n
         target1 = target.querySelector("[name='negativeAmount']");
         target2 = target.querySelector("[name='positiveAmount']");
     }
+    //var targetRate = document.querySelector("input[form='" + form + "'][name='rate']");
+    //target1.value = (sum / Number(targetRate.value.replace(/ /g,'').replace(',','.'))).toFixed(0);
     target1.value = sum.toFixed(0);
     target2.value = '';
 

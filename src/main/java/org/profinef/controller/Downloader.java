@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -12,10 +11,7 @@ import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
 import org.profinef.entity.Transaction;
-import org.profinef.service.AccountManager;
-import org.profinef.service.ClientManager;
-import org.profinef.service.CurrencyManager;
-import org.profinef.service.TransManager;
+import org.profinef.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.*;
 import java.net.URLConnection;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -45,16 +40,19 @@ public class Downloader {
     private final TransManager transManager;
     @Autowired
     private final AccountManager accountManager;
+    @Autowired
+    private final ExcelManager excelManager;
     private final int columnPerCurrency = 8;
 
     private static Logger logger = LoggerFactory.getLogger(Downloader.class);
 
     public Downloader(ClientManager clientManager, CurrencyManager currencyManager, TransManager transManager,
-                      AccountManager accountManager) {
+                      AccountManager accountManager, ExcelManager excelManager) {
         this.clientManager = clientManager;
         this.currencyManager = currencyManager;
         this.transManager = transManager;
         this.accountManager = accountManager;
+        this.excelManager = excelManager;
     }
 
     @RequestMapping(path = "/client_info")
@@ -159,11 +157,11 @@ public class Downloader {
             }
 
             // Записываем всё в файл
-            book.write(new FileOutputStream("src/main/resources/info.xlsx"));
+            book.write(new FileOutputStream("excel/info.xlsx"));
             book.close();
             logger.info("File created");
 
-            sendFile(response, "src/main/resources/info.xlsx");
+            sendFile(response, "excel/info.xlsx");
             logger.info("File sent");
         } catch (Exception e) {
             logger.error(Arrays.toString(new String[]{e.getMessage() + Arrays.toString(e.getStackTrace())}));
@@ -543,7 +541,6 @@ public class Downloader {
             }
             return book;
         }
-
     /**
      * Create a file that represents database and send it to user for download
      * @param response used to send a file
@@ -553,106 +550,8 @@ public class Downloader {
     public void writeIntoExcel(HttpServletResponse response) {
         logger.info("Downloading excel workbook...");
         try {
-            //creating workbook
-            List<Client> clients = clientManager.findAll();
-            List<Currency> currencies = currencyManager.getAllCurrencies();
-            List<Transaction> transactions = transManager.getAllTransactions();
-            Workbook book = createWorkbook(clients, currencies, transactions);
-
-            Sheet total = book.createSheet("Итоговый");
-            logger.info("Created total sheet");
-            CellStyle boldStyle = book.createCellStyle();
-            Font bold = book.createFont();
-            bold.setBold(true);
-            boldStyle.setFont(bold);
-
-            CellStyle redBoldStyle = book.createCellStyle();
-            Font redBold = book.createFont();
-            redBold.setBold(true);
-            redBold.setColor(Font.COLOR_RED);
-            redBoldStyle.setFont(redBold);
-            redBoldStyle.setBorderTop(BorderStyle.MEDIUM);
-            logger.debug("Styles set");
-
-            Row firstRow = total.createRow(0);
-            Cell firstCell = firstRow.createCell(2);
-            firstCell.setCellStyle(boldStyle);
-            firstCell.setCellValue("Итоговый лист");
-            logger.trace("Created first cell");
-
-            //creating style for date cells
-            CellStyle dateStyle = book.createCellStyle();
-            DataFormat format = book.createDataFormat();
-            dateStyle.setDataFormat(format.getFormat("dd.mm.yyyy"));
-
-            Row secondRow = total.createRow(1);
-            Cell secondCell = secondRow.createCell(2);
-            secondCell.setCellStyle(dateStyle);
-            secondCell.setCellValue(LocalDate.now());
-            total.autoSizeColumn(2);
-            logger.trace("Created second cell");
-
-            Row thirdRow = total.createRow(2);
-            logger.debug("Created third row");
-            int headerCellNum = 0;
-            for (Currency currency : currencies){
-                Cell headerCell = thirdRow.createCell(++headerCellNum);
-                headerCell.setCellStyle(boldStyle);
-                headerCell.setCellValue(currency.getName());
-                logger.trace("Created currency names cell with value = " + currency.getName());
-            }
-            int rowNum = 2;
-            for (Client client : clients) {
-                Row row = total.createRow(++rowNum);
-                Cell nameCell = row.createCell(0);
-                nameCell.setCellStyle(boldStyle);
-                nameCell.setCellValue(client.getPib());
-                logger.trace("Created client cell with value = " + client.getPib());
-                int cellNum = 0;
-                Set<Map.Entry<Currency, Account.Properties>> currencySet = accountManager.getAccounts(client.getPib()).get(0)
-                        .getCurrencies().entrySet();
-                for (Map.Entry<Currency, Account.Properties> currency : currencySet) {
-                    Cell cell = row.createCell(++cellNum);
-                    cell.setCellStyle(boldStyle);
-                    cell.setCellValue(currency.getValue().getAmount());
-                    logger.trace("Created currency cell with value = " + currency.getValue());
-                }
-            }
-
-            Row totalRow = total.createRow(++rowNum);
-            logger.debug("Created row total");
-            Cell nameTotalCell = totalRow.createCell(0);
-            nameTotalCell.setCellStyle(redBoldStyle);
-            nameTotalCell.setCellValue("Итог");
-            logger.trace("Created cell total names");
-
-            List<Map.Entry<Currency, Account.Properties>> currencyList = accountManager.getAllAccounts()
-                    .stream()
-                    .map(account -> account.getCurrencies().entrySet())
-                    .flatMap(Collection::stream)
-                    .toList();
-            Map<Integer, Double> totalMap = new HashMap<>();
-            for (Map.Entry<Currency, Account.Properties> entry : currencyList) {
-                if (totalMap.containsKey(entry.getKey().getId())) {
-                    totalMap.put(entry.getKey().getId(), totalMap.get(entry.getKey().getId()) + entry.getValue().getAmount());
-                } else {
-                    totalMap.put(entry.getKey().getId(), entry.getValue().getAmount());
-                }
-            }
-            int totalCellNum = 0;
-            for (Map.Entry<Integer, Double> entry : totalMap.entrySet()) {
-                Cell totalCell = totalRow.createCell(++totalCellNum);
-                totalCell.setCellStyle(redBoldStyle);
-                totalCell.setCellValue(entry.getValue());
-                logger.trace("Created cell total with value = " + entry.getValue());
-            }
-
-            // Записываем всё в файл
-            book.write(new FileOutputStream("src/main/resources/info.xlsx"));
-            book.close();
-            logger.info("File created");
-
-            sendFile(response, "src/main/resources/info.xlsx");
+            excelManager.createFull();
+            sendFile(response, "excel/info.xlsx");
             logger.info("File sent");
         } catch (Exception e) {
             logger.error(Arrays.toString(e.getStackTrace()));

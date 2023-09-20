@@ -1,5 +1,10 @@
 package org.profinef.service;
 
+import com.hierynomus.smbj.SMBClient;
+import com.hierynomus.smbj.auth.AuthenticationContext;
+import com.hierynomus.smbj.connection.Connection;
+import com.hierynomus.smbj.session.Session;
+import com.hierynomus.smbj.share.DiskShare;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -8,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -33,25 +37,24 @@ public class Scheduler {
     @PreDestroy
     @Scheduled(cron = "0 0 8,14 * * *")
     public void makeBackUp() throws Exception {
-        logger.info("Making backup");
+        logger.info("Making backupLocal");
         String date = new SimpleDateFormat("dd-MM-yyyy_HH-mm").format(new Date());
-        boolean doneLocal = DatabaseUtil.backup("root", "2223334456", "transactions", "backup\\" + date + ".sql");
+        boolean doneLocal = DatabaseUtil.backupLocal("root", "2223334456", "transactions", "backup\\" + date + ".sql");
         if (doneLocal) {
-            logger.info("Local backup made");
+            logger.info("Local backupLocal made");
         } else {
             logger.info("some errors with local backup");
         }
-        /*boolean doneNetwork = DatabaseUtil.backup("root", "2223334456", "transactions", "S:\\backup\\" + date + ".sql");
-        if (doneNetwork) {
-            logger.info("Network backup made");
-        } else {
-            logger.info("some errors with network backup");
-        }*/
+        DatabaseUtil.copyBackup("Desktop-7bo0mfq", "oper", "oper01", "Desktop-7bo0mfq", "qaz", "backup\\" + date + ".sql");
+
+
+
+
     }
 /*
-    @Scheduled(cron = "0 0 22 * * *")
+    /*@Scheduled(cron = "0 0 22 * * *")
     public void restoreFromBackUp() throws Exception {
-        File directory = new File("backup\\");
+        File directory = new File("backupLocal\\");
         File[] files = directory.listFiles(File::isFile);
         long lastModifiedTime = Long.MIN_VALUE;
         File chosenFile = null;
@@ -69,16 +72,16 @@ public class Scheduler {
         assert chosenFile != null;
         boolean doneLocal = DatabaseUtil.restore("root", "2223334456", "transactions", chosenFile.getPath());
         if (doneLocal) {
-            logger.info("Restored from backup");
+            logger.info("Restored from backupLocal");
         } else {
-            logger.info("some errors with restoring from backup");
+            logger.info("some errors with restoring from backupLocal");
         }
-    }
+    }*/
 
-    @Scheduled(cron = "0 30 22 * * *")
+    /*@Scheduled(cron = "0 30 22 * * *")
     public void makeExcel() throws Exception {
         excelManager.createFull();
-    }
+    }*/
 
- */
+
 }

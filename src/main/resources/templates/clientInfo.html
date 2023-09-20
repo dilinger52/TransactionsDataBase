@@ -10,66 +10,70 @@
 </head>
 <body>
 <div class="header" id="header">
-<h2 class="inline" th:text="|Клиент: ${session.client.pib}|"></h2>
+    <h2 class="inline" th:text="|Клиент: ${session.client.pib}|"></h2>
     <th:block th:insert="userBlock.html :: user_block"></th:block>
     <div class="currencies">
-    <div th:each="currency : ${session.currencies}" th:if="${#lists.contains(session.currency_name, currency.name)}" class="inline">
-        <h3 th:text="${currency.name}">HRN</h3>
-        <h3 th:text="|Баланс на начало ${#dates.format(session.startDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['amount' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
-        <h3 th:text="|Баланс в конце ${#dates.format(session.endDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['balance' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
+        <div class="inline" th:each="currency : ${session.currencies}"
+             th:if="${#lists.contains(session.currency_name, currency.name)}">
+            <h3 th:text="${currency.name}">HRN</h3>
+            <h3 th:text="|Баланс на начало ${#dates.format(session.startDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['amount' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
+            <h3 th:text="|Баланс в конце ${#dates.format(session.endDate, 'dd-MM-yyyy')}: ${#numbers.formatDecimal(session.total['balance' + currency.id], 1, 'POINT', 2, 'COMMA')}|"></h3>
+        </div>
     </div>
-</div>
     <div>
-<form method="get" action="client" class="inline">
-    <input type="submit" value="<- Назад">
-</form>
-        <form method="get" action="convertation" class="inline">
+        <form action="client" class="inline" method="get">
+            <input type="submit" value="<- Назад">
+        </form>
+        <form action="convertation" class="inline" method="get">
             <input type="submit" value="Обмен валют">
         </form>
-        <form method="get" action="transfer" class="inline">
+        <form action="transfer" class="inline" method="get">
             <input type="submit" value="Выполнить перевод">
         </form>
-        <form method="post" action="download/client_info" class="inline">
+        <form action="download/client_info" class="inline" method="post">
             <input type="submit" value="Скачать таблицу">
         </form>
-        <form method="get" action="edit_client" class="inline">
-            <input type="hidden" name="client_id" th:value="${session.client.id}">
+        <form action="edit_client" class="inline" method="get">
+            <input name="client_id" th:value="${session.client.id}" type="hidden">
             <input type="submit" value="Изменить данные пользователя">
         </form>
 
-    <!--<button onclick="confirmDel(1)" class="inline">Удалить пользователя</button>-->
+        <!--<button onclick="confirmDel(1)" class="inline">Удалить пользователя</button>-->
     </div>
-<div>
-<form method="get" action="client_info" class="inline">
-    <input type="date" name="startDate" th:value="${#dates.format(session.startDate, 'yyyy-MM-dd')}" class="inline">
-    <input type="date" name="endDate" th:value="${#dates.format(session.endDate1, 'yyyy-MM-dd')}" class="inline">
-    <th:block th:each="currency : ${session.currencies}">
-    <input type="checkbox" th:id="|currency_id${currency.id}|" name="currency_id" th:value="${currency.id}" th:checked="${#lists.contains(session.currency_name, currency.name)}" class="inline">
-    <label th:for="|currency_id${currency.id}|" class="inline" th:text="${currency.name}"></label>
-    </th:block>
-    <input type="submit" value="Найти" class="inline">
-</form>
-    <form id="color" class="inline">
-        <input type="radio" name="color" id="white" value="rgb(255,255,255)" class="inline check-with-label">
-        <label for="white" class="inline sphere white label-for-check"></label>
-        <input type="radio" name="color" id="red" value="rgb(255,0,0)" class="inline check-with-label">
-        <label for="red" class="inline sphere red label-for-check"></label>
-        <input type="radio" name="color" id="yellow" value="rgb(255,255,0)" class="inline check-with-label">
-        <label for="yellow" class="inline sphere yellow label-for-check"></label>
-        <input type="radio" name="color" id="blue" value="rgb(0,0,255)" class="inline check-with-label">
-        <label for="blue" class="inline sphere blue label-for-check"></label>
-        <input type="radio" name="color" id="orange" value="rgb(255,165,0)" class="inline check-with-label">
-        <label for="orange" class="inline sphere orange label-for-check"></label>
-        <input type="radio" name="color" id="green" value="rgb(0,128,0)" class="inline check-with-label">
-        <label for="green" class="inline sphere green label-for-check"></label>
-        <input type="radio" name="color" id="violet" value="rgb(238,130,238)" class="inline check-with-label">
-        <label for="violet" class="inline sphere violet label-for-check"></label>
-        <input type="radio" name="color" id="black" value="rgb(0,0,0)" class="inline check-with-label">
-        <label for="black" class="inline sphere black label-for-check"></label>
-    </form>
-    <button onclick="saveColors()" class="inline">Сохранить расцветку</button>
-    <button onclick="capture()" class="inline">Скриншот</button>
-</div>
+    <div>
+        <form action="client_info" class="inline" method="get">
+            <input class="inline" name="startDate" th:value="${#dates.format(session.startDate, 'yyyy-MM-dd')}"
+                   type="date">
+            <input class="inline" name="endDate" th:value="${#dates.format(session.endDate1, 'yyyy-MM-dd')}"
+                   type="date">
+            <th:block th:each="currency : ${session.currencies}">
+                <input class="inline" name="currency_id" th:checked="${#lists.contains(session.currency_name, currency.name)}" th:id="|currency_id${currency.id}|"
+                       th:value="${currency.id}" type="checkbox">
+                <label class="inline" th:for="|currency_id${currency.id}|" th:text="${currency.name}"></label>
+            </th:block>
+            <input class="inline" type="submit" value="Найти">
+        </form>
+        <form class="inline" id="color">
+            <input class="inline check-with-label" id="white" name="color" type="radio" value="rgb(255,255,255)">
+            <label class="inline sphere white label-for-check" for="white"></label>
+            <input class="inline check-with-label" id="red" name="color" type="radio" value="rgb(255,0,0)">
+            <label class="inline sphere red label-for-check" for="red"></label>
+            <input class="inline check-with-label" id="yellow" name="color" type="radio" value="rgb(255,255,0)">
+            <label class="inline sphere yellow label-for-check" for="yellow"></label>
+            <input class="inline check-with-label" id="blue" name="color" type="radio" value="rgb(0,0,255)">
+            <label class="inline sphere blue label-for-check" for="blue"></label>
+            <input class="inline check-with-label" id="orange" name="color" type="radio" value="rgb(255,165,0)">
+            <label class="inline sphere orange label-for-check" for="orange"></label>
+            <input class="inline check-with-label" id="green" name="color" type="radio" value="rgb(0,128,0)">
+            <label class="inline sphere green label-for-check" for="green"></label>
+            <input class="inline check-with-label" id="violet" name="color" type="radio" value="rgb(238,130,238)">
+            <label class="inline sphere violet label-for-check" for="violet"></label>
+            <input class="inline check-with-label" id="black" name="color" type="radio" value="rgb(0,0,0)">
+            <label class="inline sphere black label-for-check" for="black"></label>
+        </form>
+        <button class="inline" onclick="saveColors()">Сохранить расцветку</button>
+        <button class="inline" onclick="capture()">Скриншот</button>
+    </div>
 </div>
 <table class="under-header" id="capture">
     <thead id="thead">
@@ -89,22 +93,42 @@
     </thead>
     <tbody>
     <tr th:each="transaction : ${session.transactions}">
-        <th  class="ignore">
-            <form method="get" action="edit">
-                <input type="hidden" name="transaction_id" th:value="${transaction.id}">
+        <th class="ignore">
+            <form action="edit" method="get">
+                <input name="transaction_id" th:value="${transaction.id}" type="hidden">
                 <input type="submit" value="ред.">
             </form>
         </th>
         <th th:if="${session.user.role.name == 'Admin'}" th:text="${transaction.user.login}"></th>
-        <th th:style="|color: ${transaction.commentColor}|" th:text="${transaction.client.pib}" th:onclick="|changeColor(pib_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|pib_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
-        <th th:text="${transaction.comment}" th:onclick="|changeColor(comment_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|comment_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
-        <th th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}" th:onclick="|changeColor(date_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|date_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
-        <th th:text="${transaction.currency.name}" th:onclick="|changeColor(currency_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|currency_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
-        <th th:style="|color: ${transaction.balanceColor}|" th:text="${#numbers.formatDecimal(transaction.balance, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(balance_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|balance_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
-        <th th:text="${#numbers.formatDecimal(transaction.rate, 1, 'POINT', 3, 'COMMA')}" th:onclick="|changeColor(rate_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|rate_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
-        <th th:text="${#numbers.formatDecimal(transaction.commission, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(commission_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|commission_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
-        <th th:style="|color: ${transaction.amountColor}|" th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(amount_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|amount_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
-        <th th:text="${#numbers.formatDecimal(transaction.transportation, 1, 'POINT', 2, 'COMMA')}" th:onclick="|changeColor(transportation_${transaction.id}_${session.client.id}_${transaction.currency.id})|" th:id="|transportation_${transaction.id}_${session.client.id}_${transaction.currency.id}|"></th>
+        <th th:id="|pib_${transaction.id}_${session.client.id}_${transaction.currency.id}|" th:onclick="|changeColor(pib_${transaction.id}_${session.client.id}_${transaction.currency.id})|"
+            th:style="|color: ${transaction.commentColor}|"
+            th:text="${transaction.client.pib}"></th>
+        <th th:id="|comment_${transaction.id}_${session.client.id}_${transaction.currency.id}|"
+            th:onclick="|changeColor(comment_${transaction.id}_${session.client.id}_${transaction.currency.id})|"
+            th:text="${transaction.comment}"></th>
+        <th th:id="|date_${transaction.id}_${session.client.id}_${transaction.currency.id}|"
+            th:onclick="|changeColor(date_${transaction.id}_${session.client.id}_${transaction.currency.id})|"
+            th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}"></th>
+        <th th:id="|currency_${transaction.id}_${session.client.id}_${transaction.currency.id}|"
+            th:onclick="|changeColor(currency_${transaction.id}_${session.client.id}_${transaction.currency.id})|"
+            th:text="${transaction.currency.name}"></th>
+        <th th:id="|balance_${transaction.id}_${session.client.id}_${transaction.currency.id}|"
+            th:onclick="|changeColor(balance_${transaction.id}_${session.client.id}_${transaction.currency.id})|"
+            th:style="|color: ${transaction.balanceColor}|"
+            th:text="${#numbers.formatDecimal(transaction.balance, 1, 'POINT', 2, 'COMMA')}"></th>
+        <th th:id="|rate_${transaction.id}_${session.client.id}_${transaction.currency.id}|"
+            th:onclick="|changeColor(rate_${transaction.id}_${session.client.id}_${transaction.currency.id})|"
+            th:text="${#numbers.formatDecimal(transaction.rate, 1, 'POINT', 3, 'COMMA')}"></th>
+        <th th:id="|commission_${transaction.id}_${session.client.id}_${transaction.currency.id}|"
+            th:onclick="|changeColor(commission_${transaction.id}_${session.client.id}_${transaction.currency.id})|"
+            th:text="${#numbers.formatDecimal(transaction.commission, 1, 'POINT', 2, 'COMMA')}"></th>
+        <th th:id="|amount_${transaction.id}_${session.client.id}_${transaction.currency.id}|"
+            th:onclick="|changeColor(amount_${transaction.id}_${session.client.id}_${transaction.currency.id})|"
+            th:style="|color: ${transaction.amountColor}|"
+            th:text="${#numbers.formatDecimal(transaction.amount, 1, 'POINT', 2, 'COMMA')}"></th>
+        <th th:id="|transportation_${transaction.id}_${session.client.id}_${transaction.currency.id}|"
+            th:onclick="|changeColor(transportation_${transaction.id}_${session.client.id}_${transaction.currency.id})|"
+            th:text="${#numbers.formatDecimal(transaction.transportation, 1, 'POINT', 2, 'COMMA')}"></th>
     </tr>
     </tbody>
 </table>

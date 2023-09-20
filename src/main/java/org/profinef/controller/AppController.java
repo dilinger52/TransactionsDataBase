@@ -1300,7 +1300,7 @@ public class AppController {
             return "error";
         }
 
-        scheduler.restoreFromBackUp();
+        //scheduler.restoreFromBackUp();
         /*}*/
         return "redirect:/users";
     }

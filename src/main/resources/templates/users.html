@@ -8,22 +8,22 @@
 <body>
 <h2 class="inline">Администрирование пользователей</h2>
 <th:block th:insert="userBlock.html :: user_block"></th:block>
-<form method="get" action="client">
+<form action="client" method="get">
     <input type="submit" value="<- Назад">
 </form>
-<form method="get" action="database">
+<form action="database" method="get">
     <input type="submit" value="Создать бэкап">
 </form>
-<form method="post" action="database">
+<form action="database" method="post">
     <input type="submit" value="Восстановить из бэкапа">
 </form>
-<form method="get" action="recashe" class="inline">
+<form action="recashe" class="inline" method="get">
     <input type="submit" value="Пересчитать значения">
 </form>
 <h3>Создать нового пользователя</h3>
-<form method="post" action="create_user">
+<form action="create_user" method="post">
     <label for="login">Логин</label>
-    <input type="text" id="login" name="login" minlength="3" required>
+    <input id="login" minlength="3" name="login" required type="text">
     <input type="submit" value="Новый пользователь">
 </form>
 <h3>Список пользователей</h3>
@@ -44,20 +44,20 @@
             </span>
         </th>
         <th>
-            <form method="get" action="manager_history">
-                <input type="hidden" th:value="${user.id}" name="manager_id">
+            <form action="manager_history" method="get">
+                <input name="manager_id" th:value="${user.id}" type="hidden">
                 <input type="submit" value="Посмотреть">
             </form>
         </th>
         <th>
-            <form method="post" action="restore_pass">
-                <input type="hidden" th:value="${user.id}" name="id">
+            <form action="restore_pass" method="post">
+                <input name="id" th:value="${user.id}" type="hidden">
                 <input type="submit" value="Сброс">
             </form>
         </th>
         <th>
-            <form th:if="${user.role.name != 'Admin'}" method="post" action="delete_user">
-                <input type="hidden" th:value="${user.id}" name="id">
+            <form action="delete_user" method="post" th:if="${user.role.name != 'Admin'}">
+                <input name="id" th:value="${user.id}" type="hidden">
                 <input type="submit" value="Удалить">
             </form>
         </th>

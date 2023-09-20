@@ -64,10 +64,20 @@ public class TransManager {
         double oldBalance = 0.0;
         if (trBalance != null) {
             if (trBalance != 0) {
-                oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
+                AccountDto accountDto = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId);
+                if (accountDto == null) {
+                    accountRepository.save(new AccountDto(client.getId(), currencyId, 0.0));
+                    accountDto = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId);
+                }
+                oldBalance = accountDto.getAmount();
             }
         } else {
-            oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
+            AccountDto accountDto = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId);
+            if (accountDto == null) {
+                accountRepository.save(new AccountDto(client.getId(), currencyId, 0.0));
+                accountDto = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId);
+            }
+            oldBalance = accountDto.getAmount();
             trBalance = 0.0;
         }
         double balance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
@@ -88,7 +98,12 @@ public class TransManager {
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
                 "Введите значение от -100 до 100 включительно");
         Client client = clientManager.getClientExactly(clientName);
-        double oldBalance = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId).getAmount();
+        AccountDto accountDto = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId);
+        if (accountDto == null) {
+            accountRepository.save(new AccountDto(client.getId(), currencyId, 0.0));
+            accountDto = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId);
+        }
+        double oldBalance = accountDto.getAmount();
         double newBalance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
         double result = trBalance + newBalance - oldBalance;
         TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
@@ -149,8 +164,12 @@ public class TransManager {
         logger.debug("Deleting transactions");
         List<TransactionDto> transactionDtoList = new ArrayList<>();
         for (Transaction t : transaction) {
-            double oldBalance = accountRepository
-                    .findByClientIdAndCurrencyId(t.getClient().getId(), t.getCurrency().getId()).getAmount();
+            AccountDto accountDto = accountRepository.findByClientIdAndCurrencyId(t.getClient().getId(), t.getCurrency().getId());
+            if (accountDto == null) {
+                accountRepository.save(new AccountDto(t.getClient().getId(), t.getCurrency().getId(), 0.0));
+                accountDto = accountRepository.findByClientIdAndCurrencyId(t.getClient().getId(), t.getCurrency().getId());
+            }
+            double oldBalance = accountDto.getAmount();
             logger.trace("Old balance: " + oldBalance);
             double newBalance = undoTransaction(t.getId(), t.getClient().getPib(), t.getCurrency().getId());
             logger.trace("New balance: " + newBalance);

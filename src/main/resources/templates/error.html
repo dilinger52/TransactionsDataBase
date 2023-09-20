@@ -12,7 +12,7 @@
 <th:block th:insert="userBlock.html :: user_block"></th:block>
 <h3 th:text="${session.error}">Непредвиденная ошибка. Попробуйте повторить позже</h3>
 <form method="get" th:action="${session.path}">
-  <input type="submit" value="<- Назад">
+    <input type="submit" value="<- Назад">
 </form>
 </body>
 </html>

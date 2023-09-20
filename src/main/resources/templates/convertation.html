@@ -7,55 +7,59 @@
     <script src="main.js"></script>
 </head>
 <body>
-<h2 class="inline">Обмен валют</h2><th:block th:insert="userBlock.html :: user_block"></th:block>
+<h2 class="inline">Обмен валют</h2>
+<th:block th:insert="userBlock.html :: user_block"></th:block>
 <h3 th:text="|Клиент: ${session.client.pib}|"></h3>
-<form method="get" action="client_info">
+<form action="client_info" method="get">
     <input type="submit" value="<- Назад">
 </form>
-<form method="post" action="/transaction">
-    <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
-    <input type="hidden" name="client_name" th:value="${session.client.pib}">
-    <input type="hidden" name="client_name" th:value="${session.client.pib}">
-    <input type="hidden" name="comment" value="Обмен валют">
-    <input type="hidden" name="comment" value="Обмен валют">
-    <input type="hidden" name="commission" value="0">
-    <input type="hidden" name="transportation" value="0">
-    <input type="hidden" name="commission" value="0">
-    <input type="hidden" name="transportation" value="0">
-    <input type="hidden" class="exchange" th:each="currency : ${session.currencies}" th:name="${currency.name}" th:value="${currency.averageExchange}">
+<form action="/transaction" method="post">
+    <input name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" type="hidden">
+    <input name="client_name" th:value="${session.client.pib}" type="hidden">
+    <input name="client_name" th:value="${session.client.pib}" type="hidden">
+    <input name="comment" type="hidden" value="Обмен валют">
+    <input name="comment" type="hidden" value="Обмен валют">
+    <input name="commission" type="hidden" value="0">
+    <input name="transportation" type="hidden" value="0">
+    <input name="commission" type="hidden" value="0">
+    <input name="transportation" type="hidden" value="0">
+    <input class="exchange" th:each="currency : ${session.currencies}" th:name="${currency.name}" th:value="${currency.averageExchange}"
+           type="hidden">
 
     <div>
-    <div class="inline">
-        <label for="currency1">Валюта 1</label>
-        <input type="text" name="currency_name" id="currency1" onkeyup="convertDescription()" list="currency_datalist" required autocomplete="off">
-        <datalist id="currency_datalist">
-            <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
-        </datalist>
-    </div>
-    <div class="inline">
-        <label for="amount">Колличество</label>
-        <input type="text" name="positiveAmount" id="amount" onkeyup="convert()" required>
-    </div>
-    <div class="inline">
-        <label for="rate1">Обменный курс</label>
-        <input type="text" name="rate" id="rate1" onkeyup="convert()" value="1" required>
-    </div>
+        <div class="inline">
+            <label for="currency1">Валюта 1</label>
+            <input autocomplete="off" id="currency1" list="currency_datalist" name="currency_name"
+                   onkeyup="convertDescription()" required type="text">
+            <datalist id="currency_datalist">
+                <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
+            </datalist>
+        </div>
+        <div class="inline">
+            <label for="amount">Колличество</label>
+            <input id="amount" name="positiveAmount" onkeyup="convert()" required type="text">
+        </div>
+        <div class="inline">
+            <label for="rate1">Обменный курс</label>
+            <input id="rate1" name="rate" onkeyup="convert()" required type="text" value="1">
+        </div>
         <!--<button class="inline" onclick="convertRate()" type="button">Обратить курс</button>-->
     </div>
     <div>
-    <div class="inline">
-        <label for="currency2">Валюта 2</label>
-        <input type="text" name="currency_name" id="currency2" onkeyup="convertDescription()" list="currency_datalist" required autocomplete="off">
+        <div class="inline">
+            <label for="currency2">Валюта 2</label>
+            <input autocomplete="off" id="currency2" list="currency_datalist" name="currency_name"
+                   onkeyup="convertDescription()" required type="text">
+        </div>
+        <div class="inline">
+            <input id="changeInput" name="positiveAmount" type="hidden" value="0">
+            <label for="changeDiv">Колличество</label>
+            <input id="changeDiv" readonly type="text">
+        </div>
     </div>
-    <div class="inline">
-        <input type="hidden" name="positiveAmount" value="0" id="changeInput">
-        <label for="changeDiv">Колличество</label>
-        <input type="text" id="changeDiv" readonly>
-    </div>
-    </div>
-    <input type="hidden" name="rate" value="1" id="rate2">
-    <input type="hidden" name="negativeAmount" value="0">
-    <input type="hidden" name="negativeAmount" value="0">
+    <input id="rate2" name="rate" type="hidden" value="1">
+    <input name="negativeAmount" type="hidden" value="0">
+    <input name="negativeAmount" type="hidden" value="0">
     <input type="submit">
 </form>
 </body>

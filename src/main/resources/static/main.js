@@ -33,6 +33,8 @@ const tables = document.querySelectorAll('table');
                                 // Выделяем прямоугольную область
                                 for (let row = Math.min(startRow, endRow); row <= Math.max(startRow, endRow); row++) {
                                     for (let col = Math.min(startIndex, endIndex); col <= Math.max(startIndex, endIndex); col++) {
+                                    console.log(row);
+                                    console.log(col);
                                         table.rows[row].cells[col].classList.add('highlight');
                                     }
                                 }
@@ -534,7 +536,6 @@ function capture() {
 //window.scrollTo(0,0);
 html2canvas(document.querySelector("table th.highlight").parentElement.parentElement.parentElement, {
     ignoreElements: (element) => {
-        element.style.position = 'unset';
         if (element.classList.contains("highlight") || element.parentElement.classList.contains("highlight") || element.querySelectorAll(".highlight").length > 0 || element.tagName == 'HEAD' || element.parentElement.tagName == 'HEAD') {
             return false;
         } else {
@@ -542,12 +543,17 @@ html2canvas(document.querySelector("table th.highlight").parentElement.parentEle
         }
 
     },
-    allowTaint: true,
-    useCORS: true,
-    backgroundColor: null
+    scale: 2,
+    backgroundColor: null,
+    onclone: (clonDoc) => {
+        var elements = clonDoc.querySelectorAll("*");
+        for (var element of elements) {
+            element.style.position = 'unset';
+        }
+    }
 }).then(canvas => {
  canvas.toBlob((blob) => {
-          console.log(window.isSecureContext);
+
           //document.clipboardData.setData([blob.type], blob).then(
           let data = [new ClipboardItem({ [blob.type]: blob })];
 
@@ -556,8 +562,8 @@ html2canvas(document.querySelector("table th.highlight").parentElement.parentEle
                 alert("Скопировано");
             },
             (err) => {
-                        alert("Ошибка");
-                        }
+                alert("Ошибка");
+            }
           );
         });
 });

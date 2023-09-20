@@ -10,15 +10,16 @@
     Страница пересчета значений
 </h3>
 <th:block th:insert="userBlock.html :: user_block"></th:block>
-<form method="get" action="client">
+<form action="client" method="get">
     <input type="submit" value="<- Назад">
 </form>
-<p>Данная страница позволяет произвести повторный расчет балансов по любому клиенту. Оставьте поле клиента пустым для выполнения пересчета для всех клиентов</p>
-<form method="post" action="recashe">
+<p>Данная страница позволяет произвести повторный расчет балансов по любому клиенту. Оставьте поле клиента пустым для
+    выполнения пересчета для всех клиентов</p>
+<form action="recashe" method="post">
     <label for="date">Дата начиная с которой данные будут обновлены</label>
-    <input type="date" name="date" id="date" th:value="${#dates.format(session.date, 'yyyy-MM-dd')}">
+    <input id="date" name="date" th:value="${#dates.format(session.date, 'yyyy-MM-dd')}" type="date">
     <label for="file">Имя клиента для которого необходимо выполнить пересчет</label>
-    <input type="text" name="client" id="file" list="client_datalist">
+    <input id="file" list="client_datalist" name="client" type="text">
     <datalist id="client_datalist">
         <option th:each="client : ${session.clients}" th:value="${client.pib}"></option>
     </datalist>

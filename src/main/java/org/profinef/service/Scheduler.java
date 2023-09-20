@@ -48,7 +48,7 @@ public class Scheduler {
             logger.info("some errors with network backup");
         }*/
     }
-
+/*
     @Scheduled(cron = "0 0 22 * * *")
     public void restoreFromBackUp() throws Exception {
         File directory = new File("backup\\");
@@ -79,4 +79,6 @@ public class Scheduler {
     public void makeExcel() throws Exception {
         excelManager.createFull();
     }
+
+ */
 }

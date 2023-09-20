@@ -9,99 +9,109 @@
 <body>
 <div class="header" id="header">
     <div>
-<h2 class="inline">Главная</h2><th:block th:insert="userBlock.html :: user_block"></th:block>
+        <h2 class="inline">Главная</h2>
+        <th:block th:insert="userBlock.html :: user_block"></th:block>
 
-<div>
-<form method="get" action="client" class="inline">
-    <input type="submit" value="Сбросить фильтры">
-</form>
-<form method="get" action="new_client" class="inline">
-    <input type="submit" value="Добавить клиента">
-</form>
-    <form method="get" action="new_currency" class="inline">
-        <input type="submit" value="Добавить валюту">
-    </form>
-        <form method="post" action="download/all" class="inline">
-            <input type="submit" value="Скачать таблицу">
-        </form>
-        <form method="get" action="excel" class="inline">
-            <input type="submit" value="Загрузить таблицу">
-        </form>
+        <div>
+            <form action="client" class="inline" method="get">
+                <input type="submit" value="Сбросить фильтры">
+            </form>
+            <form action="new_client" class="inline" method="get">
+                <input type="submit" value="Добавить клиента">
+            </form>
+            <form action="new_currency" class="inline" method="get">
+                <input type="submit" value="Добавить валюту">
+            </form>
+            <form action="download/all" class="inline" method="post">
+                <input type="submit" value="Скачать таблицу">
+            </form>
+            <form action="excel" class="inline" method="get">
+                <input type="submit" value="Загрузить таблицу">
+            </form>
 
-</div>
+        </div>
     </div>
-<div>
-<form method="get" action="client" class="inline">
-
-    <div class="inline">
-
-        <label for="client_name">Поиск по ФИО</label>
-    <input type="text" list="client_name_datalist" id="client_name" name="client_name" placeholder="Поиск.." onkeyup="filterFunction()" autocomplete="off">
-    <datalist id="client_name_datalist">
-        <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
-    </datalist>
-    </div>
-    <input type="submit" value="Поиск" class="inline">
     <div>
-        <input type="checkbox" name="search_exactly" class="inline" id="checkbox">
-        <label for="checkbox" class="inline">Точное совпадение</label>
-    </div>
+        <form action="client" class="inline" method="get">
 
-</form>
-    <form id="color" class="inline">
-        <input type="radio" name="color" id="white" value="color: rgb(255,255,255);" class="inline check-with-label">
-        <label for="white" class="inline sphere white label-for-check"></label>
-        <input type="radio" name="color" id="red" value="color: rgb(255,0,0);" class="inline check-with-label">
-        <label for="red" class="inline sphere red label-for-check"></label>
-        <input type="radio" name="color" id="yellow" value="color: rgb(255,255,0);" class="inline check-with-label">
-        <label for="yellow" class="inline sphere yellow label-for-check"></label>
-        <input type="radio" name="color" id="blue" value="color: rgb(0,0,255);" class="inline check-with-label">
-        <label for="blue" class="inline sphere blue label-for-check"></label>
-        <input type="radio" name="color" id="orange" value="color: rgb(255,165,0);" class="inline check-with-label">
-        <label for="orange" class="inline sphere orange label-for-check"></label>
-        <input type="radio" name="color" id="green" value="color: rgb(0,128,0);" class="inline check-with-label">
-        <label for="green" class="inline sphere green label-for-check"></label>
-        <input type="radio" name="color" id="violet" value="color: rgb(238,130,238);" class="inline check-with-label">
-        <label for="violet" class="inline sphere violet label-for-check"></label>
-        <input type="radio" name="color" id="black" value="color: rgb(0,0,0);" class="inline check-with-label">
-        <label for="black" class="inline sphere black label-for-check"></label>
-        <input type="radio" name="color" id="none" class="inline check-with-label" checked>
-        <label for="none" class="inline sphere none label-for-check"></label>
-        <input type="radio" name="color" id="bold" value="font-weight: bold;" class="inline check-with-label">
-        <label for="bold" class="inline bold sphere label-for-check">B</label>
-        <input type="radio" name="color" id="nobold" value="" class="inline check-with-label">
-        <label for="nobold" class="inline bold sphere none label-for-check">B</label>
-        <input type="radio" name="color" id="italic" value="font-style: italic;" class="inline check-with-label">
-        <label for="italic" class="inline italic sphere  label-for-check">i</label>
-        <input type="radio" name="color" id="noitalic" value="" class="inline check-with-label">
-        <label for="noitalic" class="inline italic sphere none label-for-check">i</label>
-    </form>
+            <div class="inline">
+
+                <label for="client_name">Поиск по ФИО</label>
+                <input autocomplete="off" id="client_name" list="client_name_datalist" name="client_name" onkeyup="filterFunction()"
+                       placeholder="Поиск.." type="text">
+                <datalist id="client_name_datalist">
+                    <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}"
+                            th:value="${client.client.pib}"></option>
+                </datalist>
+            </div>
+            <input class="inline" type="submit" value="Поиск">
+            <div>
+                <input class="inline" id="checkbox" name="search_exactly" type="checkbox">
+                <label class="inline" for="checkbox">Точное совпадение</label>
+            </div>
+
+        </form>
+        <form class="inline" id="color">
+            <input class="inline check-with-label" id="white" name="color" type="radio"
+                   value="color: rgb(255,255,255);">
+            <label class="inline sphere white label-for-check" for="white"></label>
+            <input class="inline check-with-label" id="red" name="color" type="radio" value="color: rgb(255,0,0);">
+            <label class="inline sphere red label-for-check" for="red"></label>
+            <input class="inline check-with-label" id="yellow" name="color" type="radio" value="color: rgb(255,255,0);">
+            <label class="inline sphere yellow label-for-check" for="yellow"></label>
+            <input class="inline check-with-label" id="blue" name="color" type="radio" value="color: rgb(0,0,255);">
+            <label class="inline sphere blue label-for-check" for="blue"></label>
+            <input class="inline check-with-label" id="orange" name="color" type="radio" value="color: rgb(255,165,0);">
+            <label class="inline sphere orange label-for-check" for="orange"></label>
+            <input class="inline check-with-label" id="green" name="color" type="radio" value="color: rgb(0,128,0);">
+            <label class="inline sphere green label-for-check" for="green"></label>
+            <input class="inline check-with-label" id="violet" name="color" type="radio"
+                   value="color: rgb(238,130,238);">
+            <label class="inline sphere violet label-for-check" for="violet"></label>
+            <input class="inline check-with-label" id="black" name="color" type="radio" value="color: rgb(0,0,0);">
+            <label class="inline sphere black label-for-check" for="black"></label>
+            <input checked class="inline check-with-label" id="none" name="color" type="radio">
+            <label class="inline sphere none label-for-check" for="none"></label>
+            <input class="inline check-with-label" id="bold" name="color" type="radio" value="font-weight: bold;">
+            <label class="inline bold sphere label-for-check" for="bold">B</label>
+            <input class="inline check-with-label" id="nobold" name="color" type="radio" value="">
+            <label class="inline bold sphere none label-for-check" for="nobold">B</label>
+            <input class="inline check-with-label" id="italic" name="color" type="radio" value="font-style: italic;">
+            <label class="inline italic sphere  label-for-check" for="italic">i</label>
+            <input class="inline check-with-label" id="noitalic" name="color" type="radio" value="">
+            <label class="inline italic sphere none label-for-check" for="noitalic">i</label>
+        </form>
+    </div>
 </div>
-</div>
-    <table class="under-header-main" id="capture">
-        <thead class="main" name="thead">
-        <tr>
-            <th>ФИО</th>
-            <th th:each="currency : ${session.currencies}" th:if="${currency.name != 'RUB'}" th:text="${currency.name}"></th>
-            <th>Детали</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="client : ${session.clients}">
-            <th th:text="${client.client.pib}" th:id="|${client.client.id}_name|" th:onclick="|changeMainColor('${client.client.id}_name')|" th:style="|${client.client.color}|"></th>
-            <th:block th:each="currency : ${client.currencies}" th:if="${currency.key.name != 'RUB'}" >
-                <th th:text="${#numbers.formatInteger(currency.value.amount, 1, 'WHITESPACE')}" th:id="|${client.client.id}_${currency.key.id}|" th:onclick="|changeMainColor('${client.client.id}_${currency.key.id}')|" th:style="|${currency.value.color}|"></th>
-            </th:block>
-            <th th:if="${client.client.pib != 'Всего'}">
-                <form method="get" action="client_info">
-                    <input type="hidden" name="client_id" th:value="${client.client.id}">
-                    <input type="submit" value="посмотреть">
-                </form>
-            </th>
-            <th th:if="${client.client.pib == 'Всего'}"></th>
-        </tr>
-        </tbody>
-    </table>
+<table class="under-header-main" id="capture">
+    <thead class="main" name="thead">
+    <tr>
+        <th>ФИО</th>
+        <th th:each="currency : ${session.currencies}" th:if="${currency.name != 'RUB'}"
+            th:text="${currency.name}"></th>
+        <th>Детали</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="client : ${session.clients}">
+        <th th:id="|${client.client.id}_name|" th:onclick="|changeMainColor('${client.client.id}_name')|"
+            th:style="|${client.client.color}|" th:text="${client.client.pib}"></th>
+        <th:block th:each="currency : ${client.currencies}" th:if="${currency.key.name != 'RUB'}">
+            <th th:id="|${client.client.id}_${currency.key.id}|"
+                th:onclick="|changeMainColor('${client.client.id}_${currency.key.id}')|"
+                th:style="|${currency.value.color}|"
+                th:text="${#numbers.formatInteger(currency.value.amount, 1, 'WHITESPACE')}"></th>
+        </th:block>
+        <th th:if="${client.client.pib != 'Всего'}">
+            <form action="client_info" method="get">
+                <input name="client_id" th:value="${client.client.id}" type="hidden">
+                <input type="submit" value="посмотреть">
+            </form>
+        </th>
+        <th th:if="${client.client.pib == 'Всего'}"></th>
+    </tr>
+    </tbody>
+</table>
 
 
 </body>

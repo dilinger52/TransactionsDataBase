@@ -2,18 +2,7 @@ package org.profinef.controller;
 
 import com.monitorjbl.xlsx.StreamingReader;
 import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.util.IOUtils;
-import org.apache.poi.xssf.streaming.SXSSFRow;
-import org.apache.poi.xssf.streaming.SXSSFSheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
 import org.profinef.entity.User;
@@ -25,15 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.IntStream;
 
 /**
  * This class realised functionality to get file in office open xml format and use it for update the database
@@ -77,15 +65,13 @@ public class Uploader {
      *
      * @param file file with information to update
      */
+
     @RequestMapping("/full")
     public String uploadDataFromExcel(@RequestParam("file") MultipartFile file,
                                       @RequestParam(name = "date", required = false, defaultValue = "0") java.sql.Date dateAfter,
                                       HttpSession session) throws Exception {
         logger.info("Getting file...");
         User user = (User) session.getAttribute("user");
-        System.out.println(dateAfter);
-        //clean database before inserting new data. it needed to avoid doubles. method marked transactional, so
-        //old information will be restored in case of exception, I hope
         if (dateAfter == null) {
             session.setAttribute("error", "date is null");
             clientManager.deleteAll();
@@ -118,7 +104,6 @@ public class Uploader {
             try {
                 accountManager.addClient(client);
             } catch (RuntimeException ignored) {}
-
             //first row contains information about currencies
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) {
@@ -202,7 +187,6 @@ public class Uploader {
                                 }
                             logger.trace("Found amountColor: " + amountColor);*/
                             isTransaction = true;
-                            //if (date.after(new Date(123, Calendar.JULY, 19))) isTransaction = true; //TODO change date to variable
                             continue;
                         }
                         //getting commission
@@ -228,7 +212,6 @@ public class Uploader {
                     }
                     //last cell for transaction. Insert transaction with previous info
                     if ((cell.getColumnIndex() % columnPerCurrency == 0) && isTransaction) {
-                        System.out.println("currencyId=" + (currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1)));
                         logger.info("Inserting transaction on sheet: " + sheet.getSheetName());
                         insertTransaction(row, cell.getColumnIndex(), currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1), user);
                         amount = 0;
@@ -287,8 +270,11 @@ public class Uploader {
         }
         try {
             //writing transaction to database
+            date = transManager.getAvailableDate(new Timestamp(date.getTime()));
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId());
+                    currencyId, rate, commission, amount, transportation, null, amountColor, user.getId(),
+                    0.0, null, null, null, null, null,
+                    null);
         } catch (RuntimeException e) {
             e.printStackTrace();
             //if currency did not exist create it and try again
@@ -299,7 +285,9 @@ public class Uploader {
                 ex.printStackTrace();
             }
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, null, user.getId());
+                    currencyId, rate, commission, amount, transportation, null, amountColor,
+                    user.getId(), 0.0, null, null, null, null, null,
+                    null);
         }
         //setting parameters to default
         amount = 0;

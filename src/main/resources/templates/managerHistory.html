@@ -11,26 +11,29 @@
     <h2 class="inline" th:text="|Менеджер: ${session.manager.login}|"></h2>
     <th:block th:insert="userBlock.html :: user_block"></th:block>
     <div>
-        <form method="get" action="users" class="inline">
+        <form action="users" class="inline" method="get">
             <input type="submit" value="<- Назад">
         </form>
     </div>
     <div>
-        <form method="get" action="manager_history" class="inline">
+        <form action="manager_history" class="inline" method="get">
             <div class="inline">
                 <label for="client_name">Поиск по ФИО</label>
-                <input type="text" list="client_name_datalist" id="client_name" name="client_name" placeholder="Поиск.." onkeyup="filterFunction()">
+                <input autocomplete="off" id="client_name" list="client_name_datalist" name="client_name" onkeyup="filterFunction()"
+                       placeholder="Поиск.." type="text">
                 <datalist id="client_name_datalist">
-                    <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
+                    <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}"
+                            th:value="${client.client.pib}"></option>
                 </datalist>
             </div>
-            <input type="date" name="startDate" th:value="${#dates.format(session.startDate, 'yyyy-MM-dd')}" class="inline">
-            <input type="date" name="endDate" th:value="${#dates.format(session.endDate, 'yyyy-MM-dd')}" class="inline">
+            <input class="inline" name="strDate" th:value="${#dates.format(session.strDate, 'yyyy-MM-dd')}" type="date">
+            <input class="inline" name="edDate" th:value="${#dates.format(session.edDate, 'yyyy-MM-dd')}" type="date">
             <th:block th:each="currency : ${session.currencies}">
-                <input type="checkbox" th:id="|currency_id${currency.id}|" name="currency_id" th:value="${currency.id}" th:checked="${#lists.contains(session.currency_name, currency.name)}" class="inline">
-                <label th:for="|currency_id${currency.id}|" class="inline" th:text="${currency.name}"></label>
+                <input class="inline" name="currency_id" th:checked="${#lists.contains(session.currency_name, currency.name)}" th:id="|currency_id${currency.id}|"
+                       th:value="${currency.id}" type="checkbox">
+                <label class="inline" th:for="|currency_id${currency.id}|" th:text="${currency.name}"></label>
             </th:block>
-            <input type="submit" value="Найти" class="inline">
+            <input class="inline" type="submit" value="Найти">
         </form>
     </div>
 </div>

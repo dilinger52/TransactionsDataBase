@@ -176,3 +176,20 @@ INSERT INTO `transactions`.`user` (`id`, `login`, `password`, `role_id`) VALUES 
 
 COMMIT;
 
+
+-- -----------------------------------------------------
+-- Data for table `transactions`.`transaction`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `transactions`;
+INSERT INTO `transactions`.`transaction` (`id`, `date`, `client_id`, `currency_id`, `rate`, `balance`, `commission`, `amount`, `transportation`, `pib_color`, `amount_color`, `balance_color`, `comment`, `user_id`) VALUES (1, '2023-08-14', 1, 980, 1, 100.01, 0, 100.01, 0, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `transactions`.`transaction` (`id`, `date`, `client_id`, `currency_id`, `rate`, `balance`, `commission`, `amount`, `transportation`, `pib_color`, `amount_color`, `balance_color`, `comment`, `user_id`) VALUES (2, '2023-08-14', 1, 840, 1, 120.45, 0, 120.45, 0, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `transactions`.`transaction` (`id`, `date`, `client_id`, `currency_id`, `rate`, `balance`, `commission`, `amount`, `transportation`, `pib_color`, `amount_color`, `balance_color`, `comment`, `user_id`) VALUES (3, '2023-08-14', 2, 980, 1, 500, 0, 500, 0, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `transactions`.`transaction` (`id`, `date`, `client_id`, `currency_id`, `rate`, `balance`, `commission`, `amount`, `transportation`, `pib_color`, `amount_color`, `balance_color`, `comment`, `user_id`) VALUES (4, '2023-08-14', 3, 980, 1, 70.68, 0, 70.68, 0, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `transactions`.`transaction` (`id`, `date`, `client_id`, `currency_id`, `rate`, `balance`, `commission`, `amount`, `transportation`, `pib_color`, `amount_color`, `balance_color`, `comment`, `user_id`) VALUES (5, '2023-08-14', 3, 840, 1, 17.52, 0, 17.52, 0, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `transactions`.`transaction` (`id`, `date`, `client_id`, `currency_id`, `rate`, `balance`, `commission`, `amount`, `transportation`, `pib_color`, `amount_color`, `balance_color`, `comment`, `user_id`) VALUES (6, '2023-08-14', 4, 840, 1, 732, 0, 732, 0, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `transactions`.`transaction` (`id`, `date`, `client_id`, `currency_id`, `rate`, `balance`, `commission`, `amount`, `transportation`, `pib_color`, `amount_color`, `balance_color`, `comment`, `user_id`) VALUES (7, '2023-08-14', 5, 980, 1, 1000, 0, 1000, 0, NULL, NULL, NULL, NULL, 1);
+INSERT INTO `transactions`.`transaction` (`id`, `date`, `client_id`, `currency_id`, `rate`, `balance`, `commission`, `amount`, `transportation`, `pib_color`, `amount_color`, `balance_color`, `comment`, `user_id`) VALUES (8, '2023-08-14', 6, 980, 1, 5000, 0, 5000, 0, NULL, NULL, NULL, NULL, 1);
+
+COMMIT;
+

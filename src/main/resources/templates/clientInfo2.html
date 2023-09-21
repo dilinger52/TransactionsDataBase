@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Страница клиента</title>
+    <link href="main.css" rel="stylesheet">
+
+</head>
+<body>
+<div id="header" style="position: sticky;left: 0px;width: 100vw;background: white;top: 0px;margin: 0px;z-index: 10000;">
+    <h2 class="inline" th:text="|Клиент: ${session.client.pib}|"></h2>
+    <form action="client_info" class="inline" method="get">
+        <input autocomplete="off" class="inline" id="client_name" list="client_datalist" name="client_name"
+               placeholder="Поиск.." type="text">
+        <datalist id="client_datalist">
+            <option th:each="client : ${session.clients}" th:value="${client.pib}"></option>
+        </datalist>
+        <input class="inline" type="submit" value="Перейти">
+    </form>
+
+    <th:block th:insert="userBlock.html :: user_block"></th:block>
+    <p style="color: red;" th:if="${session.client_alert != null}" th:text="${session.client_alert}"></p>
+    <div>
+        <form action="client" class="inline" method="get">
+            <input type="submit" value="<- Назад">
+        </form>
+        <form action="convertation" class="inline" method="get">
+            <input type="submit" value="Обмен валют">
+        </form>
+        <form action="download/client_info" class="inline" method="post">
+            <input type="submit" value="Скачать таблицу">
+        </form>
+        <form action="edit_client" class="inline" method="get">
+            <input name="client_id" th:value="${session.client.id}" type="hidden">
+            <input type="submit" value="Изменить данные пользователя">
+        </form>
+
+    </div>
+    <div>
+        <form action="client_info" class="inline" method="get">
+            <input class="inline" name="startDate"
+                   th:value="${#dates.format(session[startDate__${session.client.id}__], 'yyyy-MM-dd')}" type="date">
+            <input class="inline" name="endDate"
+                   th:value="${#dates.format(session[endDate1__${session.client.id}__], 'yyyy-MM-dd')}" type="date">
+            <th:block th:each="currency : ${session.currencies}" th:if="${currency.name != 'RUB'}">
+                <input class="inline" name="currency_id" th:checked="${#lists.contains(session.currency_name, currency.name)}" th:id="|currency_id${currency.id}|"
+                       th:value="${currency.id}" type="checkbox">
+                <label class="inline" th:for="|currency_id${currency.id}|" th:text="${currency.name}"></label>
+            </th:block>
+            <input class="inline" type="submit" value="Найти">
+        </form>
+        <form class="inline" id="color">
+            <input class="inline check-with-label" id="white" name="color" type="radio"
+                   value="color: rgb(255,255,255);">
+            <label class="inline sphere white label-for-check" for="white"></label>
+            <input class="inline check-with-label" id="red" name="color" type="radio" value="color: rgb(255,0,0);">
+            <label class="inline sphere red label-for-check" for="red"></label>
+            <input class="inline check-with-label" id="yellow" name="color" type="radio" value="color: rgb(255,255,0);">
+            <label class="inline sphere yellow label-for-check" for="yellow"></label>
+            <input class="inline check-with-label" id="blue" name="color" type="radio" value="color: rgb(0,0,255);">
+            <label class="inline sphere blue label-for-check" for="blue"></label>
+            <input class="inline check-with-label" id="orange" name="color" type="radio" value="color: rgb(255,165,0);">
+            <label class="inline sphere orange label-for-check" for="orange"></label>
+            <input class="inline check-with-label" id="green" name="color" type="radio" value="color: rgb(0,128,0);">
+            <label class="inline sphere green label-for-check" for="green"></label>
+            <input class="inline check-with-label" id="violet" name="color" type="radio"
+                   value="color: rgb(238,130,238);">
+            <label class="inline sphere violet label-for-check" for="violet"></label>
+            <input class="inline check-with-label" id="black" name="color" type="radio" value="color: rgb(0,0,0);">
+            <label class="inline sphere black label-for-check" for="black"></label>
+            <input checked class="inline check-with-label" id="none" name="color" type="radio">
+            <label class="inline sphere none label-for-check" for="none"></label>
+            <input class="inline check-with-label" id="bold" name="color" type="radio" value="font-weight: bold;">
+            <label class="inline bold sphere label-for-check" for="bold">B</label>
+            <input class="inline check-with-label" id="nobold" name="color" type="radio" value="">
+            <label class="inline bold sphere none label-for-check" for="nobold">B</label>
+            <input class="inline check-with-label" id="italic" name="color" type="radio" value="font-style: italic;">
+            <label class="inline italic sphere  label-for-check" for="italic">i</label>
+            <input class="inline check-with-label" id="noitalic" name="color" type="radio" value="">
+            <label class="inline italic sphere none label-for-check" for="noitalic">i</label>
+        </form>
+        <button class="inline" onclick="capture()">Скриншот</button>
+    </div>
+</div>
+<input class="exchange" th:each="currency : ${session.currencies}" th:name="${currency.name}" th:value="${currency.averageExchange}"
+       type="hidden">
+<div class="currencies">
+    <div class="inline"
+         th:each="currency : ${session.currencies}" th:if="${#lists.contains(session.currency_name, currency.name) && currency.name != 'RUB'}">
+        <input id="pointer" name="pointer" th:form="|form${currency.id}|" type="hidden">
+        <div name="thead" style="background-color: white; position: sticky;">
+            <h3 class="inline" th:text="${currency.name}">HRN</h3>
+            <h3 class="inline"
+                th:text="|Баланс на начало ${#dates.format(session[startDate__${session.client.id}__], 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['amount' + currency.id], 1, 'WHITESPACE')}|"></h3>
+            <h3 class="inline"
+                th:text="|Баланс в конце ${#dates.format(session[endDate__${session.client.id}__], 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['balance' + currency.id], 1, 'WHITESPACE')}|"></h3>
+            <input class="exchange" th:name="${currency.name}" th:value="${currency.averageExchange}" type="hidden">
+        </div>
+        <table th:style="${currency.name == 'RUB' ? 'background-color: mistyrose;' : currency.name == 'USD' ? 'background-color: honeydew;' : currency.name == 'EUR' ? 'background-color: lavender;' : currency.name == 'PLN' ? 'background-color: lightcyan;' : currency.name == 'UAH' ? 'background-color: white;' : ''}">
+            <thead name="thead2" style="background-color: inherit; position: sticky;">
+            <tr>
+                <th class="ignore">Редактир.</th>
+                <th>Дата</th>
+                <th>Контрагенты</th>
+                <th>Комментарий</th>
+                <th>Прием</th>
+                <th>Выдача</th>
+                <th>Тариф</th>
+                <th>Комиссия</th>
+                <th>Курс</th>
+                <th>Инкас.</th>
+                <th>Итого</th>
+                <th th:if="${session.user.role.name == 'Admin'}">Менеджер</th>
+            </tr>
+            </thead>
+            <tbody th:id="${currency.name}">
+            <th:block th:each="id : ${session.transactionIds[currency.id]}">
+                <form action="edit_transaction" method="post" th:id="${id}">
+                    <input name="pointer" th:id="|pointer${id}|" type="hidden">
+                </form>
+                <form action="delete_transaction" method="post" th:id="|del${id}|">
+                    <input name="transaction_id" th:value="${id}" type="hidden">
+                </form>
+
+                <th:block th:each="transaction, iter : ${session.transactions}"
+                          th:if="${transaction.id == id && transaction.currency.id == currency.id}">
+
+                    <input name="client_name" th:form="${id}" th:if="${transaction.client.id == session.client.id}"
+                           th:value="${session.client.pib}" type="hidden">
+                    <input name="currency_name" th:form="${id}" th:value="${currency.name}" type="hidden">
+                    <tr th:id="|${currency.id}${iter.index}|"
+                        th:name="|${currency.id}${transaction.id}|" th:style="|${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? '' : 'display:none;'}|">
+
+                        <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
+                            <input name="transaction_id" th:form="${id}" th:value="${transaction.id}" type="hidden">
+                            <input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit"
+                                   value="Сохранить">
+                            <input th:form="|del${id}|" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit"
+                                   value="Удалить">
+                            <input th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:onclick="|deleteRow(${currency.id}${iter.index})|"
+                                   type="submit"
+                                   value="Удалить строку">
+                        </th>
+                        <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}"
+                            th:text="${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? #dates.format(transaction.date, 'dd-MM-yyyy') : ''}"></th>
+                        <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
+                            <input th:form="${id}"
+                                   th:id="|${currency.id}${transaction.id}|"
+                                   th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" th:onclick="|showAgents(${currency.id}${transaction.id})|"
+                                   type="button"
+                                   value="Показать">
+                            <input th:data-1="${currency.name}"
+                                   th:data-2="|${currency.id}${iter.index}|" th:data-3="${id}" th:data-4="${transaction.date}"
+                                   th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" th:onclick="addRowInside(this.getAttribute('data-2'), this.getAttribute('data-1'), this.getAttribute('data-3'), this.getAttribute('data-4'))"
+                                   type="button"
+                                   value="Добавить">
+                            <input autocomplete="off"
+                                   list="client_datalist"
+                                   name="client_name" th:form="${id}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_client|"
+                                   th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:value="${transaction.client.pib}"
+                                   type="text">
+                        </th>
+                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_comment')|"
+                            th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
+                            <input name="comment"
+                                   th:form="${id}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_comment|" th:style="|${transaction.commentColor != null ? transaction.commentColor : ''}|" th:value="${transaction.comment}"
+                                   type="text">
+                        </th>
+                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_pAmount')|"
+                            th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
+                            <input autocomplete="off"
+                                   name="positiveAmount" th:data-id="|${transaction.id}_${currency.id}_${transaction.client.id}|" th:form="${id}"
+                                   th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_pAmount|"
+                                   th:if="${transaction.amount > 0}"
+                                   th:onkeyup="changeAssociated(this.getAttribute('data-id'))"
+                                   th:style="|${transaction.inputColor != null ? transaction.inputColor : ''}|"
+                                   th:value="${#numbers.formatInteger(transaction.amount, 1,'WHITESPACE')}" type="text">
+                            <input autocomplete="off"
+                                   name="positiveAmount" th:data-id="|${transaction.id}_${currency.id}_${transaction.client.id}|" th:form="${id}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_pAmount|"
+                                   th:if="${transaction.amount <= 0}"
+                                   th:onkeyup="changeAssociated(this.getAttribute('data-id'))"
+                                   th:style="|${transaction.inputColor != null ? transaction.inputColor : ''}|" type="text">
+                        </th>
+                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_nAmount')|"
+                            th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
+                            <input autocomplete="off"
+                                   name="negativeAmount" th:data-id="|${transaction.id}_${currency.id}_${transaction.client.id}|" th:form="${id}"
+                                   th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_nAmount|"
+                                   th:if="${transaction.amount < 0}"
+                                   th:onkeyup="changeAssociated(this.getAttribute('data-id'))"
+                                   th:style="|${transaction.outputColor != null ? transaction.outputColor : ''}|"
+                                   th:value="${#numbers.formatInteger(transaction.amount, 1,'WHITESPACE')}" type="text">
+                            <input autocomplete="off"
+                                   name="negativeAmount" th:data-id="|${transaction.id}_${currency.id}_${transaction.client.id}|" th:form="${id}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_nAmount|"
+                                   th:if="${transaction.amount >= 0}"
+                                   th:onkeyup="changeAssociated(this.getAttribute('data-id'))"
+                                   th:style="|${transaction.outputColor != null ? transaction.outputColor : ''}|" type="text">
+                        </th>
+                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_commission')|"
+                            th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
+                            <input class="commission"
+                                   name="commission"
+                                   th:data-id="|${transaction.id}_${currency.id}_${transaction.client.id}|" th:form="${id}"
+                                   th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_commission|"
+                                   th:onkeyup="changeAssociated(this.getAttribute('data-id'))"
+                                   th:style="|${transaction.tarifColor != null ? transaction.tarifColor : ''}|"
+                                   th:value="${transaction.commission != 0 ? transaction.commission : ''}"
+                                   type="text">
+                        </th>
+                        <th th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_com|"
+                            th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_com')|"
+                            th:style="|${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''} ${transaction.commissionColor != null ? transaction.commissionColor : ''}|"
+                            th:text="${#numbers.formatInteger(transaction.commission * transaction.amount / 100, 1,'WHITESPACE')}">
+
+                        </th>
+                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_rate')|"
+                            th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
+                            <input class="rate"
+                                   name="rate"
+                                   th:form="${id}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_rate|"
+                                   th:style="|${transaction.rateColor != null ? transaction.rateColor : ''};|" th:value="${transaction.rate != 1 ? transaction.rate : ''}"
+                                   type="text">
+                        </th>
+                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_transportation')|"
+                            th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
+                            <input class="transportation"
+                                   name="transportation"
+                                   th:data-id="|${transaction.id}_${currency.id}_${transaction.client.id}|" th:form="${id}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_transportation|"
+                                   th:onkeyup="changeAssociated(this.getAttribute('data-id'))"
+                                   th:style="|${transaction.transportationColor != null ? transaction.transportationColor : ''}|"
+                                   th:value="${transaction.transportation != 0 ? #numbers.formatInteger(transaction.transportation, 1,'WHITESPACE') : ''}"
+                                   type="text">
+                        </th>
+                        <th th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_total|"
+                            th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_total')|"
+                            th:style="|${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''} ${transaction.amountColor};|"
+                            th:text="${#numbers.formatInteger(transaction.amount + transaction.commission * transaction.amount / 100 + transaction.transportation, 1,'WHITESPACE')}"></th>
+                        <th th:if="${session.user.role.name == 'Admin'}"
+                            th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${transaction.user.login}"></th>
+                        <input name="dateh" th:value="${transaction.date}" type="hidden">
+                </th:block>
+
+                </tr>
+            </th:block>
+            <form action="transaction" method="post" th:id="|form${currency.id}|">
+
+                <input name="currency_name" th:form="|form${currency.id}|" th:value="${currency.name}" type="hidden">
+                <input name="client_name" th:form="|form${currency.id}|" th:value="${session.client.pib}" type="hidden">
+                <tr th:id="|${currency.name}tr0|" th:name="|${currency.name}form${currency.id}|">
+                    <th>
+                        <input class="inline" th:form="|form${currency.id}|" type="submit" value="Сохранить">
+                    </th>
+                    <th>
+                        <input class="date" name="date" th:form="|form${currency.id}|"
+                               th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" type="date">
+                    </th>
+                    <th>
+                        <input th:data-form="|${currency.id}|" th:data-id="|${currency.name}|" th:onclick="addRow(this.getAttribute('data-id'), this.getAttribute('data-form'))"
+                               type="button"
+                               value="Добавить">
+                    </th>
+                    <th>
+                        <input name="comment" th:form="|form${currency.id}|" th:id="|${currency.name}tr0_comment|"
+                               type="text">
+                    </th>
+                    <th>
+                        <input autocomplete="off" name="positiveAmount" th:data-id="|${currency.name}tr0|"
+                               th:form="|form${currency.id}|" th:id="|${currency.name}tr0_pAmount|"
+                               th:onkeyup="changeAssociated(this.getAttribute('data-id'))" type="text">
+                    </th>
+                    <th>
+                        <input autocomplete="off" name="negativeAmount" th:data-id="|${currency.name}tr0|"
+                               th:form="|form${currency.id}|" th:id="|${currency.name}tr0_nAmount|"
+                               th:onkeyup="changeAssociated(this.getAttribute('data-id'))" type="text">
+                    </th>
+                    <th>
+                        <input class="commission" name="commission" th:data-id="|${currency.name}tr0|" th:form="|form${currency.id}|"
+                               th:id="|${currency.name}tr0_commission|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))"
+                               type="text">
+                    </th>
+                    <th th:id="|${currency.name}tr0_com|"></th>
+
+                    <th>
+                        <input class="rate" name="rate" th:form="|form${currency.id}|" th:id="|${currency.name}tr0_rate|"
+                               type="text">
+                    </th>
+                    <th>
+                        <input class="transportation" name="transportation" th:data-id="|${currency.name}tr0|" th:form="|form${currency.id}|"
+                               th:id="|${currency.name}tr0_transportation|" th:onkeyup="changeAssociated(this.getAttribute('data-id'))"
+                               type="text">
+                    </th>
+                    <th th:id="|${currency.name}tr0_total|"></th>
+
+                </tr>
+            </form>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div style="width: 100%; height: 40px;"></div>
+</body>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="main.js"></script>
+<script src="html2canvas.min.js"></script>
+<script th:inline="javascript">
+    console.log("script works");
+    var target = document.getElementById(/*[[${session.pointer}]]*/);
+    const end = target.value.length;
+    console.log(end);
+        target.setSelectionRange(end, end);
+
+        if (target.parentElement.parentElement.id.substring(3, 6) != 'tr0') {
+            showAgents(target.parentElement.parentElement.getAttribute('name'));
+        }
+
+        target.focus();
+        currentRow = target.parentElement.parentElement.getAttribute("name");
+</script>
+</html>

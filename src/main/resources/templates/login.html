@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Авторизация</title>
     <link href="main.css" rel="stylesheet">
 </head>
 <body>
-  <h2>Авторизация</h2>
-  <form method="post" action="log_in">
+<h2>Авторизация</h2>
+<form action="log_in" method="post">
     <label for="login">Логин</label>
-    <input type="text" name="login" id="login">
+    <input id="login" name="login" type="text">
     <label for="password">Пароль</label>
-    <input type="password" name="password" id="password">
-      <input type="submit" value="Войти">
-  </form>
+    <input id="password" name="password" type="password">
+    <input type="submit" value="Войти">
+</form>
 </body>
 </html>

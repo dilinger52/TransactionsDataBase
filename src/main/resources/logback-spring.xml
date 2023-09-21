@@ -12,8 +12,11 @@
         </filter>
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-                %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1}): %msg%n%throwable
+                %white(%d{UTF-8}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1}): %msg%n%throwable
             </Pattern>
+            <Charset>
+                UTF-8
+            </Charset>
         </layout>
     </appender>
 

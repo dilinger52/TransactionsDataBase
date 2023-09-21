@@ -1,6 +1,7 @@
 package org.profinef.entity;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class User implements Serializable {
     int id;
@@ -52,4 +53,15 @@ public class User implements Serializable {
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User user)) return false;
+        return getId() == user.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 }

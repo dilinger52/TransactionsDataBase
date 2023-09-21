@@ -10,62 +10,66 @@
 <h2 class="inline">Перевод валют</h2>
 <th:block th:insert="userBlock.html :: user_block"></th:block>
 <h3 th:text="|Клиент: ${session.client.pib}|"></h3>
-<form method="get" action="client_info">
+<form action="client_info" method="get">
     <input type="submit" value="<- Назад">
 </form>
-<form method="post" action="transaction">
-    <input type="hidden" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
-    <input type="hidden" name="amount" id="amount2">
-    <input type="hidden" name="currency_name" id="currency2">
-    <input type="hidden" name="rate" value="1">
-    <input type="hidden" name="rate" value="1">
-    <input type="hidden" name="comment" value="Перевод">
-    <input type="hidden" name="comment" value="Перевод">
+<form action="transaction" method="post">
+    <input name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" type="hidden">
+    <input id="amount2" name="positiveAmount" type="hidden">
+    <input id="currency2" name="currency_name" type="hidden">
+    <input name="rate" type="hidden" value="1">
+    <input name="rate" type="hidden" value="1">
+    <input name="comment" type="hidden" value="Перевод">
+    <input name="comment" type="hidden" value="Перевод">
     <div>
-    <div class="inline">
-    <label for="currency1">Валюта</label>
-    <input type="text" name="currency_name" id="currency1" onkeyup="transferCurrency()" list="currency_datalist" required>
-        <datalist id="currency_datalist">
-            <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
-        </datalist>
-    </div>
-    <div class="inline">
-    <label for="amount1">Количество</label>
-    <input type="text" name="amount" id="amount1" onkeyup="transfer()" required>
-    </div>
+        <div class="inline">
+            <label for="currency1">Валюта</label>
+            <input autocomplete="off" id="currency1" list="currency_datalist" name="currency_name" onkeyup="transferCurrency()"
+                   required type="text">
+            <datalist id="currency_datalist">
+                <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
+            </datalist>
+        </div>
+        <div class="inline">
+            <label for="amount1">Количество</label>
+            <input id="amount1" name="positiveAmount" onkeyup="transfer()" required type="text">
+        </div>
     </div>
     <div>
-    <div class="inline">
-    <label for="client1">Клиент отправляющий</label>
-    <input type="text" name="client_name" th:value="${session.client.pib}" id="client1" list="client_datalist" readonly>
+        <div class="inline">
+            <label for="client1">Клиент отправляющий</label>
+            <input id="client1" name="client_name" readonly th:value="${session.client.pib}" type="text">
 
-    </div>
-    <div class="inline">
-    <label for="commission1">Комиссия</label>
-    <input type="text" name="commission" id="commission1" value="0" required>
-    </div>
-    <div class="inline">
-    <label for="transportation1">Инкасация</label>
-    <input type="text" name="transportation" id="transportation1" value="0" required>
-    </div>
+        </div>
+        <div class="inline">
+            <label for="commission1">Комиссия</label>
+            <input id="commission1" name="commission" required type="text" value="0">
+        </div>
+        <div class="inline">
+            <label for="transportation1">Инкасация</label>
+            <input id="transportation1" name="transportation" required type="text" value="0">
+        </div>
     </div>
     <div>
-    <div class="inline">
-    <label for="client2">Клиент получающий</label>
-    <input type="text" name="client_name" id="client2" list="client_datalist" required>
-        <datalist id="client_datalist">
-            <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
-        </datalist>
+        <div class="inline">
+            <label for="client2">Клиент получающий</label>
+            <input autocomplete="off" id="client2" list="client_datalist" name="client_name" required type="text">
+            <datalist id="client_datalist">
+                <option th:each="client : ${session.clients}" th:if="${client.pib != 'Всего'}"
+                        th:value="${client.pib}"></option>
+            </datalist>
+        </div>
+        <div class="inline">
+            <label for="commission2">Комиссия</label>
+            <input id="commission2" name="commission" required type="text" value="0">
+        </div>
+        <div class="inline">
+            <label for="transportation2">Инкасация</label>
+            <input id="transportation2" name="transportation" required type="text" value="0">
+        </div>
     </div>
-    <div class="inline">
-    <label for="commission2">Комиссия</label>
-    <input type="text" name="commission" id="commission2" value="0" required>
-    </div>
-    <div class="inline">
-    <label for="transportation2">Инкасация</label>
-    <input type="text" name="transportation" id="transportation2" value="0" required>
-    </div>
-    </div>
+    <input name="negativeAmount" type="hidden" value="0">
+    <input name="negativeAmount" type="hidden" value="0">
     <input type="submit">
 </form>
 </body>

@@ -3,7 +3,7 @@ package org.profinef.repository;
 import org.profinef.dto.ClientDto;
 import org.springframework.data.repository.CrudRepository;
 
-import java.sql.Date;
+import java.util.List;
 import java.util.Optional;
 
 public interface ClientRepository extends CrudRepository<ClientDto, Integer> {
@@ -13,12 +13,13 @@ public interface ClientRepository extends CrudRepository<ClientDto, Integer> {
     void deleteById(Integer integer);
 
     Optional<ClientDto> findByIdOrderByPib(Integer integer);
-
     ClientDto findByPibIgnoreCaseOrderByPib(String name);
 
+    List<ClientDto> findAllByPibContainsIgnoreCaseOrderByPib(String name);
 
-    ClientDto findByPhoneOrderByPib(String phone);
 
-    ClientDto findByTelegramOrderByPib(String telegram);
+    List<ClientDto> findAllByPhoneContainsOrderByPib(String phone);
+
+    List<ClientDto> findAllByTelegramContainsOrderByPib(String telegram);
 
 }

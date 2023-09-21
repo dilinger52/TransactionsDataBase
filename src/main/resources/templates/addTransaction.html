@@ -8,75 +8,84 @@
     <script src="main.js"></script>
 </head>
 <body>
-<h2 class="inline" th:text="${session.path == '/add_transaction' ? 'Добавление транзакции' : session.path == '/edit' ? 'Редактирование транзакции' : ''}"></h2>
+<h2 class="inline"
+    th:text="${session.path == '/add_transaction' ? 'Добавление транзакции' : session.path == '/edit' ? 'Редактирование транзакции' : ''}"></h2>
 <th:block th:insert="userBlock.html :: user_block"></th:block>
-<form method="get" th:action="${session.path == '/add_transaction' ? '/client' : session.path == '/edit' ? '/client_info' : ''}">
-  <input type="submit" value="<- Назад">
+<form method="get"
+      th:action="${session.path == '/add_transaction' ? '/client' : session.path == '/edit' ? '/client_info' : ''}">
+    <input type="submit" value="<- Назад">
 </form>
 <th:block th:fragment="add_transaction">
-<form class="inline">
-  <input type="button" onclick="add_form()" value="Добавить строку" />
-</form>
-<form class="inline">
-  <input type="button" onclick="delete_form()" value="Удалить строку" />
-</form>
+    <form class="inline">
+        <input onclick="add_form()" type="button" value="Добавить строку"/>
+    </form>
+    <form class="inline">
+        <input onclick="delete_form()" type="button" value="Удалить строку"/>
+    </form>
 
-<form method="post" th:action="${session.path == '/add_transaction' ? 'transaction' : session.path == '/edit' ?
- 'edit_transaction' : session.path == '/client_info' ? 'transaction' : ''}" id="form_id">
-  <input type="date" name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
-  <div id="divOut">
-  <div th:each="t,id : ${session.transaction}" style="min-width: 1550px;" th:id="|divIn${id.index}|">
-    <div class="inline">
-      <input type="hidden" name="transaction_id" th:value="${t.id}">
-      <label for="client_name">Клиент</label>
-      <input type="text" id="client_name" name="client_name" list="client_datalist" th:value="${t.client.pib}" required>
-      <datalist id="client_datalist">
-        <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}" th:value="${client.client.pib}"></option>
-      </datalist>
-    </div>
-    <div class="inline">
-      <label for="comment">Комментарий</label>
-      <input type="text" list="comment_datalist" id="comment" name="comment" th:value="${t.comment}">
-      <datalist id="comment_datalist">
-        <option th:each="comment : ${session.comments}" th:value="${comment}"></option>
-      </datalist>
-    </div>
-    <div class="inline">
-      <label for="currency_id">Валюта</label>
-      <input type="text" id="currency_id" name="currency_name" list="currency_datalist" th:value="${t.currency.name}" required>
-      <datalist id="currency_datalist">
-        <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
-      </datalist>
-    </div>
-    <div class="inline">
-      <label for="rate">Обменный курс</label>
-      <input type="text" id="rate" name="rate" th:value="${t.rate}" onkeyup="sumInputs()" required>
-    </div>
-    <div class="inline">
-      <label for="commission">Комиссия в процентах</label>
-      <input type="text" id="commission" name="commission" th:value="${t.commission}" required>
-    </div>
-    <div class="inline">
-      <label for="transportation">Инкасация</label>
-      <input type="text" id="transportation" name="transportation" th:value="${t.transportation}" required>
-    </div>
-    <div class="inline">
-      <label for="amount">Объем</label>
-      <input type="text" id="amount" name="amount" th:value="${t.amount}" onkeyup="sumInputs()" required>
-    </div>
-    <div class="inline">
-      <label for="value">Рекомендуемое значение:</label>
-      <p id="value">0.00</p>
-    </div>
-  </div>
-  </div>
-    <input type="submit" value="Сохранить">
-</form>
-  <form method="post" action="delete_transaction" th:if="${session.path == '/edit'}">
-    <input type="hidden" name="transaction_id" th:value="${session.transaction[0].id}">
-    <input type="submit" value="Удалить" class="inline">
-  </form>
-  <p>Баланс по транзакции в гривне: <span id="out"></span></p>
+    <form id="form_id" method="post" th:action="${session.path == '/add_transaction' ? 'transaction' : session.path == '/edit' ?
+ 'edit_transaction' : session.path == '/client_info' ? 'transaction' : ''}">
+        <input name="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" type="date">
+        <div id="divOut">
+            <div style="min-width: 1550px;" th:each="t,id : ${session.transaction}" th:id="|divIn${id.index}|">
+                <div class="inline">
+                    <input name="transaction_id" th:value="${t.id}" type="hidden">
+                    <label for="client_name">Клиент</label>
+                    <input autocomplete="off" id="client_name" list="client_datalist" name="client_name"
+                           required th:value="${t.client.pib}" type="text">
+                    <datalist id="client_datalist">
+                        <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}"
+                                th:value="${client.client.pib}"></option>
+                    </datalist>
+                </div>
+                <div class="inline">
+                    <label for="comment">Комментарий</label>
+                    <input autocomplete="off" id="comment" list="comment_datalist" name="comment" th:value="${t.comment}"
+                           type="text">
+                    <datalist id="comment_datalist">
+                        <option th:each="comment : ${session.comments}" th:value="${comment}"></option>
+                    </datalist>
+                </div>
+                <div class="inline">
+                    <label for="currency_id">Валюта</label>
+                    <input autocomplete="off" id="currency_id" list="currency_datalist" name="currency_name"
+                           required th:value="${t.currency.name}" type="text">
+                    <datalist id="currency_datalist">
+                        <option th:each="currency : ${session.currencies}" th:value="${currency.name}"></option>
+                    </datalist>
+                </div>
+                <div class="inline">
+                    <label for="rate">Обменный курс</label>
+                    <input id="rate" name="rate" onkeyup="sumInputs()" required th:value="${t.rate}" type="text">
+                </div>
+                <div class="inline">
+                    <label for="commission">Комиссия в процентах</label>
+                    <input id="commission" name="commission" required th:value="${t.commission}" type="text">
+                </div>
+                <div class="inline">
+                    <label for="transportation">Инкасация</label>
+                    <input id="transportation" name="transportation" required th:value="${t.transportation}"
+                           type="text">
+                </div>
+                <div class="inline">
+                    <label for="amount">Объем</label>
+                    <input id="amount" name="positiveAmount" onkeyup="sumInputs()" required th:value="${t.amount}"
+                           type="text">
+                    <input name="negativeAmount" type="hidden" value="0.0">
+                </div>
+                <div class="inline">
+                    <label for="value">Рекомендуемое значение:</label>
+                    <p id="value">0.00</p>
+                </div>
+            </div>
+        </div>
+        <input type="submit" value="Сохранить">
+    </form>
+    <form action="delete_transaction" method="post" th:if="${session.path == '/edit'}">
+        <input name="transaction_id" th:value="${session.transaction[0].id}" type="hidden">
+        <input class="inline" type="submit" value="Удалить">
+    </form>
+    <p>Баланс по транзакции в гривне: <span id="out"></span></p>
 </th:block>
 </body>
 </html>

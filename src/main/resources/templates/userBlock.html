@@ -6,24 +6,36 @@
     <link href="main.css" rel="stylesheet">
 </head>
 <body>
-    <div style="float: right; margin-right: 25px;" th:fragment="user_block">
-
-      <p class="inline" th:text="${session.user.role.name}"></p>
-      <h4 class="inline" th:text="${session.user.login}"></h4>
-        <form th:if="${session.user.role.name == 'Admin'}" method="get" action="users" class="inline">
-            <input type="submit" value="Пользователи">
+<div class="col" style="float: right; margin-right: 25px; width: min-content;" th:fragment="user_block">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <div style="width: max-content;">
+        <input class="inline check-with-label" id="connection" type="radio">
+        <label class="inline sphere2 lime label-for-check" for="connection" id="connectionLabel"></label>
+        <p class="inline" th:text="${session.user.role.name}"></p>
+        <h4 class="inline" th:text="${session.user.login}"></h4>
+        <form action="users" class="inline" method="get" th:if="${session.user.role.name == 'Admin'}">
+            <input type="submit" value="Админпанель">
         </form>
-        <form method="get" action="user_settings" class="inline">
+        <form action="user_settings" class="inline" method="get">
             <input type="submit" value="Настроить">
         </form>
-      <form method="post" action="log_out" class="inline">
-        <input type="submit" value="Выйти">
-      </form>
-        <p style="color: red;" th:if="${session.user.password == 'd17f25ecfbcc7857f7bebea469308be0b2580943e96d13a3ad98a13675c4bfc2'}">
-            Смените пароль. Использование стандартного пароля не безопасно
-        </p>
-
+        <form action="log_out" class="inline" method="post">
+            <input type="submit" value="Выйти">
+        </form>
     </div>
+    <p style="color: red;" th:text="${session.mes}"></p>
+    <!--/*<script th:inline="javascript">
+       // <![CDATA[
+    // Get the message from Thymeleaf variable
+    var alertMessage = [[${session.mes}]];
+
+    // Display the message in a JavaScript alert
+    window.onload = function() {
+        alert(alertMessage);
+    };
+    //]]>
+    </script>*/-->
+</div>
 
 
 </body>

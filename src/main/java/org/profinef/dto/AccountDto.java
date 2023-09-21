@@ -12,6 +12,8 @@ public class AccountDto {
     Integer currencyId;
     @Column
     double amount;
+    @Column(name = "amount_color")
+    String amountColor;
 
     public AccountDto() {
     }
@@ -47,12 +49,21 @@ public class AccountDto {
     }
 
 
+    public String getAmountColor() {
+        return amountColor;
+    }
+
+    public void setAmountColor(String amountColor) {
+        this.amountColor = amountColor;
+    }
+
     @Override
     public String toString() {
-        return "CurrencyDbo{" +
+        return "AccountDto{" +
                 "clientId=" + clientId +
                 ", currencyId=" + currencyId +
                 ", amount=" + amount +
+                ", amountColor='" + amountColor + '\'' +
                 '}';
     }
 }

@@ -9,7 +9,7 @@
 <h3 class="inline">
     Страница загрузки эксель таблицы
 </h3>
-<th:block th:insert="userBlock.html :: user_block"></th:block>
+<th:block th:insert="~{userBlock.html :: user_block}"></th:block>
 <form action="client" method="get">
     <input type="submit" value="<- Назад">
 </form>

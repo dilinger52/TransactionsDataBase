@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -37,24 +38,21 @@ public class Scheduler {
     @PreDestroy
     @Scheduled(cron = "0 0 8,14 * * *")
     public void makeBackUp() throws Exception {
-        logger.info("Making backupLocal");
+        logger.info("Making backup");
         String date = new SimpleDateFormat("dd-MM-yyyy_HH-mm").format(new Date());
         boolean doneLocal = DatabaseUtil.backupLocal("root", "2223334456", "transactions", "backup\\" + date + ".sql");
         if (doneLocal) {
-            logger.info("Local backupLocal made");
+            logger.info("Local backup made");
         } else {
             logger.info("some errors with local backup");
-        }
+        }/*
         DatabaseUtil.copyBackup("Desktop-7bo0mfq", "oper", "oper01", "Desktop-7bo0mfq", "qaz", "backup\\" + date + ".sql");
-
-
-
-
+        logger.info("Network backup made");*/
     }
-/*
-    /*@Scheduled(cron = "0 0 22 * * *")
+
+    /*@Scheduled(cron = "0 0 22 * * *")*/
     public void restoreFromBackUp() throws Exception {
-        File directory = new File("backupLocal\\");
+        File directory = new File("backup\\");
         File[] files = directory.listFiles(File::isFile);
         long lastModifiedTime = Long.MIN_VALUE;
         File chosenFile = null;
@@ -72,16 +70,16 @@ public class Scheduler {
         assert chosenFile != null;
         boolean doneLocal = DatabaseUtil.restore("root", "2223334456", "transactions", chosenFile.getPath());
         if (doneLocal) {
-            logger.info("Restored from backupLocal");
+            logger.info("Restored from backup");
         } else {
-            logger.info("some errors with restoring from backupLocal");
+            logger.info("some errors with restoring from backup");
         }
-    }*/
+    }
 
-    /*@Scheduled(cron = "0 30 22 * * *")
+    /*@Scheduled(cron = "0 30 22 * * *")*/
     public void makeExcel() throws Exception {
         excelManager.createFull();
-    }*/
+    }
 
 
 }

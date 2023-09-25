@@ -9,7 +9,7 @@
 </head>
 <body>
 <h2 class="inline">Добавление клиента</h2>
-<th:block th:insert="userBlock.html :: user_block"></th:block>
+<th:block th:insert="~{userBlock.html :: user_block}"></th:block>
 <form action="client" method="get" th:action="${session.path == '/new_client' ? 'client' : session.path == '/edit_client' ?
  'client_info' : ''}">
     <input type="submit" value="<- Назад">

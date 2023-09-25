@@ -10,7 +10,7 @@
 <div class="header" id="header">
     <div>
         <h2 class="inline">Главная</h2>
-        <th:block th:insert="userBlock.html :: user_block"></th:block>
+        <th:block th:insert="~{userBlock.html :: user_block}"></th:block>
 
         <div>
             <form action="client" class="inline" method="get">

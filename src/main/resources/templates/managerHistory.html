@@ -9,7 +9,7 @@
 <body>
 <div class="header" id="header">
     <h2 class="inline" th:text="|Менеджер: ${session.manager.login}|"></h2>
-    <th:block th:insert="userBlock.html :: user_block"></th:block>
+    <th:block th:insert="~{userBlock.html :: user_block}"></th:block>
     <div>
         <form action="users" class="inline" method="get">
             <input type="submit" value="<- Назад">

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -54,7 +55,7 @@ public final class DatabaseUtil {
                 fileAttributes.add(FileAttributes.FILE_ATTRIBUTE_NORMAL);
                 Set<SMB2CreateOptions> createOptions = new HashSet<>();
                 createOptions.add(SMB2CreateOptions.FILE_RANDOM_ACCESS);
-                File f = share.openFile(inputFile, new HashSet(Arrays.asList(new AccessMask[]{AccessMask.GENERIC_ALL})), fileAttributes, SMB2ShareAccess.ALL, SMB2CreateDisposition.FILE_OVERWRITE_IF, createOptions);
+                File f = share.openFile(inputFile, new HashSet(List.of(AccessMask.GENERIC_ALL)), fileAttributes, SMB2ShareAccess.ALL, SMB2CreateDisposition.FILE_OVERWRITE_IF, createOptions);
 
                 OutputStream oStream = f.getOutputStream();
                 oStream.write(input.readAllBytes());

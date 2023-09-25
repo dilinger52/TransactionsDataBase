@@ -8,7 +8,7 @@
 </head>
 <body>
 <h2 class="inline">Редактирование транзакции</h2>
-<th:block th:insert="userBlock.html :: user_block"></th:block>
+<th:block th:insert="~{userBlock.html :: user_block}"></th:block>
 <form action="client_info" method="get">
     <input type="submit" value="<- Назад">
 </form>

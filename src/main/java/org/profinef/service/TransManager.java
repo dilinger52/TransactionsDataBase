@@ -436,9 +436,10 @@ public class TransManager {
 
     public Timestamp getAvailableDate(Timestamp date) {
         Timestamp nextDate = Timestamp.valueOf(LocalDate.ofInstant(new Date(date.getTime() + 86400000).toInstant(), ZoneId.systemDefault()).atStartOfDay());
-        Timestamp max = transactionRepository.getMaxDateForDay(date, nextDate);
+        Timestamp currentDate = Timestamp.valueOf(LocalDate.ofInstant(new Date(date.getTime()).toInstant(), ZoneId.systemDefault()).atStartOfDay());
+        Timestamp max = transactionRepository.getMaxDateForDay(currentDate, nextDate);
         if (max == null) {
-            return Timestamp.valueOf(LocalDate.ofInstant(new Date(date.getTime()).toInstant(), ZoneId.systemDefault()).atStartOfDay());
+            return currentDate;
         }
         return new Timestamp(max.getTime() + 1000);
     }

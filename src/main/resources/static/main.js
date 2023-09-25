@@ -275,6 +275,7 @@ async function autosave(element){
 
 
 window.addEventListener('load', e => {
+if (document.activeElement == null) {
 inputs = document.getElementsByTagName('input');
     for (d = 0; d < inputs.length; d++) {
      // если в localStorage имеются данные
@@ -293,6 +294,8 @@ inputs = document.getElementsByTagName('input');
         break;
      }
      }
+}
+
  });
 
  // Function to set the top position based on the height of the reference element
@@ -938,8 +941,6 @@ var exchangeRates = document.getElementsByClassName("exchange");
     var result = 0;
     for (var i = 0; i < exchangeRates.length; i++) {
         for (var k = 0; k < pAmount.length; ) {
-            console.log(pAmount[k].parentElement.parentElement.parentElement.id);
-            console.log(exchangeRates[i].name);
             if (pAmount[k].parentElement.parentElement.parentElement.id == exchangeRates[i].name) {
                 currencyrate[exchangeRates[i].name] = Number(exchangeRates[i].value.replace(/ /g,'').replace(',','.'));
             }

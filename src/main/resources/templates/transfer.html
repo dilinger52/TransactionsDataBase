@@ -8,7 +8,7 @@
 </head>
 <body>
 <h2 class="inline">Перевод валют</h2>
-<th:block th:insert="userBlock.html :: user_block"></th:block>
+<th:block th:insert="~{userBlock.html :: user_block}"></th:block>
 <h3 th:text="|Клиент: ${session.client.pib}|"></h3>
 <form action="client_info" method="get">
     <input type="submit" value="<- Назад">

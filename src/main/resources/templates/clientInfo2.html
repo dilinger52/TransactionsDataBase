@@ -18,7 +18,7 @@
         <input class="inline" type="submit" value="Перейти">
     </form>
 
-    <th:block th:insert="userBlock.html :: user_block"></th:block>
+    <th:block th:insert="~{userBlock.html :: user_block}"></th:block>
     <p style="color: red;" th:if="${session.client_alert != null}" th:text="${session.client_alert}"></p>
     <div>
         <form action="client" class="inline" method="get">
@@ -80,6 +80,23 @@
             <label class="inline italic sphere none label-for-check" for="noitalic">i</label>
         </form>
         <button class="inline" onclick="capture()">Скриншот</button>
+        <form action="undo" method="post" class="inline">
+            <button type="submit" value="Отменить" class="inline">
+                <img src="/images/undo-alt.png" height="8px">
+            </button>
+            <select name="id">
+                <option class="inline" th:each="undo,iter : ${session.undos__${session.client.id}__}" th:text="${undo.name}" th:value="${iter.index}" th:selected="${iter.index == 0}"></option>
+            </select>
+        </form>
+        <form action="redo" method="post" class="inline">
+            <button type="submit" value="Повторить" class="inline">
+                <img src="/images/redo-alt.png" height="8px">
+            </button>
+            <select name="id">
+                <option class="inline" th:each="redo,iter : ${session.redos__${session.client.id}__}" th:text="${redo.name}" th:value="${iter.index}" th:selected="${iter.index == 0}"></option>
+            </select>
+        </form>
+
     </div>
 </div>
 <input class="exchange" th:each="currency : ${session.currencies}" th:name="${currency.name}" th:value="${currency.averageExchange}"

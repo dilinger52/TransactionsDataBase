@@ -237,7 +237,7 @@ public class ExcelManager {
                             }
 
                         }
-                        if (row.getCell(0).getDateCellValue().toInstant()
+                        if (row.getCell(0) != null && row.getCell(0).getDateCellValue().toInstant()
                                 .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay()
                                 .isAfter(transaction.getDate().toInstant()
                                         .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay())) {

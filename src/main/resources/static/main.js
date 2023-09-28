@@ -205,14 +205,20 @@ async function autosave(element){
             console.log(oldRow);
             console.log(element.srcElement.id);
             if (oldRow != null) {
-            console.log(1);
                 form = document.getElementById(oldRow.substring(3));
 
                 var positiveAmount = document.querySelectorAll("input[form='" + form.id + "'][name='positiveAmount']");
                 var negativeAmount = document.querySelectorAll("input[form='" + form.id + "'][name='negativeAmount']");
                 var client = document.querySelectorAll("input[form='" + form.id + "'][name='client_name']");
                 for (var i = 0; i < positiveAmount.length; i++) {
-                    if (Number(positiveAmount[i].value.replace(/ /g,'').replace(',','.')) + Number(negativeAmount[i].value.replace(/ /g,'').replace(',','.')) != 0 && client[i] != '') {
+                    console.log('client: ' + client[i].value);
+                    if (client[i].value == '') return;
+                }
+
+                for (var i = 0; i < positiveAmount.length; i++) {
+
+                    if (Number(positiveAmount[i].value.replace(/ /g,'').replace(',','.')) + Number(negativeAmount[i].value.replace(/ /g,'').replace(',','.')) != 0
+                    && client[i].value != '') {
                         form.submit();
                         element.srcElement.setAttribute('readonly', true);
                     }
@@ -548,6 +554,8 @@ html2canvas(document.querySelector("table th.highlight").parentElement.parentEle
     },
     scale: 2,
     backgroundColor: null,
+    allowTaint: true,
+    useCORS: true,
     onclone: (clonDoc) => {
         var elements = clonDoc.querySelectorAll("*");
         for (var element of elements) {
@@ -599,10 +607,12 @@ function showAgents(id) {
         //rows[i].style.color = color;
     }
     console.log(id);
-    var button = document.querySelector('input[id="' + id + '"');
+    var button = document.querySelector('button[id="' + id + '"');
 
     button.setAttribute('onclick', 'hideAgents(id)');
-    button.value = "Скрыть";
+    var img = button.querySelector('img');
+    img.src = '/images/eye-crossed.png';
+    img.title = 'Скрыть контрагентов';
 }
 
 function hideAgents(id) {
@@ -611,10 +621,12 @@ var rows = document.getElementsByName(id);
 
         rows[i].style.display = "none";
     }
-    var button = document.querySelector('input[id="' + id + '"');
+    var button = document.querySelector('button[id="' + id + '"');
 
     button.setAttribute('onclick', 'showAgents(id)');
-    button.value = "Показать";
+    var img = button.querySelector('img');
+    img.src = '/images/eye.png';
+    img.title = 'Показать контрагентов';
 }
 
 function addRow(id, form) {
@@ -640,10 +652,15 @@ function addRow(id, form) {
         input0.setAttribute("Form", 'form' + form);
     tr.appendChild(input0);
     const th1 = document.createElement('th');
-        const input1 = document.createElement('input');
+        const input1 = document.createElement('button');
             input1.type = "button";
             input1.value = "Удалить строку";
             input1.setAttribute("onclick", "deleteRow('" + id + "tr" + num + "')");
+            const img = document.createElement('img');
+                img.src = '/images/delete-user.png';
+                //img.height = '16px';
+                img.title = 'Удалить контрагента';
+            input1.appendChild(img);
         th1.appendChild(input1);
     tr.appendChild(th1);
     const th2 = document.createElement('th');
@@ -656,7 +673,7 @@ function addRow(id, form) {
             input3.setAttribute("autocomplete", "off");
             input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", 'form' + form);
-            //input3.addEventListener('blur', (element) => {autosave(element)});
+            input3.addEventListener('focus', (element) => {autosave(element)});
         th3.appendChild(input3);
     tr.appendChild(th3);
     const th4 = document.createElement('th');
@@ -702,12 +719,13 @@ function addRow(id, form) {
             const input7 = document.createElement('input');
                 input7.type = "text";
                 input7.name = "commission";
+                input7.class = "commission";
                 input7.id = id + "tr" + num + "_commission";
                 input7.setAttribute("Form", 'form' + form);
                 input7.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                 input7.dataset.id = id + "tr" + num;
                 input7.addEventListener('focus', (element) => {autosave(element)});
-                input7.class = "commission";
+                input7.setAttribute("class", "commission");
             th7.appendChild(input7);
         tr.appendChild(th7);
     const th8 = document.createElement('th');
@@ -717,8 +735,9 @@ function addRow(id, form) {
             const input9 = document.createElement('input');
                 input9.type = "text";
                 input9.name = "rate";
-                input9.setAttribute("Form", 'form' + form);
                 input9.class = "rate";
+                input9.setAttribute("Form", 'form' + form);
+                input9.setAttribute("class", "rate");
                 input9.addEventListener('focus', (element) => {autosave(element)});
             th9.appendChild(input9);
         tr.appendChild(th9);
@@ -726,6 +745,7 @@ function addRow(id, form) {
                 const input10 = document.createElement('input');
                     input10.type = "text";
                     input10.name = "transportation";
+                    input10.setAttribute("class", "transportation");
                     input10.id = id + "tr" + num + "_transportation";
                     input10.class = "transportation";
                     input10.setAttribute("Form", 'form' + form);
@@ -769,10 +789,15 @@ var sum = 0;
     tr.appendChild(input0);
     const th1 = document.createElement('th');
         th1.style.borderTop = "none";
-        const input1 = document.createElement('input');
+        const input1 = document.createElement('button');
             input1.type = "button";
             input1.value = "Удалить строку";
             input1.setAttribute("onclick", "deleteRow('" + num + "')");
+             const img = document.createElement('img');
+                            img.src = '/images/delete-user.png';
+                            //img.height = '16px';
+                            img.title = 'Удалить контрагента';
+                        input1.appendChild(img);
         th1.appendChild(input1);
     tr.appendChild(th1);
     const th2 = document.createElement('th');
@@ -787,6 +812,7 @@ var sum = 0;
             input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", form);
             input3.id = id + "tr" + num + "_client";
+            input3.addEventListener('focus', (element) => {autosave(element)});
         th3.appendChild(input3);
     tr.appendChild(th3);
     const th4 = document.createElement('th');
@@ -837,10 +863,10 @@ var sum = 0;
                 input7.type = "text";
                 input7.name = "commission";
                 input7.id = num + "_commission";
-                input7.class = "commission";
                 input7.setAttribute("Form", form);
                 input7.setAttribute("onkeyup", "changeAssociated('" + num + "')");
                 input7.addEventListener('focus', (element) => {autosave(element)});
+                input7.setAttribute("class", "commission");
             th7.appendChild(input7);
         tr.appendChild(th7);
     const th8 = document.createElement('th');
@@ -852,7 +878,7 @@ var sum = 0;
             const input9 = document.createElement('input');
                 input9.type = "text";
                 input9.name = "rate";
-                input9.class = "rate";
+                input9.setAttribute("class", "rate");
                 input9.setAttribute("Form", form);
                 input9.addEventListener('focus', (element) => {autosave(element)});
             th9.appendChild(input9);
@@ -862,8 +888,9 @@ var sum = 0;
                 const input10 = document.createElement('input');
                     input10.type = "text";
                     input10.name = "transportation";
-                    input10.id = num + "_transportation";
                     input10.class = "transportation";
+                    input10.id = num + "_transportation";
+                    input10.setAttribute("class", "transportation");
                     input10.setAttribute("Form", form);
                     input10.setAttribute("onkeyup", "changeAssociated('" + num + "')");
                     input10.addEventListener('focus', (element) => {autosave(element)});

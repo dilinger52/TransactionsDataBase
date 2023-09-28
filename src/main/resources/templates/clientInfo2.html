@@ -15,7 +15,9 @@
         <datalist id="client_datalist">
             <option th:each="client : ${session.clients}" th:value="${client.pib}"></option>
         </datalist>
-        <input class="inline" type="submit" value="Перейти">
+        <button class="inline" type="submit" value="Перейти">
+            <img src="/images/arrow-right.png" class="inline" height="12px" title="Перейти">
+        </button>
     </form>
 
     <th:block th:insert="~{userBlock.html :: user_block}"></th:block>
@@ -45,9 +47,15 @@
             <th:block th:each="currency : ${session.currencies}" th:if="${currency.name != 'RUB'}">
                 <input class="inline" name="currency_id" th:checked="${#lists.contains(session.currency_name, currency.name)}" th:id="|currency_id${currency.id}|"
                        th:value="${currency.id}" type="checkbox">
-                <label class="inline" th:for="|currency_id${currency.id}|" th:text="${currency.name}"></label>
+                <img th:if="${currency.name == 'UAH'}" src="/images/hryvnia.png" height="16px" class="inline" title="UAH, гривна">
+                <img th:if="${currency.name == 'USD'}" src="/images/dollar.png" height="16px" class="inline" title="USD, доллар">
+                <img th:if="${currency.name == 'EUR'}" src="/images/euro.png" height="16px" class="inline" title="EUR, евро">
+                <img th:if="${currency.name == 'PLN'}" src="/images/zloty.png" height="16px" class="inline" title="PLN, злотый">
+                <!--/*<label class="inline" th:for="|currency_id${currency.id}|" th:text="${currency.name}"></label>*/-->
             </th:block>
-            <input class="inline" type="submit" value="Найти">
+            <button class="inline" type="submit" value="Найти">
+                <img src="/images/search.png" height="12px" title="Найти">
+            </button>
         </form>
         <form class="inline" id="color">
             <input class="inline check-with-label" id="white" name="color" type="radio"
@@ -79,20 +87,22 @@
             <input class="inline check-with-label" id="noitalic" name="color" type="radio" value="">
             <label class="inline italic sphere none label-for-check" for="noitalic">i</label>
         </form>
-        <button class="inline" onclick="capture()">Скриншот</button>
+        <button class="inline" onclick="capture()">
+            <img src="/images/expand.png" height="12px" title="Сделать скриншот">
+        </button>
         <form action="undo" method="post" class="inline">
             <button type="submit" value="Отменить" class="inline">
-                <img src="/images/undo-alt.png" height="8px">
+                <img src="/images/undo-alt.png" height="12px" title="Отменить выбранное действие">
             </button>
-            <select name="id">
+            <select name="id" class="inline" style="max-width: 135px;">
                 <option class="inline" th:each="undo,iter : ${session.undos__${session.client.id}__}" th:text="${undo.name}" th:value="${iter.index}" th:selected="${iter.index == 0}"></option>
             </select>
         </form>
         <form action="redo" method="post" class="inline">
             <button type="submit" value="Повторить" class="inline">
-                <img src="/images/redo-alt.png" height="8px">
+                <img src="/images/redo-alt.png" height="12px" title="Повторить выбранное действие">
             </button>
-            <select name="id">
+            <select name="id" class="inline" style="max-width: 135px;">
                 <option class="inline" th:each="redo,iter : ${session.redos__${session.client.id}__}" th:text="${redo.name}" th:value="${iter.index}" th:selected="${iter.index == 0}"></option>
             </select>
         </form>
@@ -102,11 +112,15 @@
 <input class="exchange" th:each="currency : ${session.currencies}" th:name="${currency.name}" th:value="${currency.averageExchange}"
        type="hidden">
 <div class="currencies">
-    <div class="inline"
+    <div class="inline" style="vertical-align: top;"
          th:each="currency : ${session.currencies}" th:if="${#lists.contains(session.currency_name, currency.name) && currency.name != 'RUB'}">
         <input id="pointer" name="pointer" th:form="|form${currency.id}|" type="hidden">
         <div name="thead" style="background-color: white; position: sticky;">
-            <h3 class="inline" th:text="${currency.name}">HRN</h3>
+            <!--/*<h3 class="inline" th:text="${currency.name}">HRN</h3>*/-->
+            <img th:if="${currency.name == 'UAH'}" src="/images/hryvnia.png" height="16px" class="inline" title="UAH, гривна">
+            <img th:if="${currency.name == 'USD'}" src="/images/dollar.png" height="16px" class="inline" title="USD, доллар">
+            <img th:if="${currency.name == 'EUR'}" src="/images/euro.png" height="16px" class="inline" title="EUR, евро">
+            <img th:if="${currency.name == 'PLN'}" src="/images/zloty.png" height="16px" class="inline" title="PLN, злотый">
             <h3 class="inline"
                 th:text="|Баланс на начало ${#dates.format(session[startDate__${session.client.id}__], 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['amount' + currency.id], 1, 'WHITESPACE')}|"></h3>
             <h3 class="inline"
@@ -150,32 +164,40 @@
 
                         <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                             <input name="transaction_id" th:form="${id}" th:value="${transaction.id}" type="hidden">
-                            <input th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit"
-                                   value="Сохранить">
-                            <input th:form="|del${id}|" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit"
-                                   value="Удалить">
-                            <input th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:onclick="|deleteRow(${currency.id}${iter.index})|"
+                            <button th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit">
+                                <img src="/images/disk.png" height="16px" class="inline" title="Сохранить запись">
+                            </button>
+                            <button th:form="|del${id}|" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit">
+                                <img src="/images/trash.png" height="16px" class="inline" title="Удалить запись">
+                            </button>
+                            <button th:form="${id}" th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:onclick="|deleteRow(${currency.id}${iter.index})|"
                                    type="submit"
-                                   value="Удалить строку">
+                                    value="Удалить строку">
+                                <img src="/images/delete-user.png" height="16px" class="inline" title="Удалить контрагента">
+                            </button>
                         </th>
                         <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}"
                             th:text="${transaction.client.id == session.client.id && transaction.currency.id == currency.id ? #dates.format(transaction.date, 'dd-MM-yyyy') : ''}"></th>
                         <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
-                            <input th:form="${id}"
+                            <button th:form="${id}"
                                    th:id="|${currency.id}${transaction.id}|"
                                    th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" th:onclick="|showAgents(${currency.id}${transaction.id})|"
                                    type="button"
-                                   value="Показать">
-                            <input th:data-1="${currency.name}"
+                                    value="Показать">
+                                <img src="/images/eye.png" height="16px" class="inline" title="Показать контрагентов">
+                            </button>
+                            <button th:data-1="${currency.name}"
                                    th:data-2="|${currency.id}${iter.index}|" th:data-3="${id}" th:data-4="${transaction.date}"
                                    th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" th:onclick="addRowInside(this.getAttribute('data-2'), this.getAttribute('data-1'), this.getAttribute('data-3'), this.getAttribute('data-4'))"
                                    type="button"
-                                   value="Добавить">
+                                    value="Добавить">
+                                <img src="/images/user-add.png" height="16px" class="inline" title="Добавить контрагента">
+                            </button>
                             <input autocomplete="off"
                                    list="client_datalist"
                                    name="client_name" th:form="${id}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_client|"
                                    th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:value="${transaction.client.pib}"
-                                   type="text">
+                                    type="text">
                         </th>
                         <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_comment')|"
                             th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
@@ -265,16 +287,20 @@
                 <input name="client_name" th:form="|form${currency.id}|" th:value="${session.client.pib}" type="hidden">
                 <tr th:id="|${currency.name}tr0|" th:name="|${currency.name}form${currency.id}|">
                     <th>
-                        <input class="inline" th:form="|form${currency.id}|" type="submit" value="Сохранить">
+                        <button class="inline" th:form="|form${currency.id}|" type="submit" value="Сохранить">
+                            <img src="/images/disk.png" height="16px" class="inline" title="Сохранить новую запись">
+                        </button>
                     </th>
                     <th>
                         <input class="date" name="date" th:form="|form${currency.id}|"
                                th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" type="date">
                     </th>
                     <th>
-                        <input th:data-form="|${currency.id}|" th:data-id="|${currency.name}|" th:onclick="addRow(this.getAttribute('data-id'), this.getAttribute('data-form'))"
+                        <button th:data-form="|${currency.id}|" th:data-id="|${currency.name}|" th:onclick="addRow(this.getAttribute('data-id'), this.getAttribute('data-form'))"
                                type="button"
-                               value="Добавить">
+                                value="Добавить">
+                            <img src="/images/user-add.png" height="16px" class="inline" title="Добавить контрагента">
+                        </button>
                     </th>
                     <th>
                         <input name="comment" th:form="|form${currency.id}|" th:id="|${currency.name}tr0_comment|"

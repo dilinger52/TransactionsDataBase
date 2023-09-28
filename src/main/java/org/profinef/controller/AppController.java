@@ -530,47 +530,6 @@ public class AppController {
                     transportation.set(i, 0.0);
                 }
             }
-            if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
-                logger.debug("new action of editing");
-                redos.clear();
-            }
-            if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
-                logger.debug("redoing of editing");
-                Action action = new Action();
-                action.setName("Редактирование");
-                action.setChanges(transactionList);
-                logger.trace(String.valueOf(action));
-                if (!undos.contains(action)) {
-                    undos.push(action);
-                }
-                session.removeAttribute("path");
-            }
-            if (session.getAttribute("path") == "undo") {
-                logger.debug("undoing of editing");
-                Action action = new Action();
-                action.setName("Редактирование");
-                /*List<Transaction> changes = new ArrayList<>();
-                for (int i = 0; i < clientName.size(); i++) {
-                   Transaction change = new Transaction();
-                   change.setId(tr.getId());
-                   change.setClient(clientManager.getClientExactly(clientName.get(i)));
-                   change.setCurrency(currencyManager.getCurrency(currencyName.get(i)));
-                   change.setDate(tr.getDate());
-                   change.setComment(comment.get(i));
-                   change.setAmount(amount.get(i));
-                   change.setCommission(commission.get(i));
-                   change.setRate(rate.get(i));
-                   change.setTransportation(transportation.get(i));
-                   changes.add(change);
-                }
-                action.setChanges(changes);*/
-                action.setChanges(transactionList);
-                logger.trace(String.valueOf(action));
-                if (!redos.contains(action)) {
-                    redos.push(action);
-                }
-                session.removeAttribute("path");
-            }
 
 
             for (int i = 0; i < clientName.size(); i++) {
@@ -619,6 +578,53 @@ public class AppController {
                     transManager.updateNext(key.getPib(), o, newBalances.get(key).get(k) - v, tr.getDate());
                 }
             }
+
+
+            List<Transaction> newTransactionList = transManager.getTransaction(transactionId.get(0));
+            //String change = findChanges(newTransactionList, transactionList);
+            if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
+                logger.debug("new action of editing");
+                redos.clear();
+            }
+            if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
+                logger.debug("redoing of editing");
+                Action action = new Action();
+                //action.setName("Редактирование " + change);
+                action.setName("Редактирование");
+                action.setChanges(transactionList);
+                logger.trace(String.valueOf(action));
+                if (!undos.contains(action)) {
+                    undos.push(action);
+                }
+                session.removeAttribute("path");
+            }
+            if (session.getAttribute("path") == "undo") {
+                logger.debug("undoing of editing");
+                Action action = new Action();
+                //action.setName("Редактирование " + change);
+                action.setName("Редактирование");
+                /*List<Transaction> changes = new ArrayList<>();
+                for (int i = 0; i < clientName.size(); i++) {
+                   Transaction change = new Transaction();
+                   change.setId(tr.getId());
+                   change.setClient(clientManager.getClientExactly(clientName.get(i)));
+                   change.setCurrency(currencyManager.getCurrency(currencyName.get(i)));
+                   change.setDate(tr.getDate());
+                   change.setComment(comment.get(i));
+                   change.setAmount(amount.get(i));
+                   change.setCommission(commission.get(i));
+                   change.setRate(rate.get(i));
+                   change.setTransportation(transportation.get(i));
+                   changes.add(change);
+                }
+                action.setChanges(changes);*/
+                action.setChanges(transactionList);
+                logger.trace(String.valueOf(action));
+                if (!redos.contains(action)) {
+                    redos.push(action);
+                }
+                session.removeAttribute("path");
+            }
             reverse(undos);
             reverse(redos);
             session.setAttribute("undos" + clientId.get(0), undos);
@@ -626,7 +632,7 @@ public class AppController {
             /*String[] pp = pointer.split("_");
             pointer = transactionId + "_" + currencyManager.getCurrency(pp[0].substring(0, 3)).getId() + "_" + clientId.get(0) + "_" + pp[1];*/
         } catch (Exception e) {
-            logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));
+            logger.info("Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
 
             session.setAttribute("error", e.getMessage());
             return "error";
@@ -637,6 +643,55 @@ public class AppController {
 
         return "redirect:/client_info";
     }
+
+    /*private String findChanges(List<Transaction> newTransactionList, List<Transaction> transactionList) {
+        StringBuilder result = new StringBuilder();
+        int length = Math.max(newTransactionList.size(), transactionList.size());
+
+        if (newTransactionList.size() < length) {
+            result.append("удаление контрагента ");
+            for (int i = 0; i < length; i++) {
+                if (!newTransactionList.contains(transactionList.get(i))) {
+                    result.append(transactionList.get(i).getClient().getPib());
+                    break;
+                }
+            }
+            return result.toString();
+        }
+        if (transactionList.size() < length) {
+            result.append("добавление контрагента ");
+            for (int i = 0; i < length; i++) {
+                if (!transactionList.contains(newTransactionList.get(i))) {
+                    result.append(newTransactionList.get(i).getClient().getPib());
+                    break;
+                }
+            }
+            return result.toString();
+        }
+        for (int i = 0; i < length; i++) {
+            if (!Objects.equals(transactionList.get(i).getComment(), newTransactionList.get(i).getComment())) {
+                result.append("изменение комментария ").append(newTransactionList.get(i).getComment());
+                break;
+            }
+            if (!Objects.equals(transactionList.get(i).getAmount(), newTransactionList.get(i).getAmount())) {
+                result.append("изменение объема ").append(newTransactionList.get(i).getAmount());
+                break;
+            }
+            if (!Objects.equals(transactionList.get(i).getCommission(), newTransactionList.get(i).getCommission())) {
+                result.append("изменение тарифа ").append(newTransactionList.get(i).getCommission());
+                break;
+            }
+            if (!Objects.equals(transactionList.get(i).getRate(), newTransactionList.get(i).getRate())) {
+                result.append("изменение курса ").append(newTransactionList.get(i).getRate());
+                break;
+            }
+            if (!Objects.equals(transactionList.get(i).getTransportation(), newTransactionList.get(i).getTransportation())) {
+                result.append("изменение инкасации ").append(newTransactionList.get(i).getTransportation());
+                break;
+            }
+        }
+        return result.toString();
+    }*/
 
     /**
      * Deleting transaction from database
@@ -660,6 +715,9 @@ public class AppController {
         reverse(undos);
         reverse(redos);
         List<Transaction> transactionList = transManager.getTransaction(transactionId);
+        transManager.deleteTransaction(transactionList);
+        List<Transaction> newTransactionList = transManager.getTransaction(transactionId);
+        //String change = findChanges(newTransactionList, transactionList);
         if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
             redos.clear();
             logger.debug("new action of deleting");
@@ -668,6 +726,7 @@ public class AppController {
         if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
             logger.debug("redoing deleting");
             Action action = new Action();
+            //action.setName("Удаление " + change);
             action.setName("Удаление");
             action.setChanges(transactionList);
             logger.trace(String.valueOf(action));
@@ -680,6 +739,7 @@ public class AppController {
         if (session.getAttribute("path") == "undo") {
             logger.debug("undoing adding");
             Action action = new Action();
+            //action.setName("Добавление " + change);
             action.setName("Добавление");
             action.setChanges(transactionList);
             logger.trace(String.valueOf(action));
@@ -691,7 +751,6 @@ public class AppController {
         }
         reverse(undos);
         reverse(redos);
-        transManager.deleteTransaction(transactionList);
         session.setAttribute("undos" + clientId, undos);
         session.setAttribute("redos" + clientId, redos);
         logger.info("Transaction deleted");
@@ -831,6 +890,7 @@ public class AppController {
             }
             int transactionId = transManager.getMaxId() + 1;
             logger.trace("transactionId: " + transactionId);
+            List<Transaction> oldTransactionList = transManager.getTransaction(transactionId);
             List<Integer> currencyId = new ArrayList<>();
             for (String name : currencyName) {
                 currencyId.add(currencyManager.getCurrency(name).getId());
@@ -906,11 +966,13 @@ public class AppController {
                                 rateColor.get(i), transportationColor.get(i));
                     }
                 } catch (Exception e) {
-                    logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));
+                    logger.info("Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
                     session.setAttribute("error", e.getMessage());
                     return "error";
                 }
             }
+
+
             Stack<Action> undos = (Stack<Action>) session.getAttribute("undos" + clientId.get(0));
             if (undos == null) {
                 undos = new Stack<>();
@@ -922,6 +984,7 @@ public class AppController {
             reverse(undos);
             reverse(redos);
             List<Transaction> transactionList = transManager.getTransaction(transactionId);
+            //String change = findChanges(transactionList, oldTransactionList);
             if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
                 logger.debug("new action of adding");
                 redos.clear();
@@ -929,6 +992,7 @@ public class AppController {
             if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
                 logger.debug("redo adding");
                 Action action = new Action();
+                //action.setName("Добавление " + change);
                 action.setName("Добавление");
                 action.setChanges(transactionList);
                 logger.trace(String.valueOf(action));
@@ -941,6 +1005,7 @@ public class AppController {
             if (session.getAttribute("path") == "undo") {
                 logger.debug("undo deleting");
                 Action action = new Action();
+                //action.setName("Удаление " + change);
                 action.setName("Удаление");
                 action.setChanges(transactionList);
                 logger.trace(String.valueOf(action));
@@ -957,8 +1022,14 @@ public class AppController {
             clientId = clientId.stream().distinct().collect(Collectors.toList());
             String[] pp = pointer.split("_");
             pointer = transactionId + "_" + currencyManager.getCurrency(pp[0].substring(0, 3)).getId() + "_" + clientId.get(Integer.parseInt(pp[0].substring(5))) + "_" + pp[1];
+            Date startDate = new Date(((Timestamp) session.getAttribute("startDate" + clientId.get(0))).getTime());
+            if (startDate.after(date)) {
+                startDate = date;
+            }
+            assert startDate != null;
+            session.setAttribute("startDate" + clientId.get(0), new Timestamp(startDate.getTime()));
         } catch (Exception e) {
-            logger.info("Redirecting to error page with error: " + Arrays.toString(e.getStackTrace()));
+            logger.info("Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
             session.setAttribute("error", e.getMessage());
             return "error";
         }
@@ -1599,87 +1670,81 @@ public class AppController {
                 reverse(redos);
                 session.setAttribute("redos" + clientId, redos);
                 session.setAttribute("undos" + clientId, undos);
-                switch (action.getName()) {
-                    case "Редактирование": {
-                        logger.debug("found edit");
-                        List<Transaction> transactions = action.getChanges();
-                        List<Integer> transactionId = new ArrayList<>();
-                        List<String> clientName = new ArrayList<>();
-                        List<String> comment = new ArrayList<>();
-                        List<String> currencyName = new ArrayList<>();
-                        List<String> rate = new ArrayList<>();
-                        List<String> commission = new ArrayList<>();
-                        List<String> positiveAmount = new ArrayList<>();
-                        List<String> negativeAmount = new ArrayList<>();
-                        List<String> transportation = new ArrayList<>();
-                        for (Transaction transaction : transactions) {
-                            transactionId.add(transaction.getId());
-                            clientName.add(transaction.getClient().getPib());
-                            comment.add(transaction.getComment());
-                            currencyName.add((transaction.getCurrency().getName()));
-                            rate.add(String.valueOf(transaction.getRate()));
-                            commission.add(String.valueOf(transaction.getCommission()));
-                            positiveAmount.add(String.valueOf(transaction.getAmount()));
-                            negativeAmount.add(String.valueOf(0.0));
-                            transportation.add(String.valueOf(transaction.getTransportation()));
-                        }
-                        editTransaction(transactionId, clientName, comment, currencyName, rate, commission, positiveAmount, negativeAmount, transportation, "UAHtr0_pAmount", session);
-                        //return "redirect:/client_info";
+                if (action.getName().matches("Редактирование.*")) {
+                    logger.debug("found edit");
+                    List<Transaction> transactions = action.getChanges();
+                    List<Integer> transactionId = new ArrayList<>();
+                    List<String> clientName = new ArrayList<>();
+                    List<String> comment = new ArrayList<>();
+                    List<String> currencyName = new ArrayList<>();
+                    List<String> rate = new ArrayList<>();
+                    List<String> commission = new ArrayList<>();
+                    List<String> positiveAmount = new ArrayList<>();
+                    List<String> negativeAmount = new ArrayList<>();
+                    List<String> transportation = new ArrayList<>();
+                    for (Transaction transaction : transactions) {
+                        transactionId.add(transaction.getId());
+                        clientName.add(transaction.getClient().getPib());
+                        comment.add(transaction.getComment());
+                        currencyName.add((transaction.getCurrency().getName()));
+                        rate.add(String.valueOf(transaction.getRate()));
+                        commission.add(String.valueOf(transaction.getCommission()));
+                        positiveAmount.add(String.valueOf(transaction.getAmount()));
+                        negativeAmount.add(String.valueOf(0.0));
+                        transportation.add(String.valueOf(transaction.getTransportation()));
                     }
-                    break;
-                    case "Удаление": {
-                        logger.debug("found delete");
-                        List<Transaction> transactions = action.getChanges();
-                        List<Integer> transactionId = new ArrayList<>();
-                        Timestamp date = transactions.get(0).getDate();
-                        List<String> clientName = new ArrayList<>();
-                        List<String> comment = new ArrayList<>();
-                        List<String> currencyName = new ArrayList<>();
-                        List<String> rate = new ArrayList<>();
-                        List<String> commission = new ArrayList<>();
-                        List<String> positiveAmount = new ArrayList<>();
-                        List<String> negativeAmount = new ArrayList<>();
-                        List<String> transportation = new ArrayList<>();
-                        List<String> commentColor = new ArrayList<>();
-                        List<String> inputColor = new ArrayList<>();
-                        List<String> outputColor = new ArrayList<>();
-                        List<String> tarifColor = new ArrayList<>();
-                        List<String> commissionColor = new ArrayList<>();
-                        List<String> rateColor = new ArrayList<>();
-                        List<String> transportationColor = new ArrayList<>();
-                        List<String> amountColor = new ArrayList<>();
-                        for (Transaction transaction : transactions) {
-                            transactionId.add(transaction.getId());
-                            clientName.add(transaction.getClient().getPib());
-                            comment.add(transaction.getComment());
-                            currencyName.add((transaction.getCurrency().getName()));
-                            rate.add(String.valueOf(transaction.getRate()));
-                            commission.add(String.valueOf(transaction.getCommission()));
-                            positiveAmount.add(String.valueOf(transaction.getAmount()));
-                            negativeAmount.add(String.valueOf(0.0));
-                            transportation.add(String.valueOf(transaction.getTransportation()));
-                            commentColor.add(transaction.getCommentColor());
-                            inputColor.add(transaction.getInputColor());
-                            outputColor.add(transaction.getOutputColor());
-                            tarifColor.add(transaction.getTarifColor());
-                            commissionColor.add(transaction.getCommissionColor());
-                            rateColor.add(transaction.getRateColor());
-                            transportationColor.add(transaction.getTransportationColor());
-                            amountColor.add(transaction.getAmountColor());
-                        }
-                        doTransaction(clientName, currencyName, comment, rate, commission, positiveAmount, negativeAmount,
-                                transportation, new Date(date.getTime()), "UAHtr0_pAmount", session, commentColor,
-                                inputColor, outputColor, tarifColor, commissionColor, rateColor, transportationColor,
-                                amountColor);
-                        //return "redirect:/client_info";
+                    editTransaction(transactionId, clientName, comment, currencyName, rate, commission, positiveAmount, negativeAmount, transportation, "UAHtr0_pAmount", session);
+                    //return "redirect:/client_info";
+                } else if (action.getName().matches("Удаление.*")) {
+                    logger.debug("found delete");
+                    List<Transaction> transactions = action.getChanges();
+                    List<Integer> transactionId = new ArrayList<>();
+                    Timestamp date = transactions.get(0).getDate();
+                    List<String> clientName = new ArrayList<>();
+                    List<String> comment = new ArrayList<>();
+                    List<String> currencyName = new ArrayList<>();
+                    List<String> rate = new ArrayList<>();
+                    List<String> commission = new ArrayList<>();
+                    List<String> positiveAmount = new ArrayList<>();
+                    List<String> negativeAmount = new ArrayList<>();
+                    List<String> transportation = new ArrayList<>();
+                    List<String> commentColor = new ArrayList<>();
+                    List<String> inputColor = new ArrayList<>();
+                    List<String> outputColor = new ArrayList<>();
+                    List<String> tarifColor = new ArrayList<>();
+                    List<String> commissionColor = new ArrayList<>();
+                    List<String> rateColor = new ArrayList<>();
+                    List<String> transportationColor = new ArrayList<>();
+                    List<String> amountColor = new ArrayList<>();
+                    for (Transaction transaction : transactions) {
+                        transactionId.add(transaction.getId());
+                        clientName.add(transaction.getClient().getPib());
+                        comment.add(transaction.getComment());
+                        currencyName.add((transaction.getCurrency().getName()));
+                        rate.add(String.valueOf(transaction.getRate()));
+                        commission.add(String.valueOf(transaction.getCommission()));
+                        positiveAmount.add(String.valueOf(transaction.getAmount()));
+                        negativeAmount.add(String.valueOf(0.0));
+                        transportation.add(String.valueOf(transaction.getTransportation()));
+                        commentColor.add(transaction.getCommentColor());
+                        inputColor.add(transaction.getInputColor());
+                        outputColor.add(transaction.getOutputColor());
+                        tarifColor.add(transaction.getTarifColor());
+                        commissionColor.add(transaction.getCommissionColor());
+                        rateColor.add(transaction.getRateColor());
+                        transportationColor.add(transaction.getTransportationColor());
+                        amountColor.add(transaction.getAmountColor());
                     }
-                    break;
-                    case "Добавление": {
-                        logger.debug("found add");
-                        List<Transaction> transactions = action.getChanges();
-                        deleteTransaction(transactions.get(0).getId(), session);
-                        //return "redirect:/client_info";
-                    }
+                    doTransaction(clientName, currencyName, comment, rate, commission, positiveAmount, negativeAmount,
+                            transportation, new Date(date.getTime()), "UAHtr0_pAmount", session, commentColor,
+                            inputColor, outputColor, tarifColor, commissionColor, rateColor, transportationColor,
+                            amountColor);
+                    //return "redirect:/client_info";
+                } else if (action.getName().matches("Добавление.*")) {
+                    logger.debug("found add");
+                    List<Transaction> transactions = action.getChanges();
+                    deleteTransaction(transactions.get(0).getId(), session);
+                    //return "redirect:/client_info";
                 }
             }
 
@@ -1720,90 +1785,82 @@ public class AppController {
                 reverse(redos);
                 session.setAttribute("undos" + clientId, undos);
                 session.setAttribute("redos" + clientId, redos);
-                switch (action.getName()) {
-                    case "Редактирование": {
-                        logger.debug("found edit");
-                        List<Transaction> transactions = action.getChanges();
-                        List<Integer> transactionId = new ArrayList<>();
-                        List<String> clientName = new ArrayList<>();
-                        List<String> comment = new ArrayList<>();
-                        List<String> currencyName = new ArrayList<>();
-                        List<String> rate = new ArrayList<>();
-                        List<String> commission = new ArrayList<>();
-                        List<String> positiveAmount = new ArrayList<>();
-                        List<String> negativeAmount = new ArrayList<>();
-                        List<String> transportation = new ArrayList<>();
+                if (action.getName().matches("Редактирование.*")) {
+                    logger.debug("found edit");
+                    List<Transaction> transactions = action.getChanges();
+                    List<Integer> transactionId = new ArrayList<>();
+                    List<String> clientName = new ArrayList<>();
+                    List<String> comment = new ArrayList<>();
+                    List<String> currencyName = new ArrayList<>();
+                    List<String> rate = new ArrayList<>();
+                    List<String> commission = new ArrayList<>();
+                    List<String> positiveAmount = new ArrayList<>();
+                    List<String> negativeAmount = new ArrayList<>();
+                    List<String> transportation = new ArrayList<>();
 
-                        for (Transaction transaction : transactions) {
-                            transactionId.add(transaction.getId());
-                            clientName.add(transaction.getClient().getPib());
-                            comment.add(transaction.getComment());
-                            currencyName.add((transaction.getCurrency().getName()));
-                            rate.add(String.valueOf(transaction.getRate()));
-                            commission.add(String.valueOf(transaction.getCommission()));
-                            positiveAmount.add(String.valueOf(transaction.getAmount()));
-                            negativeAmount.add(String.valueOf(0.0));
-                            transportation.add(String.valueOf(transaction.getTransportation()));
-                        }
-                        editTransaction(transactionId, clientName, comment, currencyName, rate, commission, positiveAmount, negativeAmount, transportation, "UAHtr0_pAmount", session);
-                        //return "redirect:/client_info";
+                    for (Transaction transaction : transactions) {
+                        transactionId.add(transaction.getId());
+                        clientName.add(transaction.getClient().getPib());
+                        comment.add(transaction.getComment());
+                        currencyName.add((transaction.getCurrency().getName()));
+                        rate.add(String.valueOf(transaction.getRate()));
+                        commission.add(String.valueOf(transaction.getCommission()));
+                        positiveAmount.add(String.valueOf(transaction.getAmount()));
+                        negativeAmount.add(String.valueOf(0.0));
+                        transportation.add(String.valueOf(transaction.getTransportation()));
                     }
-                    break;
-                    case "Удаление": {
-                        logger.debug("found delete");
-                        List<Transaction> transactions = action.getChanges();
-                        deleteTransaction(transactions.get(0).getId(), session);
-                        //return "redirect:/client_info";
+                    editTransaction(transactionId, clientName, comment, currencyName, rate, commission, positiveAmount, negativeAmount, transportation, "UAHtr0_pAmount", session);
+                    //return "redirect:/client_info";
+                } else if (action.getName().matches("Удаление.*")) {
+                    logger.debug("found delete");
+                    List<Transaction> transactions = action.getChanges();
+                    deleteTransaction(transactions.get(0).getId(), session);
+                    //return "redirect:/client_info";
+                } else if (action.getName().matches("Добавление.*")) {
+                    logger.debug("found add");
+                    List<Transaction> transactions = action.getChanges();
+                    List<Integer> transactionId = new ArrayList<>();
+                    Timestamp date = transactions.get(0).getDate();
+                    List<String> clientName = new ArrayList<>();
+                    List<String> comment = new ArrayList<>();
+                    List<String> currencyName = new ArrayList<>();
+                    List<String> rate = new ArrayList<>();
+                    List<String> commission = new ArrayList<>();
+                    List<String> positiveAmount = new ArrayList<>();
+                    List<String> negativeAmount = new ArrayList<>();
+                    List<String> transportation = new ArrayList<>();
+                    List<String> commentColor = new ArrayList<>();
+                    List<String> inputColor = new ArrayList<>();
+                    List<String> outputColor = new ArrayList<>();
+                    List<String> tarifColor = new ArrayList<>();
+                    List<String> commissionColor = new ArrayList<>();
+                    List<String> rateColor = new ArrayList<>();
+                    List<String> transportationColor = new ArrayList<>();
+                    List<String> amountColor = new ArrayList<>();
+                    for (Transaction transaction : transactions) {
+                        transactionId.add(transaction.getId());
+                        clientName.add(transaction.getClient().getPib());
+                        comment.add(transaction.getComment());
+                        currencyName.add((transaction.getCurrency().getName()));
+                        rate.add(String.valueOf(transaction.getRate()));
+                        commission.add(String.valueOf(transaction.getCommission()));
+                        positiveAmount.add(String.valueOf(transaction.getAmount()));
+                        negativeAmount.add(String.valueOf(0.0));
+                        transportation.add(String.valueOf(transaction.getTransportation()));
+                        commentColor.add(transaction.getCommentColor());
+                        inputColor.add(transaction.getInputColor());
+                        outputColor.add(transaction.getOutputColor());
+                        tarifColor.add(transaction.getTarifColor());
+                        commissionColor.add(transaction.getCommissionColor());
+                        rateColor.add(transaction.getRateColor());
+                        transportationColor.add(transaction.getTransportationColor());
+                        amountColor.add(transaction.getAmountColor());
                     }
-                    break;
-                    case "Добавление": {
-                        logger.debug("found add");
-                        List<Transaction> transactions = action.getChanges();
-                        List<Integer> transactionId = new ArrayList<>();
-                        Timestamp date = transactions.get(0).getDate();
-                        List<String> clientName = new ArrayList<>();
-                        List<String> comment = new ArrayList<>();
-                        List<String> currencyName = new ArrayList<>();
-                        List<String> rate = new ArrayList<>();
-                        List<String> commission = new ArrayList<>();
-                        List<String> positiveAmount = new ArrayList<>();
-                        List<String> negativeAmount = new ArrayList<>();
-                        List<String> transportation = new ArrayList<>();
-                        List<String> commentColor = new ArrayList<>();
-                        List<String> inputColor = new ArrayList<>();
-                        List<String> outputColor = new ArrayList<>();
-                        List<String> tarifColor = new ArrayList<>();
-                        List<String> commissionColor = new ArrayList<>();
-                        List<String> rateColor = new ArrayList<>();
-                        List<String> transportationColor = new ArrayList<>();
-                        List<String> amountColor = new ArrayList<>();
-                        for (Transaction transaction : transactions) {
-                            transactionId.add(transaction.getId());
-                            clientName.add(transaction.getClient().getPib());
-                            comment.add(transaction.getComment());
-                            currencyName.add((transaction.getCurrency().getName()));
-                            rate.add(String.valueOf(transaction.getRate()));
-                            commission.add(String.valueOf(transaction.getCommission()));
-                            positiveAmount.add(String.valueOf(transaction.getAmount()));
-                            negativeAmount.add(String.valueOf(0.0));
-                            transportation.add(String.valueOf(transaction.getTransportation()));
-                            commentColor.add(transaction.getCommentColor());
-                            inputColor.add(transaction.getInputColor());
-                            outputColor.add(transaction.getOutputColor());
-                            tarifColor.add(transaction.getTarifColor());
-                            commissionColor.add(transaction.getCommissionColor());
-                            rateColor.add(transaction.getRateColor());
-                            transportationColor.add(transaction.getTransportationColor());
-                            amountColor.add(transaction.getAmountColor());
-                        }
-                        doTransaction(clientName, currencyName, comment, rate, commission, positiveAmount, negativeAmount,
-                                transportation, new Date(date.getTime()), "UAHtr0_pAmount", session, commentColor,
-                                inputColor, outputColor, tarifColor, commissionColor, rateColor, transportationColor,
-                                amountColor);
-                        //return "redirect:/client_info";
-
-
-                    }
+                    doTransaction(clientName, currencyName, comment, rate, commission, positiveAmount, negativeAmount,
+                            transportation, new Date(date.getTime()), "UAHtr0_pAmount", session, commentColor,
+                            inputColor, outputColor, tarifColor, commissionColor, rateColor, transportationColor,
+                            amountColor);
+                    //return "redirect:/client_info";
                 }
             }
 

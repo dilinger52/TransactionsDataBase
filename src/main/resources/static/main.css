@@ -52,7 +52,9 @@ input, label {
 display: block;
 }
 .inline {
-display: inline-block;}
+display: inline-block;
+vertical-align: middle;
+}
 
 .header {
 position: fixed;
@@ -133,7 +135,6 @@ background:
   width: 20px;
   border-radius: 50%;
   text-align: center;
-  vertical-align: middle;
   font-size: 120%;
   box-shadow: inset -1px -1px 5px #000, 1px 1px 2px black, inset 0px 0px 1px black;
   position: relative;
@@ -145,7 +146,6 @@ background:
   width: 10px;
   border-radius: 50%;
   text-align: center;
-  vertical-align: middle;
   font-size: 500%;
   box-shadow: inset -0.5px -0.5px 5px #000, 0.5px 0.5px 1px black, inset 0px 0px 0.5px black;
   position: relative;
@@ -205,4 +205,9 @@ width: max-content;
 
 .date {
     width: 60px;
+}
+img {
+margin: 0;
+padding: 0;
+vertical-align: middle;
 }

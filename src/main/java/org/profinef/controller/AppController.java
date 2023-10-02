@@ -502,7 +502,16 @@ public class AppController {
             reverse(undos);
             reverse(redos);
 
-            List<Transaction> transactionList = transManager.getTransaction(transactionId.get(0));
+            List<Transaction> transactionList = transManager.getTransaction(transactionId.get(0)).stream().sorted(new Comparator<>() {
+                final Client client = (Client) session.getAttribute("client");
+
+                @Override
+                public int compare(Transaction o1, Transaction o2) {
+                    if (Objects.equals(o1.getClient().getId(), client.getId())) return -1;
+                    if (Objects.equals(o2.getClient().getId(), client.getId())) return 1;
+                    return 0;
+                }
+            }).toList();
             Map<Client, Map<Currency, Double>> oldBalances = new TreeMap<>();
             Map<Client, Map<Currency, Double>> newBalances = new TreeMap<>();
             Transaction tr = transactionList.get(0);
@@ -580,29 +589,41 @@ public class AppController {
             }
 
 
-            List<Transaction> newTransactionList = transManager.getTransaction(transactionId.get(0));
-            //String change = findChanges(newTransactionList, transactionList);
-            if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
-                logger.debug("new action of editing");
-                redos.clear();
-            }
-            if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
-                logger.debug("redoing of editing");
-                Action action = new Action();
-                //action.setName("Редактирование " + change);
-                action.setName("Редактирование");
-                action.setChanges(transactionList);
-                logger.trace(String.valueOf(action));
-                if (!undos.contains(action)) {
-                    undos.push(action);
+            List<Transaction> newTransactionList = transManager.getTransaction(transactionId.get(0)).stream().sorted(new Comparator<>() {
+                final Client client = (Client) session.getAttribute("client");
+
+                @Override
+                public int compare(Transaction o1, Transaction o2) {
+                    if (Objects.equals(o1.getClient().getId(), client.getId())) return -1;
+                    if (Objects.equals(o2.getClient().getId(), client.getId())) return 1;
+                    return 0;
                 }
-                session.removeAttribute("path");
-            }
-            if (session.getAttribute("path") == "undo") {
-                logger.debug("undoing of editing");
-                Action action = new Action();
-                //action.setName("Редактирование " + change);
-                action.setName("Редактирование");
+            }).toList();
+            String change = findChanges(newTransactionList, transactionList, (Client) session.getAttribute("client"));
+            if (!change.isEmpty()) {
+                logger.debug("found changes");
+                if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
+                    logger.debug("new action of editing");
+                    redos.clear();
+                }
+                if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
+                    logger.debug("redoing of editing");
+                    Action action = new Action();
+                    action.setName("Редактирование " + change);
+                    //action.setName("Редактирование");
+                    action.setChanges(transactionList);
+                    logger.trace(String.valueOf(action));
+                    if (!undos.contains(action)) {
+                        logger.debug("new action");
+                        undos.push(action);
+                    }
+                    session.removeAttribute("path");
+                }
+                if (session.getAttribute("path") == "undo") {
+                    logger.debug("undoing of editing");
+                    Action action = new Action();
+                    action.setName("Редактирование " + change);
+                    //action.setName("Редактирование");
                 /*List<Transaction> changes = new ArrayList<>();
                 for (int i = 0; i < clientName.size(); i++) {
                    Transaction change = new Transaction();
@@ -618,12 +639,14 @@ public class AppController {
                    changes.add(change);
                 }
                 action.setChanges(changes);*/
-                action.setChanges(transactionList);
-                logger.trace(String.valueOf(action));
-                if (!redos.contains(action)) {
-                    redos.push(action);
+                    action.setChanges(transactionList);
+                    logger.trace(String.valueOf(action));
+                    if (!redos.contains(action)) {
+                        logger.debug("new action");
+                        redos.push(action);
+                    }
+                    session.removeAttribute("path");
                 }
-                session.removeAttribute("path");
             }
             reverse(undos);
             reverse(redos);
@@ -640,58 +663,68 @@ public class AppController {
 
         logger.info("Transaction saved");
         session.setAttribute("pointer", pointer);
-
         return "redirect:/client_info";
     }
 
-    /*private String findChanges(List<Transaction> newTransactionList, List<Transaction> transactionList) {
+    private String findChanges(List<Transaction> newTransactionList, List<Transaction> transactionList, Client client) {
         StringBuilder result = new StringBuilder();
         int length = Math.max(newTransactionList.size(), transactionList.size());
-
         if (newTransactionList.size() < length) {
-            result.append("удаление контрагента ");
             for (int i = 0; i < length; i++) {
                 if (!newTransactionList.contains(transactionList.get(i))) {
-                    result.append(transactionList.get(i).getClient().getPib());
-                    break;
+                    if (transactionList.get(i).getClient().equals(client)) {
+                        result.append("записи ").append("\"").append(transactionList.get(i).getAmount()).append("\"");
+                        return result.toString();
+                    }
                 }
             }
-            return result.toString();
+            for (int i = 0; i < length; i++) {
+                if (!newTransactionList.contains(transactionList.get(i))) {
+                    result.append("удаление контрагента ").append("\"").append(transactionList.get(i).getClient().getPib()).append("\"");
+                    return result.toString();
+                }
+            }
         }
         if (transactionList.size() < length) {
-            result.append("добавление контрагента ");
             for (int i = 0; i < length; i++) {
                 if (!transactionList.contains(newTransactionList.get(i))) {
-                    result.append(newTransactionList.get(i).getClient().getPib());
-                    break;
+                    if (newTransactionList.get(i).getClient().equals(client)) {
+                        result.append("записи ").append("\"").append(newTransactionList.get(i).getAmount()).append("\"");
+                        return result.toString();
+                    }
                 }
             }
-            return result.toString();
+            for (int i = 0; i < length; i++) {
+                if (!transactionList.contains(newTransactionList.get(i))) {
+                    result.append("добавление контрагента ").append("\"").append(newTransactionList.get(i).getClient().getPib()).append("\"");
+                    return result.toString();
+                }
+            }
         }
         for (int i = 0; i < length; i++) {
             if (!Objects.equals(transactionList.get(i).getComment(), newTransactionList.get(i).getComment())) {
-                result.append("изменение комментария ").append(newTransactionList.get(i).getComment());
+                result.append("изменение комментария ").append("\"").append(newTransactionList.get(i).getComment()).append("\"");
                 break;
             }
             if (!Objects.equals(transactionList.get(i).getAmount(), newTransactionList.get(i).getAmount())) {
-                result.append("изменение объема ").append(newTransactionList.get(i).getAmount());
+                result.append("изменение объема ").append("\"").append(newTransactionList.get(i).getAmount()).append("\"");
                 break;
             }
             if (!Objects.equals(transactionList.get(i).getCommission(), newTransactionList.get(i).getCommission())) {
-                result.append("изменение тарифа ").append(newTransactionList.get(i).getCommission());
+                result.append("изменение тарифа ").append("\"").append(newTransactionList.get(i).getCommission()).append("\"");
                 break;
             }
             if (!Objects.equals(transactionList.get(i).getRate(), newTransactionList.get(i).getRate())) {
-                result.append("изменение курса ").append(newTransactionList.get(i).getRate());
+                result.append("изменение курса ").append("\"").append(newTransactionList.get(i).getRate()).append("\"");
                 break;
             }
             if (!Objects.equals(transactionList.get(i).getTransportation(), newTransactionList.get(i).getTransportation())) {
-                result.append("изменение инкасации ").append(newTransactionList.get(i).getTransportation());
+                result.append("изменение инкасации ").append("\"").append(newTransactionList.get(i).getTransportation()).append("\"");
                 break;
             }
         }
         return result.toString();
-    }*/
+    }
 
     /**
      * Deleting transaction from database
@@ -717,37 +750,42 @@ public class AppController {
         List<Transaction> transactionList = transManager.getTransaction(transactionId);
         transManager.deleteTransaction(transactionList);
         List<Transaction> newTransactionList = transManager.getTransaction(transactionId);
-        //String change = findChanges(newTransactionList, transactionList);
-        if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
-            redos.clear();
-            logger.debug("new action of deleting");
-        }
-
-        if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
-            logger.debug("redoing deleting");
-            Action action = new Action();
-            //action.setName("Удаление " + change);
-            action.setName("Удаление");
-            action.setChanges(transactionList);
-            logger.trace(String.valueOf(action));
-            if (!undos.contains(action)) {
-                undos.push(action);
+        String change = findChanges(newTransactionList, transactionList, (Client) session.getAttribute("client"));
+        if (!change.isEmpty()) {
+            logger.debug("found changes");
+            if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
+                redos.clear();
+                logger.debug("new action of deleting");
             }
-            session.removeAttribute("path");
 
-        }
-        if (session.getAttribute("path") == "undo") {
-            logger.debug("undoing adding");
-            Action action = new Action();
-            //action.setName("Добавление " + change);
-            action.setName("Добавление");
-            action.setChanges(transactionList);
-            logger.trace(String.valueOf(action));
-            if (!redos.contains(action)) {
-                redos.push(action);
+            if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
+                logger.debug("redoing deleting");
+                Action action = new Action();
+                action.setName("Удаление " + change);
+                //action.setName("Удаление");
+                action.setChanges(transactionList);
+                logger.trace(String.valueOf(action));
+                if (!undos.contains(action)) {
+                    logger.debug("new action");
+                    undos.push(action);
+                }
+                session.removeAttribute("path");
+
             }
-            session.removeAttribute("path");
+            if (session.getAttribute("path") == "undo") {
+                logger.debug("undoing adding");
+                Action action = new Action();
+                action.setName("Добавление " + change);
+                //action.setName("Добавление");
+                action.setChanges(transactionList);
+                logger.trace(String.valueOf(action));
+                if (!redos.contains(action)) {
+                    logger.debug("new action");
+                    redos.push(action);
+                }
+                session.removeAttribute("path");
 
+            }
         }
         reverse(undos);
         reverse(redos);
@@ -899,7 +937,7 @@ public class AppController {
             for (String name : clientName) {
                 clientId.add(clientManager.getClientExactly(name).getId());
             }
-            List arr = new ArrayList<>();
+            List<String> arr = new ArrayList<>();
             for (int i = 0; i < clientName.size(); i++) {
                 arr.add(null);
             }
@@ -984,36 +1022,41 @@ public class AppController {
             reverse(undos);
             reverse(redos);
             List<Transaction> transactionList = transManager.getTransaction(transactionId);
-            //String change = findChanges(transactionList, oldTransactionList);
-            if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
-                logger.debug("new action of adding");
-                redos.clear();
-            }
-            if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
-                logger.debug("redo adding");
-                Action action = new Action();
-                //action.setName("Добавление " + change);
-                action.setName("Добавление");
-                action.setChanges(transactionList);
-                logger.trace(String.valueOf(action));
-                if (!undos.contains(action)) {
-                    undos.push(action);
+            String change = findChanges(transactionList, oldTransactionList, (Client) session.getAttribute("client"));
+            if (!change.isEmpty()) {
+                logger.debug("found changes");
+                if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
+                    logger.debug("new action of adding");
+                    redos.clear();
                 }
-                session.removeAttribute("path");
+                if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
+                    logger.debug("redo adding");
+                    Action action = new Action();
+                    action.setName("Добавление " + change);
+                    //action.setName("Добавление");
+                    action.setChanges(transactionList);
+                    logger.trace(String.valueOf(action));
+                    if (!undos.contains(action)) {
+                        logger.debug("new action");
+                        undos.push(action);
+                    }
+                    session.removeAttribute("path");
 
-            }
-            if (session.getAttribute("path") == "undo") {
-                logger.debug("undo deleting");
-                Action action = new Action();
-                //action.setName("Удаление " + change);
-                action.setName("Удаление");
-                action.setChanges(transactionList);
-                logger.trace(String.valueOf(action));
-                if (!redos.contains(action)) {
-                    redos.push(action);
                 }
-                session.removeAttribute("path");
+                if (session.getAttribute("path") == "undo") {
+                    logger.debug("undo deleting");
+                    Action action = new Action();
+                    action.setName("Удаление " + change);
+                    //action.setName("Удаление");
+                    action.setChanges(transactionList);
+                    logger.trace(String.valueOf(action));
+                    if (!redos.contains(action)) {
+                        logger.debug("new action");
+                        redos.push(action);
+                    }
+                    session.removeAttribute("path");
 
+                }
             }
             reverse(undos);
             reverse(redos);
@@ -1665,7 +1708,11 @@ public class AppController {
                 /*Action action = undos.get(undos.size() - i - 1);
                 undos.pop();*/
                 Action action = undos.pop();
-
+                action.setChanges(action.getChanges().stream().sorted((o1, o2) -> {
+                    if (o1.getClient().getId() == clientId) return -1;
+                    if (o2.getClient().getId() == clientId) return 1;
+                    return 0;
+                }).toList());
                 reverse(undos);
                 reverse(redos);
                 session.setAttribute("redos" + clientId, redos);
@@ -1785,6 +1832,11 @@ public class AppController {
                 reverse(redos);
                 session.setAttribute("undos" + clientId, undos);
                 session.setAttribute("redos" + clientId, redos);
+                action.setChanges(action.getChanges().stream().sorted((o1, o2) -> {
+                    if (o1.getClient().getId() == clientId) return -1;
+                    if (o2.getClient().getId() == clientId) return 1;
+                    return 0;
+                }).toList());
                 if (action.getName().matches("Редактирование.*")) {
                     logger.debug("found edit");
                     List<Transaction> transactions = action.getChanges();

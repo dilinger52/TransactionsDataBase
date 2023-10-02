@@ -203,7 +203,8 @@ async function autosave(element){
                 pointer.value = element.srcElement.id;
             }
             console.log(oldRow);
-            console.log(element.srcElement.id);
+            console.log(currentRow);
+            console.log(element.srcElement.parentElement.parentElement);
             if (oldRow != null) {
                 form = document.getElementById(oldRow.substring(3));
 
@@ -645,6 +646,8 @@ function addRow(id, form) {
 
  const tr = document.createElement('tr');
     tr.id=id + "tr" + num;
+    tr.setAttribute('name', id + "form" + form);
+    console.log(tr.name);
     const input0 = document.createElement('input');
         input0.type = "hidden";
         input0.name = "currency_name";

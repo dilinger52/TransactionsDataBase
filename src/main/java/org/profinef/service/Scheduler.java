@@ -1,10 +1,5 @@
 package org.profinef.service;
 
-import com.hierynomus.smbj.SMBClient;
-import com.hierynomus.smbj.auth.AuthenticationContext;
-import com.hierynomus.smbj.connection.Connection;
-import com.hierynomus.smbj.session.Session;
-import com.hierynomus.smbj.share.DiskShare;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -36,7 +31,7 @@ public class Scheduler {
     }
     @PostConstruct
     @PreDestroy
-    @Scheduled(cron = "0 0 8,14 * * *")
+    @Scheduled(cron = "0 0 8,14,21 * * *")
     public void makeBackUp() throws Exception {
         logger.info("Making backup");
         String date = new SimpleDateFormat("dd-MM-yyyy_HH-mm").format(new Date());
@@ -45,9 +40,9 @@ public class Scheduler {
             logger.info("Local backup made");
         } else {
             logger.info("some errors with local backup");
-        }
+        }/*
         DatabaseUtil.copyBackup("Desktop-7bo0mfq", "oper", "oper01", "Desktop-7bo0mfq", "qaz", "backup\\" + date + ".sql");//TODO uncomit before install
-        logger.info("Network backup made");
+        logger.info("Network backup made");*/
     }
 
     /*@Scheduled(cron = "0 0 22 * * *")*/

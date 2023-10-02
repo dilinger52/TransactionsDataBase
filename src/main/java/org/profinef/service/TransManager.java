@@ -302,7 +302,7 @@ public class TransManager {
 
     public List<Transaction> getAllTransactions() {
         logger.debug("Getting all transactions");
-        List<TransactionDto> transactionDtoList = transactionRepository.findAllByOrderByDateDesc();
+        List<TransactionDto> transactionDtoList = transactionRepository.findAllByOrderByDateAsc();
         List<Transaction> transactions = new ArrayList<>();
         for (TransactionDto transactionDto : transactionDtoList) {
             transactions.add(formatFromDto(transactionDto));

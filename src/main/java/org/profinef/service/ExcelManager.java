@@ -1,8 +1,6 @@
 package org.profinef.service;
 
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.profinef.entity.Account;
 import org.profinef.entity.Client;
@@ -47,7 +45,10 @@ public class ExcelManager {
         List<Transaction> transactions = transManager.getAllTransactions();
         Workbook book = createWorkbook(clients, currencies, transactions);
 
-        Sheet total = book.createSheet("Итоговый");
+        Sheet total = null;
+        if (book != null) {
+            total = book.createSheet("Итоговый");
+        }
         logger.info("Created total sheet");
         CellStyle boldStyle = book.createCellStyle();
         Font bold = book.createFont();

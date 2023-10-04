@@ -18,7 +18,7 @@ public class Scheduler {
     private final NBUManager nbuManager;
     @Autowired
     private final ExcelManager excelManager;
-    private Logger logger = LoggerFactory.getLogger(Scheduler.class);
+    private final Logger logger = LoggerFactory.getLogger(Scheduler.class);
     public Scheduler(NBUManager nbuManager, ExcelManager excelManager) {
         this.nbuManager = nbuManager;
         this.excelManager = excelManager;
@@ -31,7 +31,7 @@ public class Scheduler {
     }
     @PostConstruct
     @PreDestroy
-    @Scheduled(cron = "0 0 8,14,21 * * *")
+    @Scheduled(cron = "0 0 8,14,22 * * *")
     public void makeBackUp() throws Exception {
         logger.info("Making backup");
         String date = new SimpleDateFormat("dd-MM-yyyy_HH-mm").format(new Date());
@@ -45,7 +45,7 @@ public class Scheduler {
         logger.info("Network backup made");
     }
 
-    /*@Scheduled(cron = "0 0 22 * * *")*/
+    /*@Scheduled(cron = "0 30 22 * * *")*/
     public void restoreFromBackUp() throws Exception {
         File directory = new File("backup\\");
         File[] files = directory.listFiles(File::isFile);
@@ -71,7 +71,7 @@ public class Scheduler {
         }
     }
 
-    /*@Scheduled(cron = "0 30 22 * * *")*/
+    /*@Scheduled(cron = "0 0 23 * * *")*/
     public void makeExcel() throws Exception {
         excelManager.createFull();
     }

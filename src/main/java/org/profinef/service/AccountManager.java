@@ -1,6 +1,5 @@
 package org.profinef.service;
 
-import org.profinef.controller.WebMvcConfig;
 import org.profinef.dto.AccountDto;
 import org.profinef.entity.Account;
 import org.profinef.entity.Client;
@@ -23,7 +22,7 @@ public class AccountManager {
     private final ClientManager clientManager;
     @Autowired
     private final CurrencyManager currencyManager;
-    private static Logger logger = LoggerFactory.getLogger(AccountManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(AccountManager.class);
 
     public AccountManager(AccountRepository accountRepository, ClientManager clientManager,
                           CurrencyManager currencyManager) {

@@ -11,7 +11,6 @@ import com.hierynomus.smbj.connection.Connection;
 import com.hierynomus.smbj.session.Session;
 import com.hierynomus.smbj.share.DiskShare;
 import com.hierynomus.smbj.share.File;
-import com.zaxxer.hikari.pool.HikariProxyCallableStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,8 +26,7 @@ import java.util.Set;
 public final class DatabaseUtil {
 
     private static final Logger logger =  LoggerFactory.getLogger(DatabaseUtil.class);
-    public static boolean backupLocal(String dbUsername, String dbPassword, String dbName, String outputFile)
-            throws InterruptedException, IOException {
+    public static boolean backupLocal(String dbUsername, String dbPassword, String dbName, String outputFile) {
         try {
             String command = String.format("C:\\Program Files\\MySQL\\MySQL Workbench 8.0\\mysqldump -u%s -p%s --add-drop-table --databases %s -r %s",
                     dbUsername, dbPassword, dbName, outputFile);
@@ -55,7 +52,7 @@ public final class DatabaseUtil {
                 fileAttributes.add(FileAttributes.FILE_ATTRIBUTE_NORMAL);
                 Set<SMB2CreateOptions> createOptions = new HashSet<>();
                 createOptions.add(SMB2CreateOptions.FILE_RANDOM_ACCESS);
-                File f = share.openFile(inputFile, new HashSet(List.of(AccessMask.GENERIC_ALL)), fileAttributes, SMB2ShareAccess.ALL, SMB2CreateDisposition.FILE_OVERWRITE_IF, createOptions);
+                File f = share.openFile(inputFile, new HashSet<>(List.of(AccessMask.GENERIC_ALL)), fileAttributes, SMB2ShareAccess.ALL, SMB2CreateDisposition.FILE_OVERWRITE_IF, createOptions);
 
                 OutputStream oStream = f.getOutputStream();
                 oStream.write(input.readAllBytes());
@@ -67,8 +64,7 @@ public final class DatabaseUtil {
         }
     }
 
-    public static boolean restore(String dbUsername, String dbPassword, String dbName, String inputFile)
-            throws InterruptedException, IOException {
+    public static boolean restore(String dbUsername, String dbPassword, String dbName, String inputFile) {
         try {
             String[] command= new String[]{"C:\\Program Files\\MySQL\\MySQL Workbench 8.0\\mysql", "--user=" + dbUsername, "--password=" + dbPassword, dbName,"-e", " source "+ inputFile};
             Process process = Runtime.getRuntime().exec(command);

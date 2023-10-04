@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession;
 import org.apache.poi.ss.usermodel.*;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
+import org.profinef.entity.Role;
 import org.profinef.entity.User;
 import org.profinef.service.AccountManager;
 import org.profinef.service.ClientManager;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,7 +43,7 @@ public class Uploader {
     private Date date = null;
     private List<Integer> currencies = new ArrayList<>();
     private double amount = 0;
-    private String amountColor = "";
+    private final String amountColor = "";
     private double commission = 0;
     private double rate = 1;
     private double transportation = 0;
@@ -51,7 +51,7 @@ public class Uploader {
     private String comment = "";
     private final int columnPerCurrency = 8;
 
-    private static Logger logger = LoggerFactory.getLogger(Uploader.class);
+    private static final Logger logger = LoggerFactory.getLogger(Uploader.class);
 
     public Uploader(ClientManager clientManager, TransManager transManager, CurrencyManager currencyManager, AccountManager accountManager) {
         this.clientManager = clientManager;
@@ -68,23 +68,20 @@ public class Uploader {
 
     @RequestMapping("/full")
     public String uploadDataFromExcel(@RequestParam("file") MultipartFile file,
-                                      @RequestParam(name = "date", required = false, defaultValue = "0") java.sql.Date dateAfter,
+                                      @RequestParam(name = "date", required = false, defaultValue = "0001-01-01") java.sql.Date dateAfter,
                                       HttpSession session) throws Exception {
         logger.info("Getting file...");
         User user = (User) session.getAttribute("user");
-        if (dateAfter == null) {
-            session.setAttribute("error", "date is null");
-            clientManager.deleteAll();
+        if (user.getRole() != Role.Admin) {
+            logger.info("Redirecting to error page with error: Отказано в доступе");
+            session.setAttribute("error", "Отказано в доступе");
             return "error";
-        } else {
-            transManager.deleteAfter(new Timestamp(dateAfter.getTime()));
         }
+        transManager.deleteAfter(new Timestamp(dateAfter.getTime()));
 
         logger.info("Data base cleared");
         //creating workbook from file
-        //XSSFWorkbook myExcelBook = new XSSFWorkbook(file.getInputStream());
         InputStream stream = file.getInputStream();
-        //org.apache.poi.util.IOUtils.setByteArrayMaxOverride(1000000000);
 
         Workbook myExcelBook = StreamingReader.builder()
                 .rowCacheSize(1000000000)
@@ -242,9 +239,8 @@ public class Uploader {
      * @param row        contain information about color of balance cell
      * @param cellNum    number of cell that contains balance value
      * @param currencyId id of currency for which transaction will be created
-     * @throws Exception potentially can be sent but actually it not possible
      */
-    private void insertTransaction(Row row, int cellNum, int currencyId, User user) throws Exception {
+    private void insertTransaction(Row row, int cellNum, int currencyId, User user) {
 
         //Getting balance color if it exists
         /*XSSFColor c = cell
@@ -256,18 +252,7 @@ public class Uploader {
             logger.trace("Found balance color: " + balanceColor);
         }*/
         //Getting transaction id based on max id of transaction in database
-        int transactionId;
-        try {
-            transactionId = transManager.getMaxId() + 1;
-            /*transactionId = transManager.getAllTransactions()
-                    .stream()
-                    .flatMapToInt(t -> IntStream.of(t.getId()))
-                    .max()
-                    .orElse(0) + 1;*/
-        } catch (RuntimeException e) {
-            //if zero transactions exist in base set id to 1
-            transactionId = 1;
-        }
+        int transactionId = getTransactionId();
         try {
             //writing transaction to database
             date = transManager.getAvailableDate(new Timestamp(date.getTime()));
@@ -297,6 +282,22 @@ public class Uploader {
         isTransaction = false;
         comment = "";
 
+    }
+
+    private int getTransactionId() {
+        int transactionId;
+        try {
+            transactionId = transManager.getMaxId() + 1;
+            /*transactionId = transManager.getAllTransactions()
+                    .stream()
+                    .flatMapToInt(t -> IntStream.of(t.getId()))
+                    .max()
+                    .orElse(0) + 1;*/
+        } catch (RuntimeException e) {
+            //if zero transactions exist in base set id to 1
+            transactionId = 1;
+        }
+        return transactionId;
     }
 
 

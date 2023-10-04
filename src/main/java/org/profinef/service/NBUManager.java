@@ -2,7 +2,6 @@ package org.profinef.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.profinef.dto.CurrencyDto;
 import org.profinef.entity.NBUCurrency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.profinef.entity.Currency;
-import org.profinef.repository.CurrencyRepository;
 
 @Service
 public class NBUManager {
 
     @Autowired
     private final CurrencyManager currencyManager;
-    private Logger logger =  LoggerFactory.getLogger(NBUManager.class);
+    private final Logger logger =  LoggerFactory.getLogger(NBUManager.class);
 
     public NBUManager(CurrencyManager currencyManager) {
         this.currencyManager = currencyManager;

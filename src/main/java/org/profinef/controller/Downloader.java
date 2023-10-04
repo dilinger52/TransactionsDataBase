@@ -2,12 +2,10 @@ package org.profinef.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
 import org.profinef.entity.Transaction;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.*;
 import java.net.URLConnection;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -44,7 +41,7 @@ public class Downloader {
     private final ExcelManager excelManager;
     private final int columnPerCurrency = 8;
 
-    private static Logger logger = LoggerFactory.getLogger(Downloader.class);
+    private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
     public Downloader(ClientManager clientManager, CurrencyManager currencyManager, TransManager transManager,
                       AccountManager accountManager, ExcelManager excelManager) {
@@ -56,7 +53,7 @@ public class Downloader {
     }
 
     @RequestMapping(path = "/client_info")
-    public void downloadClientInfo(HttpServletResponse response, HttpSession session) throws IOException {
+    public void downloadClientInfo(HttpServletResponse response, HttpSession session) {
         logger.info("Downloading excel workbook...");
         try {
             List<Client> clients = new ArrayList<>();

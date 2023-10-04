@@ -36,7 +36,7 @@ public class TransManager {
     private final CurrencyRepository currencyRepository;
     @Autowired
     private final UserManager userManager;
-    private static Logger logger = LoggerFactory.getLogger(TransManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransManager.class);
 
     public TransManager(TransactionRepository transactionRepository, AccountRepository accountRepository,
                         ClientManager clientManager, CurrencyManager currencyManager,

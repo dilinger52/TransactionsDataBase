@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class ClientManager {
     @Autowired
     private final ClientRepository clientRepository;
-    private static Logger logger = LoggerFactory.getLogger(ClientManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClientManager.class);
 
     public ClientManager(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;

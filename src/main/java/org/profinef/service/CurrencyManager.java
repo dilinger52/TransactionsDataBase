@@ -14,7 +14,7 @@ import java.util.*;
 public class CurrencyManager {
     @Autowired
     private final CurrencyRepository currencyRepository;
-    private static Logger logger = LoggerFactory.getLogger(CurrencyManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(CurrencyManager.class);
 
     public CurrencyManager(CurrencyRepository currencyRepository) {
         this.currencyRepository = currencyRepository;
@@ -74,7 +74,7 @@ public class CurrencyManager {
         logger.debug("Currency saved");
     }
 
-    public void updateCurrency(Currency newCurrency) throws Exception {
+    public void updateCurrency(Currency newCurrency) {
         logger.debug("Updating currency");
         currencyRepository.save(formatToDto(newCurrency));
         logger.debug("Currency updated");

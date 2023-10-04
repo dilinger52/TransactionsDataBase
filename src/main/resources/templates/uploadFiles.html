@@ -18,7 +18,7 @@
     предотвращения их задвоения.</p>
 <form action="upload/full" enctype="multipart/form-data" method="post">
     <label for="date">Дата начиная с которой данные будут обновлены</label>
-    <input id="date" name="date" th:value="${#dates.format(session.date, 'yyyy-MM-dd')}" type="date">
+    <input id="date" name="date" th:value="${session.date != null ? #dates.format(session.date, 'yyyy-MM-dd') : ''}" type="date">
     <label for="file">Эксель файл для обновления данных</label>
     <input id="file" name="file" type="file">
     <input type="submit" value="Подтвердить">

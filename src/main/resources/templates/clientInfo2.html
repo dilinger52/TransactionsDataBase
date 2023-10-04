@@ -32,6 +32,9 @@
         <form action="download/client_info" class="inline" method="post">
             <input type="submit" value="Скачать таблицу">
         </form>
+        <form action="recashe" class="inline" method="get">
+            <input type="submit" value="Пересчитать значения">
+        </form>
         <form action="edit_client" class="inline" method="get">
             <input name="client_id" th:value="${session.client.id}" type="hidden">
             <input type="submit" value="Изменить данные пользователя">

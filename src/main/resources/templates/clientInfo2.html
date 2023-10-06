@@ -11,9 +11,9 @@
     <h2 class="inline" th:text="|Клиент: ${session.client.pib}|"></h2>
     <form action="client_info" class="inline" method="get">
         <input autocomplete="off" class="inline" id="client_name" list="client_datalist" name="client_name"
-               placeholder="Поиск.." type="text">
-        <datalist id="client_datalist">
-            <option th:each="client : ${session.clients}" th:value="${client.pib}"></option>
+               placeholder="Поиск.." type="text" onkeyup="autoinsert('client_name', 'client_datalist')" required>
+        <datalist id="client_datalist" aria-required="true">
+            <option th:each="client,iter : ${session.clients}" th:value="${client.pib}" th:selected="${iter.first}"></option>
         </datalist>
         <button class="inline" type="submit" value="Перейти">
             <img src="/images/arrow-right.png" class="inline" height="12px" title="Перейти">
@@ -133,14 +133,14 @@
         <table th:style="${currency.name == 'RUB' ? 'background-color: mistyrose;' : currency.name == 'USD' ? 'background-color: honeydew;' : currency.name == 'EUR' ? 'background-color: lavender;' : currency.name == 'PLN' ? 'background-color: lightcyan;' : currency.name == 'UAH' ? 'background-color: white;' : ''}">
             <thead name="thead2" style="background-color: inherit; position: sticky;">
             <tr>
-                <th class="ignore">Редактир.</th>
+                <th>Ред.</th>
                 <th>Дата</th>
                 <th>Контрагенты</th>
-                <th>Комментарий</th>
+                <th>Коммент.</th>
                 <th>Прием</th>
                 <th>Выдача</th>
                 <th>Тариф</th>
-                <th>Комиссия</th>
+                <th>Комис.</th>
                 <th>Курс</th>
                 <th>Инкас.</th>
                 <th>Итого</th>
@@ -167,9 +167,9 @@
 
                         <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                             <input name="transaction_id" th:form="${id}" th:value="${transaction.id}" type="hidden">
-                            <button th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit">
+                            <!--/*<button th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit">
                                 <img src="/images/disk.png" height="16px" class="inline" title="Сохранить запись">
-                            </button>
+                            </button>*/-->
                             <button th:form="|del${id}|" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit">
                                 <img src="/images/trash.png" height="16px" class="inline" title="Удалить запись">
                             </button>
@@ -200,7 +200,7 @@
                                    list="client_datalist"
                                    name="client_name" th:form="${id}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_client|"
                                    th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:value="${transaction.client.pib}"
-                                    type="text">
+                                    type="text" th:onkeyup="|autoinsert('${transaction.id}_${currency.id}_${transaction.client.id}_client', 'client_datalist')|">
                         </th>
                         <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_comment')|"
                             th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">

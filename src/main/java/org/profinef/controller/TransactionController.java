@@ -567,6 +567,7 @@ public class TransactionController {
                 rate.add(null);
             }
         }
+        System.out.println(rate);
         List<Double> commission = new ArrayList<>();
         for (String s : commissionS) {
             s = s.replaceAll("\\s+", "").replaceAll(",", ".");

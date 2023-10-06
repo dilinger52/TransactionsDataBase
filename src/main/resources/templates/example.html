@@ -37,7 +37,7 @@
             <div class="inline">
 
                 <label for="client_name">Поиск по ФИО</label>
-                <input autocomplete="off" id="client_name" list="client_name_datalist" name="client_name" onkeyup="filterFunction()"
+                <input autocomplete="off" id="client_name" list="client_name_datalist" name="client_name" onkeyup="filterFunction(), autoinsert('client_name', 'client_name_datalist')"
                        placeholder="Поиск.." type="text">
                 <datalist id="client_name_datalist">
                     <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}"

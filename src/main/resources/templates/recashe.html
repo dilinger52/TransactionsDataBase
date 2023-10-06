@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link href="main.css" rel="stylesheet">
+    <script src="main.js"></script>
     <title>Обновление кэшированных значений</title>
 </head>
 <body>
@@ -19,7 +20,7 @@
     <label for="date">Дата начиная с которой данные будут обновлены</label>
     <input id="date" name="date" th:value="${session.client != null ? #dates.format(session[startDate__${session.client != null ? session.client.id : ''}__], 'yyyy-MM-dd')  : ''}" type="date">
     <label for="file">Имя клиента для которого необходимо выполнить пересчет</label>
-    <input id="file" list="client_datalist" name="client" type="text" th:value="${session.client != null ? session.client.pib : ''}">
+    <input id="file" list="client_datalist" name="client" type="text" th:value="${session.client != null ? session.client.pib : ''}" onkeyup="autoinsert('file', 'client_datalist')">
     <datalist id="client_datalist">
         <option th:each="client : ${session.clients}" th:value="${client.pib}"></option>
     </datalist>

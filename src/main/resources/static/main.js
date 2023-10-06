@@ -49,7 +49,32 @@ const tables = document.querySelectorAll('table');
 
     });
 
-
+function autoinsert(inputId, datalistId) {
+console.log('changed');
+console.log(inputId);
+console.log(datalistId);
+  // Получите элементы формы и datalist
+  var input = document.getElementById(inputId);
+  var dataList = document.getElementById(datalistId);
+  console.log(input);
+  console.log(dataList);
+  console.log(dataList.options);
+  // Получите все опции из datalist
+  var options = Array.from(dataList.options);
+console.log(options);
+  // Фильтрация опций на основе введенного значения
+  var filteredOptions = options.filter(function(option) {
+    return option.value.toLowerCase().includes(input.value.toLowerCase());
+  });
+console.log(filteredOptions);
+  // Если есть хотя бы одна видимая опция, установите значение input
+  if (filteredOptions.length == 1) {
+  console.log(filteredOptions[0].value);
+    input.value = filteredOptions[0].value;
+  }
+console.log('done');
+  // Отправьте форму
+}
 
 
 
@@ -402,7 +427,7 @@ function convert() {
 
     document.getElementById("changeDiv").value = result.toFixed(2);
     document.getElementById("changeInput").value = result.toFixed(2);
-    document.getElementById("rate2").value = (Number(rate.value));
+    document.getElementById("rate2").value = (rate.value);
 }
 
 function convertDescription() {
@@ -677,6 +702,7 @@ function addRow(id, form) {
             input3.setAttribute("list", "client_datalist");
             input3.setAttribute("Form", 'form' + form);
             input3.addEventListener('focus', (element) => {autosave(element)});
+            input3.setAttribute('onkeyup', "autoinsert('" + id + "tr" + num + "_client', 'client_datalist')");
         th3.appendChild(input3);
     tr.appendChild(th3);
     const th4 = document.createElement('th');
@@ -816,6 +842,7 @@ var sum = 0;
             input3.setAttribute("Form", form);
             input3.id = id + "tr" + num + "_client";
             input3.addEventListener('focus', (element) => {autosave(element)});
+            input3.setAttribute('onkeyup', "autoinsert('" + id + "tr" + num + "_client', 'client_datalist')");
         th3.appendChild(input3);
     tr.appendChild(th3);
     const th4 = document.createElement('th');
@@ -1020,7 +1047,7 @@ var exchangeRates = document.getElementsByClassName("exchange");
     }
     //var targetRate = document.querySelector("input[form='" + form + "'][name='rate']");
     //target1.value = (sum / Number(targetRate.value.replace(/ /g,'').replace(',','.'))).toFixed(0);
-    target1.value = sum.toFixed(0);
+    target1.value = numberWithSpaces(sum.toFixed(0));
     target2.value = '';
 
     arithmetic(target1.dataset.id);

@@ -58,9 +58,13 @@ public final class DatabaseUtil {
                 oStream.write(input.readAllBytes());
                 oStream.flush();
                 oStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
 
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

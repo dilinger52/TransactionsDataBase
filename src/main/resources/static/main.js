@@ -209,7 +209,7 @@ for (var z = 0; z < inputs.length; z++) {
 
 });*/
 
-async function autosave(element){
+async function autosave(element) {
     if (!element.srcElement.id.match(/.+tr[0-9].+/)) {
         saveColors(element.srcElement.id);
     }
@@ -966,7 +966,7 @@ var form = element.querySelector("[id$='pAmount'").form.id;
 
 function arithmetic(id) {
     var positiveAmount = Number(document.getElementById(id + '_pAmount').value.replace(/ /g,'').replace(',','.'));
-
+    console.log("arithmetic");
     var negativeAmount = Number(document.getElementById(id + '_nAmount').value.replace(/ /g,'').replace(',','.'));
     var commission = Number(document.getElementById(id + '_commission').value.replace(/ /g,'').replace(',','.'));
 
@@ -1008,6 +1008,10 @@ var exchangeRates = document.getElementsByClassName("exchange");
     console.log(currencyrate);
     var target = null;
     var sum = 0;
+    console.log(pAmount);
+    console.log(pAmount[1]);
+    console.log(pAmount[1].parentElement);
+    console.log(pAmount[1].parentElement.parentElement);
          for (var j = 0; j < pAmount.length; j++) {
 
 
@@ -1034,9 +1038,10 @@ var exchangeRates = document.getElementsByClassName("exchange");
             // sum -= Number(pAmount[j].value.replace(/ /g,'').replace(',','.'));
             // sum -= Number(nAmount[j].value.replace(/ /g,'').replace(',','.'));
          }
-
+    console.log('change');
     var target1;
     var target2;
+    console.log(target);
     if (target != null) {
     if (sum >= 0) {
         target1 = target.querySelector("[name='positiveAmount']");

@@ -167,9 +167,9 @@
 
                         <th th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                             <input name="transaction_id" th:form="${id}" th:value="${transaction.id}" type="hidden">
-                            <!--/*<button th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit">
+                            <button style="display: none;" th:form="${id}" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit">
                                 <img src="/images/disk.png" height="16px" class="inline" title="Сохранить запись">
-                            </button>*/-->
+                            </button>
                             <button th:form="|del${id}|" th:if="${transaction.client.id == session.client.id && transaction.currency.id == currency.id}" type="submit">
                                 <img src="/images/trash.png" height="16px" class="inline" title="Удалить запись">
                             </button>
@@ -290,7 +290,7 @@
                 <input name="client_name" th:form="|form${currency.id}|" th:value="${session.client.pib}" type="hidden">
                 <tr th:id="|${currency.name}tr0|" th:name="|${currency.name}form${currency.id}|">
                     <th>
-                        <button class="inline" th:form="|form${currency.id}|" type="submit" value="Сохранить">
+                        <button style="display: none;" class="inline" th:form="|form${currency.id}|" type="submit" value="Сохранить">
                             <img src="/images/disk.png" height="16px" class="inline" title="Сохранить новую запись">
                         </button>
                     </th>

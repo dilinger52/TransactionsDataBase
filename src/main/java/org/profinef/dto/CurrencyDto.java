@@ -15,6 +15,12 @@ public class CurrencyDto {
     public CurrencyDto() {
     }
 
+    public CurrencyDto(int id, String name, Double averageExchange) {
+        this.id = id;
+        this.name = name;
+        this.averageExchange = averageExchange;
+    }
+
     public int getId() {
         return id;
     }

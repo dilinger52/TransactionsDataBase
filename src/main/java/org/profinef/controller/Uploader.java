@@ -70,16 +70,16 @@ public class Uploader {
     public String uploadDataFromExcel(@RequestParam("file") MultipartFile file,
                                       @RequestParam(name = "date", required = false, defaultValue = "0001-01-01") java.sql.Date dateAfter,
                                       HttpSession session) throws Exception {
-        logger.info("Getting file...");
         User user = (User) session.getAttribute("user");
+        logger.info(user + " Getting file...");
         if (user.getRole() != Role.Admin) {
-            logger.info("Redirecting to error page with error: Отказано в доступе");
+            logger.info(user + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
         transManager.deleteAfter(new Timestamp(dateAfter.getTime()));
 
-        logger.info("Data base cleared");
+        logger.info(user + " Data base cleared");
         //creating workbook from file
         InputStream stream = file.getInputStream();
 
@@ -87,7 +87,7 @@ public class Uploader {
                 .rowCacheSize(1000000000)
                 .bufferSize(1000000000)
                 .open(stream);
-        logger.info("Created workbook");
+        logger.info(user + " Created workbook");
         for (Sheet sheet : myExcelBook) {
             if (sheet.getSheetName().equals("Итоговый лист")) {
                 break;
@@ -95,7 +95,7 @@ public class Uploader {
             if (sheet.getSheetName().equals("Итоговый")) {
                 break;
             }
-            logger.info("Created sheet: " + sheet.getSheetName());
+            logger.info(user + " Created sheet: " + sheet.getSheetName());
 
             client = new Client(sheet.getSheetName());
             try {
@@ -209,7 +209,7 @@ public class Uploader {
                     }
                     //last cell for transaction. Insert transaction with previous info
                     if ((cell.getColumnIndex() % columnPerCurrency == 0) && isTransaction) {
-                        logger.info("Inserting transaction on sheet: " + sheet.getSheetName());
+                        logger.info(user + " Inserting transaction on sheet: " + sheet.getSheetName());
                         insertTransaction(row, cell.getColumnIndex(), currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1), user);
                         amount = 0;
                         commission = 0;
@@ -228,7 +228,7 @@ public class Uploader {
         }
             //for each sheet except last creating user
             myExcelBook.close();
-            logger.info("File decoded and uploaded");
+            logger.info(user + " File decoded and uploaded");
             return "redirect:/client";
     }
 

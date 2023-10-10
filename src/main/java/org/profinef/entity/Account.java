@@ -11,6 +11,11 @@ public class Account implements Serializable {
     public Account() {
     }
 
+    public Account(Client client, Map<Currency, Properties> currencies) {
+        this.client = client;
+        this.currencies = currencies;
+    }
+
     public Client getClient() {
         return client;
     }

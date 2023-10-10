@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,7 +71,7 @@ public class AppController {
         logger.info("Loading load files page");
         User user = (User) session.getAttribute("user");
         if (user.getRole() != Role.Admin) {
-            logger.info("Redirecting to error page with error: Отказано в доступе");
+            logger.info(user + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
@@ -100,7 +101,8 @@ public class AppController {
                                          @RequestParam(name = "startDate", required = false) Date startDate,
                                          @RequestParam(name = "endDate", required = false) Date endDate,
                                          HttpSession session) {
-        logger.info("Loading client info page...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Loading client info page...");
         session.removeAttribute("transaction");
         session.removeAttribute("client_alert");
         if (clientId == 0) {
@@ -109,7 +111,7 @@ public class AppController {
                 clientId = clientManager.getClientExactly(clientName).getId();
             } else if (session.getAttribute("client") == null) {
                 logger.debug("client = null");
-                logger.info("Redirecting to main page");
+                logger.info(user + " Redirecting to main page");
                 return "redirect:/client";
             } else {
                 clientId = ((Client) session.getAttribute("client")).getId();
@@ -229,7 +231,7 @@ public class AppController {
         session.setAttribute("transactions", transactions);
         session.setAttribute("transactionIds", transactionIds);
         session.setAttribute("currency_name", currencyName);
-        logger.info("Client info page loaded");
+        logger.info(user + " Client info page loaded");
         return "clientInfo2";
     }
 
@@ -247,7 +249,8 @@ public class AppController {
                                  @RequestParam(name = "client_telegram", required = false) String clientTelegram,
                                  @RequestParam(name = "search_exactly", required = false) boolean searchExactly,
                                  HttpSession session) {
-        logger.info("Loading main page...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Loading main page...");
         session.removeAttribute("error");
         session.removeAttribute("client");
         List<Account> clients;
@@ -262,7 +265,7 @@ public class AppController {
                 }
             } catch (Exception e) {
                 session.setAttribute("error", e.getMessage());
-                logger.info("Redirected to error page with error: " + e.getMessage());
+                logger.info(user + " Redirected to error page with error: " + e.getMessage());
                 return "error";
             }
         } else if (clientPhone != null && !clientPhone.isEmpty()) {
@@ -272,7 +275,7 @@ public class AppController {
                 clients.addAll(accountManager.getAccountsByPhone(clientPhone));
             } catch (Exception e) {
                 session.setAttribute("error", e.getMessage());
-                logger.info("Redirected to error page with error: " + e.getMessage());
+                logger.info(user + " Redirected to error page with error: " + e.getMessage());
                 return "error";
             }
         } else if (clientTelegram != null && !clientTelegram.isEmpty()) {
@@ -282,7 +285,7 @@ public class AppController {
                 clients.addAll(accountManager.getAccountsByTelegram(clientTelegram));
             } catch (Exception e) {
                 session.setAttribute("error", e.getMessage());
-                logger.info("Redirected to error page with error: " + e.getMessage());
+                logger.info(user + " Redirected to error page with error: " + e.getMessage());
                 return "error";
             }
         } else {
@@ -297,7 +300,7 @@ public class AppController {
         session.setAttribute("path", "/client");
         session.setAttribute("currencies", currencies);
         session.setAttribute("clients", clients);
-        logger.info("Main page loaded");
+        logger.info(user + " Main page loaded");
         return "example";
     }
 
@@ -325,11 +328,12 @@ public class AppController {
      */
     @GetMapping(path = "/edit_client")
     public String editClient(HttpSession session, @RequestParam(name = "client_id") int clientId) {
-        logger.info("Loading edit client page...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Loading edit client page...");
         Client client = clientManager.getClient(clientId);
         session.setAttribute("client", client);
         session.setAttribute("path", "/edit_client");
-        logger.info("Edit client page loaded");
+        logger.info(user + " Edit client page loaded");
         return "addClient";
     }
 
@@ -348,7 +352,8 @@ public class AppController {
                                 @RequestParam(name = "client_phone", required = false) String phone,
                                 @RequestParam(name = "client_telegram", required = false) String telegram,
                                 HttpSession session) {
-        logger.info("Saving client...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Saving client...");
         Client client;
         if (clientId <= 0) {
             logger.debug("Client is new");
@@ -361,7 +366,7 @@ public class AppController {
         if (!phone.isEmpty()) {
             logger.debug("Validating phone...");
             if (!phone.matches("\\+38 \\(0[0-9]{2}\\) [0-9]{3}-[0-9]{2}-[0-9]{2}")) {
-                logger.info("Redirecting to error page with error: Номер телефона должен соответсвовать паттерну: " +
+                logger.info(user + " Redirecting to error page with error: Номер телефона должен соответсвовать паттерну: " +
                         "+38 (011) 111-11-11");
                 session.setAttribute("error", "Номер телефона должен соответсвовать паттерну: " +
                         "+38 (011) 111-11-11");
@@ -372,7 +377,7 @@ public class AppController {
         if (!telegram.isEmpty()) {
             logger.debug("Validating telegram...");
             if (!telegram.matches("@[a-z._0-9]+")) {
-                logger.info("Redirecting to error page with error: Телеграм тег должен начинаться с @ содержать " +
+                logger.info(user + " Redirecting to error page with error: Телеграм тег должен начинаться с @ содержать " +
                         "латинские буквы нижнего регистра, цифры, \".\" или \"_\"");
                 session.setAttribute("error", "Телеграм тег должен начинаться с @ содержать латинские буквы " +
                         "нижнего регистра, цифры, \".\" или \"_\"");
@@ -390,11 +395,11 @@ public class AppController {
                 accountManager.addClient(client);
             }
         } catch (Exception e) {
-            logger.info("Redirecting to error page with error: " + e.getMessage());
+            logger.info(user + " Redirecting to error page with error: " + e.getMessage());
             session.setAttribute("error", e.getMessage());
             return "error";
         }
-        logger.info("Client saved");
+        logger.info(user + " Client saved");
         return "redirect:/client";
     }
 
@@ -406,10 +411,11 @@ public class AppController {
      */
     @PostMapping(path = "delete_client")
     public String deleteClient(@RequestParam(name = "id") int clientId, HttpSession session) {
-        logger.info("Deleting client...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Deleting client...");
         Client client = clientManager.getClient(clientId);
         clientManager.deleteClient(client);
-        logger.info("Client deleted");
+        logger.info(user + " Client deleted");
         return "redirect:/client";
     }
 
@@ -420,9 +426,10 @@ public class AppController {
      */
     @GetMapping(path = "/new_currency")
     public String newCurrency(HttpSession session) {
-        logger.info("Loading new currency page...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Loading new currency page...");
         session.setAttribute("path", "/new_currency");
-        logger.info("New currency page loaded");
+        logger.info(user + " New currency page loaded");
         return "addCurrency";
     }
 
@@ -437,14 +444,15 @@ public class AppController {
     public String saveNewCurrency(@RequestParam(name = "currency_name") String currencyName,
                                   @RequestParam(name = "currency_id") int currencyId,
                                   HttpSession session) {
-        logger.info("Saving new currency...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Saving new currency...");
         if (!currencyName.matches("[A-Z]{3}")) {
-            logger.info("Redirecting to error page with error: В названии должны быть три заглавные латинские буквы");
+            logger.info(user + " Redirecting to error page with error: В названии должны быть три заглавные латинские буквы");
             session.setAttribute("error", "В названии должны быть три заглавные латинские буквы");
             return "error";
         }
         if (currencyId < 100 || currencyId > 999) {
-            logger.info("Redirecting to error page with error: Код должен состоять из трех цифр от 0 до 9");
+            logger.info(user + " Redirecting to error page with error: Код должен состоять из трех цифр от 0 до 9");
             session.setAttribute("error", "Код должен состоять из трех цифр от 0 до 9");
             return "error";
         }
@@ -454,11 +462,11 @@ public class AppController {
         try {
             currencyManager.addCurrency(newCurrency);
         } catch (Exception e) {
-            logger.info("Redirecting to error page with error: " + e.getMessage());
+            logger.info(user + " Redirecting to error page with error: " + e.getMessage());
             session.setAttribute("error", e.getMessage());
             return "error";
         }
-        logger.info("Currency saved");
+        logger.info(user + " Currency saved");
         return "redirect:/client";
     }
 
@@ -469,10 +477,11 @@ public class AppController {
      * @param session collect parameters for view
      * @throws JsonProcessingException thrown while could not read string colors
      */
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @PostMapping(path = "/save_colors", consumes = MediaType.APPLICATION_JSON_VALUE)
     public String saveColors(@RequestBody String colors, HttpSession session) throws JsonProcessingException {
-        logger.info("Saving colors...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Saving colors...");
         List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {
         });
         for (List<String> list : entryList) {
@@ -494,14 +503,15 @@ public class AppController {
 
             transManager.save(transaction);
         }
-        logger.info("Colors saved");
+        logger.info(user + " Colors saved");
         return "redirect:/client_info";
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @PostMapping(path = "/save_main_colors", consumes = MediaType.APPLICATION_JSON_VALUE)
     public String saveMainColors(@RequestBody String colors, HttpSession session) throws JsonProcessingException {
-        logger.info("Saving colors...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Saving colors...");
         List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {
         });
         for (List<String> list : entryList) {
@@ -527,16 +537,17 @@ public class AppController {
 
 
         }
-        logger.info("Colors saved");
+        logger.info(user + " Colors saved");
         return "redirect:/client_info";
     }
 
     @GetMapping("/recashe")
     public String getRefreshPage(HttpSession session) {
-        logger.info("Loading refresh cashe page...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Loading refresh cashe page...");
         User currentUser = (User) session.getAttribute("user");
         session.setAttribute("clients", clientManager.findAll());
-        logger.info("Refresh page loaded");
+        logger.info(user + " Refresh page loaded");
         return "recashe";
     }
 
@@ -544,7 +555,8 @@ public class AppController {
     public String refreshCashe(@RequestParam(name = "date", required = false, defaultValue = "0001-01-01") Date date,
                                @RequestParam(name = "client", required = false) String clientName,
                                HttpSession session) {
-        logger.info("Updating balance values");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Updating balance values");
         List<Account> accounts = new ArrayList<>();
         if (clientName.isEmpty()) {
             logger.debug("client name is empty");
@@ -553,9 +565,9 @@ public class AppController {
             logger.debug("client name found");
             accounts.add(accountManager.getAccounts(clientName).get(0));
         }
-        logger.info("Found " + accounts.size() + " accounts");
+        logger.info(user + " Found " + accounts.size() + " accounts");
         for (Account account : accounts) {
-            logger.info("Updating " + account.getClient().getPib());
+            logger.info(user + " Updating " + account.getClient().getPib());
             Map<Currency, Account.Properties> currencies = account.getCurrencies();
 
             List<Integer> currenciesId = currencies.keySet().stream().map(Currency::getId).toList();
@@ -584,7 +596,7 @@ public class AppController {
             }
 
         }
-        logger.info("Data updated");
+        logger.info(user + " Data updated");
         return "redirect:/client_info";
     }
 

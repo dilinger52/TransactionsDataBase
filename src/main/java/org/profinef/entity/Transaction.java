@@ -31,6 +31,42 @@ public class Transaction implements Serializable {
     public Transaction() {
     }
 
+    public Transaction(Integer id, Timestamp date, Client client, Currency currency, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, User user) {
+        this.id = id;
+        this.date = date;
+        this.client = client;
+        this.currency = currency;
+        this.comment = comment;
+        this.rate = rate;
+        this.commission = commission;
+        this.amount = amount;
+        this.balance = balance;
+        this.transportation = transportation;
+        this.user = user;
+    }
+
+    public Transaction(Integer id, Timestamp date, Client client, Currency currency, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, String commentColor, String amountColor, String inputColor, String outputColor, String tarifColor, String commissionColor, String rateColor, String transportationColor, User user) {
+        this.id = id;
+        this.date = date;
+        this.client = client;
+        this.currency = currency;
+        this.comment = comment;
+        this.rate = rate;
+        this.commission = commission;
+        this.amount = amount;
+        this.balance = balance;
+        this.transportation = transportation;
+        this.commentColor = commentColor;
+        this.amountColor = amountColor;
+        this.inputColor = inputColor;
+        this.outputColor = outputColor;
+        this.tarifColor = tarifColor;
+        this.commissionColor = commissionColor;
+        this.rateColor = rateColor;
+        this.transportationColor = transportationColor;
+        this.user = user;
+    }
+
     public Integer getId() {
         return id;
     }

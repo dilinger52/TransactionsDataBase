@@ -49,10 +49,11 @@ public class AdminController {
 
     @GetMapping("/users")
     public String getUsersPage(HttpSession session) {
-        logger.info("Loading users page...");
         User currentUser = (User) session.getAttribute("user");
+        logger.info(currentUser + " Loading users page...");
+
         if (currentUser.getRole() != Role.Admin) {
-            logger.info("Redirecting to error page with error: Отказано в доступе");
+            logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
@@ -73,22 +74,23 @@ public class AdminController {
         }
         session.setAttribute("active", active);
         session.setAttribute("users", users);
-        logger.info("Users page loaded");
+        logger.info(currentUser + " Users page loaded");
         return "users";
     }
 
     @PostMapping("/create_user")
     public String createUser(@RequestParam(name = "login") String login, HttpSession session) {
-        logger.info("Creating new user...");
         User currentUser = (User) session.getAttribute("user");
+        logger.info(currentUser + " Creating new user...");
+
         if (currentUser.getRole() != Role.Admin) {
-            logger.info("Redirecting to error page with error: Отказано в доступе");
+            logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
         try {
             userManager.getUser(login);
-            logger.info("Redirecting to error page with error: Логин занят. Придумайте другой");
+            logger.info(currentUser + " Redirecting to error page with error: Логин занят. Придумайте другой");
             session.setAttribute("error", "Логин занят. Придумайте другой");
             return "error";
         } catch (RuntimeException e) {
@@ -98,16 +100,17 @@ public class AdminController {
             user.setRole(Role.Manager);
             userManager.save(user);
         }
-        logger.info("User created");
+        logger.info(currentUser + " User created");
         return "redirect:/users";
     }
 
     @PostMapping("/restore_pass")
     public String restorePass(@RequestParam(name = "id") int id, HttpSession session) {
-        logger.info("Restoring password...");
         User currentUser = (User) session.getAttribute("user");
+        logger.info(currentUser + " Restoring password...");
+
         if (currentUser.getRole() != Role.Admin) {
-            logger.info("Redirecting to error page with error: Отказано в доступе");
+            logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
@@ -121,16 +124,17 @@ public class AdminController {
         user.setPassword(sha256hex);
 
         userManager.save(user);
-        logger.info("Password restored");
+        logger.info(currentUser + " Password restored");
         return "redirect:/users";
     }
 
     @PostMapping("/delete_user")
     public String deleteUser(@RequestParam(name = "id") int id, HttpSession session) {
-        logger.info("Deleting user");
         User currentUser = (User) session.getAttribute("user");
+        logger.info(currentUser + " Deleting user");
+
         if (currentUser.getRole() != Role.Admin) {
-            logger.info("Redirecting to error page with error: Отказано в доступе");
+            logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
@@ -143,7 +147,7 @@ public class AdminController {
         }
 
         userManager.delete(id);
-        logger.info("User deleted");
+        logger.info(currentUser + " User deleted");
         return "redirect:/users";
     }
 
@@ -156,10 +160,11 @@ public class AdminController {
                                  @RequestParam(name = "client_name", required = false) String clientName,
                                  @RequestParam(name = "currencyId", required = false) List<Integer> currencyId,
                                  HttpSession session) {
-        logger.info("Loading manger history page...");
         User currentUser = (User) session.getAttribute("user");
+        logger.info(currentUser + " Loading manger history page...");
+
         if (currentUser.getRole() != Role.Admin) {
-            logger.info("Redirecting to error page with error: Отказано в доступе");
+            logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
@@ -193,33 +198,37 @@ public class AdminController {
         session.setAttribute("transactions", transactions);
         session.setAttribute("currencies", currencies);
         session.setAttribute("currency_name", currencyName);
-        logger.info("Manager history page loaded");
+        logger.info(currentUser + " Manager history page loaded");
         return "managerHistory";
     }
 
     @GetMapping("/database")
     public String makeBackUp(HttpSession session, HttpServletResponse response) throws Exception {
         User currentUser = (User) session.getAttribute("user");
+        logger.info(currentUser + " Making backup...");
         if (currentUser.getRole() != Role.Admin) {
-            logger.info("Redirecting to error page with error: Отказано в доступе");
+            logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
 
         scheduler.makeBackUp();
+        logger.info(currentUser + " Backup made");
         return "redirect:/users";
     }
 
     @PostMapping("/database")
     public String restoreBackUp(HttpSession session, HttpServletResponse response) throws Exception {
         User currentUser = (User) session.getAttribute("user");
+        logger.info(currentUser + " Restoring from backup...");
         if (currentUser.getRole() != Role.Admin) {
-            logger.info("Redirecting to error page with error: Отказано в доступе");
+            logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
 
         scheduler.restoreFromBackUp();
+        logger.info(currentUser + " Backup restored");
         return "redirect:/users";
     }
 

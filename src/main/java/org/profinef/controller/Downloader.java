@@ -9,6 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
 import org.profinef.entity.Transaction;
+import org.profinef.entity.User;
 import org.profinef.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,8 @@ public class Downloader {
 
     @RequestMapping(path = "/client_info")
     public void downloadClientInfo(HttpServletResponse response, HttpSession session) {
-        logger.info("Downloading excel workbook...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Downloading excel workbook...");
         try {
             List<Client> clients = new ArrayList<>();
             clients.add((Client) session.getAttribute("client"));
@@ -65,10 +67,10 @@ public class Downloader {
             // Записываем всё в файл
             book.write(new FileOutputStream("excel/info.xlsx"));
             book.close();
-            logger.info("File created");
+            logger.info(user + " File created");
 
             sendFile(response, "excel/info.xlsx");
-            logger.info("File sent");
+            logger.info(user + " File sent");
         } catch (Exception e) {
             logger.error(Arrays.toString(new String[]{e.getMessage() + Arrays.toString(e.getStackTrace())}));
         }

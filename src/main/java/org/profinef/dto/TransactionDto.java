@@ -56,6 +56,42 @@ public class TransactionDto {
     public TransactionDto() {
     }
 
+    public TransactionDto(Integer id, Timestamp date, Integer clientId, Integer currencyId, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, int userId) {
+        this.id = id;
+        this.date = date;
+        this.clientId = clientId;
+        this.currencyId = currencyId;
+        this.comment = comment;
+        this.rate = rate;
+        this.commission = commission;
+        this.amount = amount;
+        this.balance = balance;
+        this.transportation = transportation;
+        this.userId = userId;
+    }
+
+    public TransactionDto(Integer id, Timestamp date, Integer clientId, Integer currencyId, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, String commentColor, String amountColor, String inputColor, String outputColor, String tarifColor, String commisionColor, String rateColor, String transportationColor, int userId) {
+        this.id = id;
+        this.date = date;
+        this.clientId = clientId;
+        this.currencyId = currencyId;
+        this.comment = comment;
+        this.rate = rate;
+        this.commission = commission;
+        this.amount = amount;
+        this.balance = balance;
+        this.transportation = transportation;
+        this.commentColor = commentColor;
+        this.amountColor = amountColor;
+        this.inputColor = inputColor;
+        this.outputColor = outputColor;
+        this.tarifColor = tarifColor;
+        this.commisionColor = commisionColor;
+        this.rateColor = rateColor;
+        this.transportationColor = transportationColor;
+        this.userId = userId;
+    }
+
     public Integer getId() {
         return id;
     }

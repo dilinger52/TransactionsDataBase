@@ -39,8 +39,7 @@ public final class DatabaseUtil {
         return false;
     }
 
-    public static void copyBackup(String hostname, String username, String password, String domain, String shareName, String inputFile)
-            throws IOException {
+    public static void copyBackup(String hostname, String username, String password, String domain, String shareName, String inputFile) {
         SMBClient client = new SMBClient();
         try (Connection connection = client.connect(hostname)) {
             AuthenticationContext ac = new AuthenticationContext(username, password.toCharArray(), domain);

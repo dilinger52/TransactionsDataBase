@@ -36,13 +36,14 @@ public class UserController {
 
     @PostMapping("/log_in")
     public String login(HttpSession session, @RequestParam String login, @RequestParam String password) {
-        logger.info("Checking user authorisation information...");
+        User currentUser = (User) session.getAttribute("user");
+        logger.info(currentUser + " Checking user authorisation information...");
         User user;
         try {
             user = userManager.getUser(login);
         } catch (RuntimeException e) {
             session.setAttribute("error", e.getMessage());
-            logger.info("Redirecting to error page with error: " + e.getMessage());
+            logger.info(currentUser + " Redirecting to error page with error: " + e.getMessage());
             return "error";
         }
 
@@ -51,18 +52,19 @@ public class UserController {
                 .toString();
         if (!sha256hex.equals(user.getPassword())) {
             session.setAttribute("error", "Пароль не верный");
-            logger.info("Redirecting to error page with error: Пароль не верный");
+            logger.info(currentUser + " Redirecting to error page with error: Пароль не верный");
             return "error";
         }
 
         session.setAttribute("user", user);
-        logger.info("User accepted");
+        logger.info(currentUser + " User accepted");
         return "redirect:/client";
     }
 
     @PostMapping("/log_out")
     public String logout(HttpSession session) {
-        logger.info("Logging out");
+        User currentUser = (User) session.getAttribute("user");
+        logger.info(currentUser + " Logging out");
         session.invalidate();
         return "redirect:/";
     }
@@ -75,12 +77,13 @@ public class UserController {
 
     @PostMapping("/change_login")
     public String changeLogin(@RequestParam(name = "login") String login, HttpSession session) {
-        logger.info("Changing user login...");
+
         User user = (User) session.getAttribute("user");
+        logger.info(user + " Changing user login...");
         user = userManager.getUser(user.getId());
         try {
             userManager.getUser(login);
-            logger.info("Redirecting to error page with error: Логин занят. Придумайте другой");
+            logger.info(user + " Redirecting to error page with error: Логин занят. Придумайте другой");
             session.setAttribute("error", "Логин занят. Придумайте другой");
             return "error";
         } catch (RuntimeException e) {
@@ -89,7 +92,7 @@ public class UserController {
         }
 
         session.setAttribute("user", user);
-        logger.info("Login changed");
+        logger.info(user + " Login changed");
         return "redirect:/user_settings";
     }
 
@@ -98,20 +101,21 @@ public class UserController {
                                  @RequestParam(name = "new_password") String newPassword,
                                  @RequestParam(name = "check_password") String checkPassword,
                                  HttpSession session) {
-        logger.info("Changing password...");
+
         User user = (User) session.getAttribute("user");
+        logger.info(user + " Changing password...");
         user = userManager.getUser(user.getId());
         String oldPassSha = Hashing.sha256()
                 .hashString(oldPassword, StandardCharsets.UTF_8)
                 .toString();
         if (!Objects.equals(user.getPassword(), oldPassSha)) {
-            logger.info("Redirecting to error page with error: Неверный пароль");
+            logger.info(user + " Redirecting to error page with error: Неверный пароль");
             session.setAttribute("error", "Неверный пароль");
             return "error";
         }
 
         if (!Objects.equals(newPassword, checkPassword)) {
-            logger.info("Redirecting to error page with error: Пароли не совпадают");
+            logger.info(user + " Redirecting to error page with error: Пароли не совпадают");
             session.setAttribute("error", "Пароли не совпадают");
             return "error";
         }
@@ -122,7 +126,7 @@ public class UserController {
         user.setPassword(newPassSha);
         userManager.save(user);
         session.setAttribute("user", user);
-        logger.info("Password changed");
+        logger.info(user + " Password changed");
         return "redirect:/user_settings";
     }
 }

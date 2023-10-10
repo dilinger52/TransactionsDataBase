@@ -13,6 +13,12 @@ public class Action {
         this.id = UUID.randomUUID();
     }
 
+    public Action(String name, List<Transaction> changes) {
+        this.id = UUID.randomUUID();
+        this.name = name;
+        this.changes = changes;
+    }
+
     public String getName() {
         return name;
     }

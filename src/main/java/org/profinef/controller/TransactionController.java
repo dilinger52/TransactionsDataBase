@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,7 +49,8 @@ public class TransactionController {
 
     @GetMapping("/add_transaction")
     public String addTransaction(HttpSession session) {
-        logger.info("Loading add transaction page...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Loading add transaction page...");
         session.removeAttribute("transaction");
         List<Account> clients = accountManager.getAllAccounts();
         session.setAttribute("clients", clients);
@@ -64,7 +66,7 @@ public class TransactionController {
         session.setAttribute("transaction", transaction);
         session.setAttribute("path", "/add_transaction");
         session.setAttribute("currencies", currencies);
-        logger.info("Add transaction page loaded");
+        logger.info(user + " Add transaction page loaded");
         return "addTransaction";
     }
 
@@ -77,12 +79,13 @@ public class TransactionController {
     @GetMapping(path = "/edit")
     public String editTransactionPage(@RequestParam(name = "transaction_id", required = false, defaultValue = "0") int transactionId,
                                       HttpSession session) {
-        logger.info("Loading edit transaction page...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Loading edit transaction page...");
         if (transactionId == 0) {
             logger.debug("transactionId == 0");
             if (session.getAttribute("transaction") == null) {
                 logger.debug("Transaction is no set");
-                logger.info("Redirecting to the main page");
+                logger.info(user + " Redirecting to the main page");
                 return "redirect:/client";
             }
             transactionId = ((List<Transaction>) session.getAttribute("transaction")).get(0).getId();
@@ -96,7 +99,7 @@ public class TransactionController {
         session.setAttribute("currencies", currencies);
         session.setAttribute("transaction", transaction);
         session.setAttribute("path", "/edit");
-        logger.info("Edit transaction page loaded");
+        logger.info(user + " Edit transaction page loaded");
         return "addTransaction";
     }
 
@@ -109,7 +112,7 @@ public class TransactionController {
      * @param currencyName   new currencies names to save to transaction
      * @param session        collect parameters for view
      */
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @PostMapping(path = "/edit_transaction")
     public String editTransaction(@RequestParam(name = "transaction_id") List<Integer> transactionId,
                                   @RequestParam(name = "client_name") List<String> clientName,
@@ -122,7 +125,8 @@ public class TransactionController {
                                   @RequestParam(name = "transportation") List<String> transportationS,
                                   @RequestParam(name = "pointer", required = false) String pointer,
                                   HttpSession session) {
-        logger.info("Saving transaction after editing...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Saving transaction after editing...");
 
         List<Double> rate = new ArrayList<>();
         for (String s : rateS) {
@@ -173,7 +177,7 @@ public class TransactionController {
         int size = positiveAmount.size();
         if (size < negativeAmount.size()) size = negativeAmount.size();
         if (size < 1) {
-            logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+            logger.info(user + " Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
             session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
             return "error";
         }
@@ -193,7 +197,7 @@ public class TransactionController {
             }
 
             if (positiveAmount.isEmpty() || (!Objects.equals(positiveAmount.get(i), 0.0) && positiveAmount.get(i) + negativeAmount.get(i) == 0)) {
-                logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+                logger.info(user + " Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
                 session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
                 return "error.html";
             }
@@ -363,13 +367,13 @@ public class TransactionController {
             /*String[] pp = pointer.split("_");
             pointer = transactionId + "_" + currencyManager.getCurrency(pp[0].substring(0, 3)).getId() + "_" + clientId.get(0) + "_" + pp[1];*/
         } catch (Exception e) {
-            logger.info("Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
+            logger.info(user + " Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
 
             session.setAttribute("error", e.getMessage());
             return "error";
         }
 
-        logger.info("Transaction saved");
+        logger.info(user + " Transaction saved");
         session.setAttribute("pointer", pointer);
         return "redirect:/client_info";
     }
@@ -463,10 +467,11 @@ public class TransactionController {
      * @param transactionId id of transaction that need to be deleted
      * @param session       collect parameters for view
      */
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @PostMapping(path = "delete_transaction")
     public String deleteTransaction(@RequestParam(name = "transaction_id") int transactionId, HttpSession session) {
-        logger.info("Deleting transaction...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Deleting transaction...");
         int clientId = ((Client) session.getAttribute("client")).getId();
         Stack<Action> undos = (Stack<Action>) session.getAttribute("undos" + clientId);
         if (undos == null) {
@@ -522,7 +527,7 @@ public class TransactionController {
         reverse(redos);
         session.setAttribute("undos" + clientId, undos);
         session.setAttribute("redos" + clientId, redos);
-        logger.info("Transaction deleted");
+        logger.info(user + " Transaction deleted");
         return "redirect:/client_info";
     }
 
@@ -535,7 +540,7 @@ public class TransactionController {
      * @param session        collect parameters for view
      */
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @PostMapping(path = "/transaction")
     public String doTransaction(@RequestParam(name = "client_name") List<String> clientName,
                                 @RequestParam(name = "currency_name") List<String> currencyName,
@@ -556,7 +561,8 @@ public class TransactionController {
                                 @RequestParam(required = false) List<String> rateColor,
                                 @RequestParam(required = false) List<String> transportationColor,
                                 @RequestParam(required = false) List<String> amountColor) {
-        logger.info("Creating new transaction...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Creating new transaction...");
 
         List<Double> rate = new ArrayList<>();
         for (String s : rateS) {
@@ -622,7 +628,7 @@ public class TransactionController {
             }
 
             if (positiveAmount.isEmpty() || (positiveAmount.get(i) != 0 && positiveAmount.get(i) + negativeAmount.get(i) == 0)) {
-                logger.info("Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
+                logger.info(user + " Redirecting to error page with error: Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
                 session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
                 return "error";
             }
@@ -632,7 +638,6 @@ public class TransactionController {
         if (session.getAttribute("path") == "/transfer") {
             amount.set(0, (-1) * amount.get(0));
         }
-        User user = (User) session.getAttribute("user");
         try {
             if (comment.isEmpty()) {
                 comment = new ArrayList<>();
@@ -649,7 +654,7 @@ public class TransactionController {
                 } else if (currencyDouble.contains(currencyName.get(i))) {
                     session.setAttribute("error", "Обнаружено наличие как минимум двух позиций с совпадением " +
                             "значений клиента и валюты. Подобная операция не допустима");
-                    logger.info("Redirecting to error page with error: Обнаружено наличие как минимум двух позиций " +
+                    logger.info(user + " Redirecting to error page with error: Обнаружено наличие как минимум двух позиций " +
                             "с совпадением значений клиента и валюты. Подобная операция не допустима");
                     return "error";
                 }
@@ -732,7 +737,7 @@ public class TransactionController {
                                 rateColor.get(i), transportationColor.get(i));
                     }
                 } catch (Exception e) {
-                    logger.info("Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
+                    logger.info(user + " Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
                     session.setAttribute("error", e.getMessage());
                     return "error";
                 }
@@ -800,19 +805,20 @@ public class TransactionController {
             assert startDate != null;
             session.setAttribute("startDate" + clientId.get(0), new Timestamp(startDate.getTime()));
         } catch (Exception e) {
-            logger.info("Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
+            logger.info(user + " Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
             session.setAttribute("error", e.getMessage());
             return "error";
         }
 
-        logger.info("Transaction created");
+        logger.info(user + " Transaction created");
         session.setAttribute("pointer", pointer);
         return "redirect:/client_info";
     }
 
     @PostMapping("/undo")
     public String undo(@RequestParam(name = "id", required = false, defaultValue = "-1") int id, HttpSession session) {
-        logger.info("Starting undoing...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Starting undoing...");
         logger.trace("Action id=" + id);
         int clientId = ((Client) session.getAttribute("client")).getId();
         if (id != -1) {
@@ -928,7 +934,8 @@ public class TransactionController {
 
     @PostMapping("/redo")
     public String redo(@RequestParam(name = "id", required = false, defaultValue = "-1") int id, HttpSession session) {
-        logger.info("Starting redoing...");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Starting redoing...");
         logger.trace("Action id=" + id);
         int clientId = ((Client) session.getAttribute("client")).getId();
         if (id != -1) {
@@ -1049,14 +1056,16 @@ public class TransactionController {
 
     @GetMapping("/convertation")
     public String convertation(HttpSession session) {
-        logger.info("Loading convertation page");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Loading convertation page");
         session.setAttribute("path", "/convertation");
         return "convertation";
     }
 
     @GetMapping("/transfer")
     public String transfer(HttpSession session) {
-        logger.info("Loading transfer page");
+        User user = (User) session.getAttribute("user");
+        logger.info(user + " Loading transfer page");
         session.setAttribute("path", "/transfer");
         return "transfer";
     }

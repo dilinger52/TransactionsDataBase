@@ -3,10 +3,8 @@ package org.profinef.service;
 import org.profinef.dto.AccountDto;
 import org.profinef.dto.CurrencyDto;
 import org.profinef.dto.TransactionDto;
-import org.profinef.entity.Account;
-import org.profinef.entity.Client;
+import org.profinef.entity.*;
 import org.profinef.entity.Currency;
-import org.profinef.entity.Transaction;
 import org.profinef.repository.AccountRepository;
 import org.profinef.repository.CurrencyRepository;
 import org.profinef.repository.TransactionRepository;
@@ -14,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
@@ -59,6 +58,8 @@ public class TransManager {
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
                 "Введите значение от -100 до 100 включительно");
         Client client = clientManager.getClientExactly(clientName);
+        Currency currency = currencyManager.getCurrency(currencyId);
+        User user = userManager.getUser(userId);
         if (date == null) date = new Timestamp(System.currentTimeMillis());
 
         double oldBalance = 0.0;
@@ -81,9 +82,9 @@ public class TransManager {
             trBalance = 0.0;
         }
         double balance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
-        TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
-                transportation, client, comment,  trBalance + balance - oldBalance, commentColor, amountColor,
-                userId, inputColor, outputColor, tarifColor, commissionColor, rateColor, transportationColor);
+        TransactionDto transactionDto = formatToDto(new Transaction(transactionId, date, client, currency, comment, rate, commission, amount,
+               trBalance + balance - oldBalance,  transportation,  commentColor, amountColor,
+                inputColor, outputColor, tarifColor, commissionColor, rateColor, transportationColor, user));
         transactionRepository.save(transactionDto);
         logger.debug("Transaction saved");
         return balance;
@@ -98,6 +99,8 @@ public class TransManager {
         if (commission < -100 || commission > 100) throw new RuntimeException("Неверная величина комиссии. " +
                 "Введите значение от -100 до 100 включительно");
         Client client = clientManager.getClientExactly(clientName);
+        Currency currency = currencyManager.getCurrency(currencyId);
+        User user = userManager.getUser(userId);
         AccountDto accountDto = accountRepository.findByClientIdAndCurrencyId(client.getId(), currencyId);
         if (accountDto == null) {
             accountRepository.save(new AccountDto(client.getId(), currencyId, 0.0));
@@ -106,9 +109,9 @@ public class TransManager {
         double oldBalance = accountDto.getAmount();
         double newBalance = updateCurrencyAmount(client.getId(), currencyId, rate, commission, amount, transportation);
         double result = trBalance + newBalance - oldBalance;
-        TransactionDto transactionDto = formatToDto(transactionId, date, currencyId, rate, commission, amount,
-                transportation, client, comment, result, pibColor, amountColor, userId, inputColor,
-                outputColor, tarifColor, commissionColor, rateColor, transportationColor);
+        TransactionDto transactionDto = formatToDto(new Transaction(transactionId, date, client, currency, comment, rate, commission, amount,
+                result, transportation, pibColor, amountColor, inputColor,
+                outputColor, tarifColor, commissionColor, rateColor, transportationColor, user));
         transactionRepository.save(transactionDto);
         logger.debug("Transaction saved");
         return result;
@@ -173,10 +176,7 @@ public class TransManager {
             logger.trace("Old balance: " + oldBalance);
             double newBalance = undoTransaction(t.getId(), t.getClient().getPib(), t.getCurrency().getId());
             logger.trace("New balance: " + newBalance);
-            TransactionDto transactionDto = formatToDto(t.getId(), t.getDate(), t.getCurrency().getId(), t.getRate(),
-                    t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getComment(), t.getBalance(), t.getCommentColor(),
-            t.getAmountColor(), t.getUser().getId(), t.getInputColor(), t.getOutputColor(), t.getTarifColor(),
-                    t.getCommissionColor(), t.getRateColor(), t.getTransportationColor());
+            TransactionDto transactionDto = formatToDto(t);
             List<Integer> currencyId = new ArrayList<>();
             currencyId.add(t.getCurrency().getId());
             updateNext(t.getClient().getPib(), currencyId, newBalance - oldBalance, transactionDto.getDate());
@@ -186,15 +186,12 @@ public class TransManager {
         logger.debug("Transactions deleted");
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void safeDeleteTransaction(List<Transaction> transaction) {
         logger.debug("Deleting transactions");
         List<TransactionDto> transactionDtoList = new ArrayList<>();
         for (Transaction t : transaction) {
-            TransactionDto transactionDto = formatToDto(t.getId(), t.getDate(), t.getCurrency().getId(), t.getRate(),
-                    t.getCommission(), t.getAmount(), t.getTransportation(), t.getClient(), t.getComment(), t.getBalance(), t.getCommentColor(),
-                    t.getAmountColor(), t.getUser().getId(), t.getInputColor(), t.getOutputColor(), t.getTarifColor(),
-                    t.getCommissionColor(), t.getRateColor(), t.getTransportationColor());
+            TransactionDto transactionDto = formatToDto(t);
             transactionDtoList.add(transactionDto);
         }
         transactionRepository.deleteAll(transactionDtoList);
@@ -243,32 +240,28 @@ public class TransManager {
         return total;
     }
 
-    private TransactionDto formatToDto(int transactionId, Timestamp date, int currencyId, double rate,
-                                       double commission, double amount, double transportation, Client client,
-                                       String comment, double balance, String commentColor, String amountColor,
-                                       int userId, String inputColor, String outputColor,
-                                       String tarifColor, String commissionColor, String rateColor, String transportationColor) {
+    private TransactionDto formatToDto(Transaction transaction) {
         logger.debug("Formatting transaction from entity to dto");
         TransactionDto transactionDto = new TransactionDto();
-        if (transactionId != 0) transactionDto.setId(transactionId);
-        transactionDto.setDate(date);
-        transactionDto.setClientId(client.getId());
-        transactionDto.setCurrencyId(currencyId);
-        transactionDto.setComment(comment);
-        transactionDto.setRate(rate);
-        transactionDto.setCommission(commission);
-        transactionDto.setAmount(amount);
-        transactionDto.setBalance(balance);
-        transactionDto.setTransportation(transportation);
-        transactionDto.setCommentColor(commentColor);
-        transactionDto.setAmountColor(amountColor);
-        transactionDto.setInputColor(inputColor);
-        transactionDto.setOutputColor(outputColor);
-        transactionDto.setTarifColor(tarifColor);
-        transactionDto.setCommissionColor(commissionColor);
-        transactionDto.setRateColor(rateColor);
-        transactionDto.setTransportationColor(transportationColor);
-        transactionDto.setUserId(userId);
+        if (transaction.getId() != 0) transactionDto.setId(transaction.getId());
+        transactionDto.setDate(transaction.getDate());
+        transactionDto.setClientId(transaction.getClient().getId());
+        transactionDto.setCurrencyId(transaction.getCurrency().getId());
+        transactionDto.setComment(transaction.getComment());
+        transactionDto.setRate(transaction.getRate());
+        transactionDto.setCommission(transaction.getCommission());
+        transactionDto.setAmount(transaction.getAmount());
+        transactionDto.setBalance(transaction.getBalance());
+        transactionDto.setTransportation(transaction.getTransportation());
+        transactionDto.setCommentColor(transaction.getCommentColor());
+        transactionDto.setAmountColor(transaction.getAmountColor());
+        transactionDto.setInputColor(transaction.getInputColor());
+        transactionDto.setOutputColor(transaction.getOutputColor());
+        transactionDto.setTarifColor(transaction.getTarifColor());
+        transactionDto.setCommissionColor(transaction.getCommissionColor());
+        transactionDto.setRateColor(transaction.getRateColor());
+        transactionDto.setTransportationColor(transaction.getTransportationColor());
+        transactionDto.setUserId(transaction.getUser().getId());
         logger.trace("TransactionDTO: " + transactionDto);
         return transactionDto;
     }
@@ -350,13 +343,7 @@ public class TransManager {
 
     public void save(Transaction transaction) {
         logger.debug("Saving transaction");
-        transactionRepository.save(formatToDto(transaction.getId(), transaction.getDate(),
-                transaction.getCurrency().getId(), transaction.getRate(), transaction.getCommission(),
-                transaction.getAmount(), transaction.getTransportation(), transaction.getClient(),
-                transaction.getComment(), transaction.getBalance(), transaction.getCommentColor(),
-                transaction.getAmountColor(), transaction.getUser().getId(),
-                transaction.getInputColor(), transaction.getOutputColor(), transaction.getTarifColor(),
-                transaction.getCommissionColor(), transaction.getRateColor(), transaction.getTransportationColor()));
+        transactionRepository.save(formatToDto(transaction));
         logger.debug("Transaction saved");
     }
 
@@ -376,7 +363,7 @@ public class TransManager {
         return new HashSet<>(transactionRepository.findAllComments());
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteAfter(Timestamp afterDate) {
         logger.debug("deleting after " + afterDate);
         for (AccountDto accountDto : accountRepository.findAll()) {

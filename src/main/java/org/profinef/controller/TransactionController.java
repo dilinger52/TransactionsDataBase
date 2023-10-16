@@ -181,6 +181,20 @@ public class TransactionController {
             session.setAttribute("error", "Недопустимое зануление транзакции. Пожалуйста воспользуйтесь кнопкой удалить на против соответсвующей транзакции");
             return "error";
         }
+        List<String> clientDouble = new ArrayList<>();
+        List<String> currencyDouble = new ArrayList<>();
+        for (int i = 0; i < clientName.size(); i++) {
+            if (!clientDouble.contains(clientName.get(i))) {
+                clientDouble.add(clientName.get(i));
+                currencyDouble.add(currencyName.get(i));
+            } else if (currencyDouble.contains(currencyName.get(i))) {
+                session.setAttribute("error", "Обнаружено наличие как минимум двух позиций с совпадением " +
+                        "значений клиента и валюты. Подобная операция не допустима");
+                logger.info(user + " Redirecting to error page with error: Обнаружено наличие как минимум двух позиций " +
+                        "с совпадением значений клиента и валюты. Подобная операция не допустима");
+                return "error";
+            }
+        }
         for (int i = 0; i < size; i++) {
             if (positiveAmount.size() < size) {
                 positiveAmount.add(0.0);
@@ -202,6 +216,8 @@ public class TransactionController {
                 return "error.html";
             }
             amount.add(positiveAmount.get(i) + negativeAmount.get(i));
+
+
         }
         if (comment.isEmpty()) {
             logger.debug("comment is empty");
@@ -716,7 +732,7 @@ public class TransactionController {
                             trBalance = previousTransaction.getBalance();
                         }
                         logger.trace("trBalance: " + trBalance);
-                        Double oldBalance = accountManager.getAccounts(clientName.get(i)).get(0).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i))).getAmount();
+                        Double oldBalance = accountManager.getAccount(clientName.get(i)).getCurrencies().get(currencyManager.getCurrency(currencyId.get(i))).getAmount();
                         logger.trace("oldBalance: " + oldBalance);
                         Double newBalance = transManager.remittance(transactionId, dt, clientName.get(i), comment.get(i),
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),

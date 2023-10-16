@@ -22,8 +22,7 @@
                 <input autocomplete="off" id="client_name" list="client_name_datalist" name="client_name" onkeyup="filterFunction(), autoinsert('client_name', 'client_name_datalist')"
                        placeholder="Поиск.." type="text">
                 <datalist id="client_name_datalist">
-                    <option th:each="client : ${session.clients}" th:if="${client.client.pib != 'Всего'}"
-                            th:value="${client.client.pib}"></option>
+                    <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
                 </datalist>
             </div>
             <input class="inline" name="strDate" th:value="${#dates.format(session.strDate, 'yyyy-MM-dd')}" type="date">

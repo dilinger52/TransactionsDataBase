@@ -521,7 +521,7 @@ public class AppController {
             int currencyId = -1;
             if (arr[1].matches("[0-9]{3}")) {
                 currencyId = Integer.parseInt(arr[1]);
-                Account account = accountManager.getAccounts(client.getPib()).get(0);
+                Account account = accountManager.getAccount(client.getPib());
                 Currency currency = currencyManager.getCurrency(currencyId);
                 Map<Currency, Account.Properties> currencies = account.getCurrencies();
                 Account.Properties prop = currencies.get(currency);
@@ -563,7 +563,7 @@ public class AppController {
             accounts = accountManager.getAllAccounts();
         } else {
             logger.debug("client name found");
-            accounts.add(accountManager.getAccounts(clientName).get(0));
+            accounts.add(accountManager.getAccount(clientName));
         }
         logger.info(user + " Found " + accounts.size() + " accounts");
         for (Account account : accounts) {

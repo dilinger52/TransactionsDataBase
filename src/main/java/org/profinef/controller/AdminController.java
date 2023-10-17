@@ -52,7 +52,7 @@ public class AdminController {
         User currentUser = (User) session.getAttribute("user");
         logger.info(currentUser + " Loading users page...");
 
-        if (currentUser.getRole() != Role.Admin) {
+        if (currentUser.getRole() != Role.Admin && currentUser.getRole() != Role.Superadmin) {
             logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
@@ -79,11 +79,13 @@ public class AdminController {
     }
 
     @PostMapping("/create_user")
-    public String createUser(@RequestParam(name = "login") String login, HttpSession session) {
+    public String createUser(@RequestParam(name = "login") String login,
+                             @RequestParam(name = "role") String role,
+                             HttpSession session) {
         User currentUser = (User) session.getAttribute("user");
         logger.info(currentUser + " Creating new user...");
 
-        if (currentUser.getRole() != Role.Admin) {
+        if (currentUser.getRole() != Role.Admin && currentUser.getRole() != Role.Superadmin) {
             logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
@@ -97,10 +99,30 @@ public class AdminController {
             User user = new User();
             user.setLogin(login);
             user.setPassword("d17f25ecfbcc7857f7bebea469308be0b2580943e96d13a3ad98a13675c4bfc2");
-            user.setRole(Role.Manager);
+            user.setRole(Role.valueOf(role));
             userManager.save(user);
         }
         logger.info(currentUser + " User created");
+        return "redirect:/users";
+    }
+
+    @PostMapping("/change_role")
+    public String changeRole(@RequestParam(name = "id") int id,
+                             @RequestParam(name = "role") String role,
+                             HttpSession session) {
+        User currentUser = (User) session.getAttribute("user");
+        logger.info(currentUser + " Changing role...");
+
+        if (currentUser.getRole() != Role.Superadmin) {
+            logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
+            session.setAttribute("error", "Отказано в доступе");
+            return "error";
+        }
+
+        User user = userManager.getUser(id);
+        user.setRole(Role.valueOf(role));
+        userManager.save(user);
+        logger.info(currentUser + " Role changed");
         return "redirect:/users";
     }
 
@@ -109,7 +131,7 @@ public class AdminController {
         User currentUser = (User) session.getAttribute("user");
         logger.info(currentUser + " Restoring password...");
 
-        if (currentUser.getRole() != Role.Admin) {
+        if (currentUser.getRole() != Role.Admin && currentUser.getRole() != Role.Superadmin) {
             logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
@@ -133,14 +155,14 @@ public class AdminController {
         User currentUser = (User) session.getAttribute("user");
         logger.info(currentUser + " Deleting user");
 
-        if (currentUser.getRole() != Role.Admin) {
+        if (currentUser.getRole() != Role.Admin && currentUser.getRole() != Role.Superadmin) {
             logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
 
         User user = userManager.getUser(id);
-        if (user.getRole() == Role.Admin) {
+        if (user.getRole() == Role.Admin || currentUser.getRole() == Role.Superadmin) {
             logger.info("Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
@@ -158,12 +180,12 @@ public class AdminController {
                                  @RequestParam(name = "strDate", required = false) Date strDate,
                                  @RequestParam(name = "edDate", required = false) Date edDate,
                                  @RequestParam(name = "client_name", required = false) String clientName,
-                                 @RequestParam(name = "currencyId", required = false) List<Integer> currencyId,
+                                 @RequestParam(name = "currency_id", required = false) List<Integer> currencyId,
                                  HttpSession session) {
         User currentUser = (User) session.getAttribute("user");
         logger.info(currentUser + " Loading manger history page...");
 
-        if (currentUser.getRole() != Role.Admin) {
+        if (currentUser.getRole() != Role.Admin && currentUser.getRole() != Role.Superadmin) {
             logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
@@ -174,7 +196,8 @@ public class AdminController {
         logger.trace("managerId: " + managerId);
         if (strDate == null) strDate = Date.valueOf(LocalDate.now());
         logger.trace("strDate: " + strDate);
-        if (edDate == null) edDate = new Date(strDate.getTime() + 86400000);
+        if (edDate == null) edDate = new Date(strDate.getTime());
+        edDate = new Date(edDate.getTime() + 86400000);
         logger.trace("endDate: " + edDate);
         List<Currency> currencies = currencyManager.getAllCurrencies();
         if (currencyId == null) {
@@ -190,14 +213,16 @@ public class AdminController {
         for (Integer curId : currencyId) {
             currencyName.add(currencyManager.getCurrency(curId).getName());
         }
+        List<Client> clients = clientManager.findAll();
         List<Transaction> transactions = transManager.findByUser(managerId, new Timestamp(strDate.getTime()), new Timestamp(edDate.getTime() - 1), clientName, currencyId);
         User manager = userManager.getUser(managerId);
         session.setAttribute("strDate", new Timestamp(strDate.getTime()));
-        session.setAttribute("edDate", new Timestamp(edDate.getTime()));
+        session.setAttribute("edDate", new Timestamp(edDate.getTime() - 86400000));
         session.setAttribute("manager", manager);
         session.setAttribute("transactions", transactions);
         session.setAttribute("currencies", currencies);
         session.setAttribute("currency_name", currencyName);
+        session.setAttribute("clients", clients);
         logger.info(currentUser + " Manager history page loaded");
         return "managerHistory";
     }
@@ -206,7 +231,7 @@ public class AdminController {
     public String makeBackUp(HttpSession session, HttpServletResponse response) throws Exception {
         User currentUser = (User) session.getAttribute("user");
         logger.info(currentUser + " Making backup...");
-        if (currentUser.getRole() != Role.Admin) {
+        if (currentUser.getRole() != Role.Admin && currentUser.getRole() != Role.Superadmin) {
             logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
@@ -221,7 +246,7 @@ public class AdminController {
     public String restoreBackUp(HttpSession session, HttpServletResponse response) throws Exception {
         User currentUser = (User) session.getAttribute("user");
         logger.info(currentUser + " Restoring from backup...");
-        if (currentUser.getRole() != Role.Admin) {
+        if (currentUser.getRole() != Role.Admin && currentUser.getRole() != Role.Superadmin) {
             logger.info(currentUser + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";

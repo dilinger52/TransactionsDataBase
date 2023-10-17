@@ -72,7 +72,7 @@ public class Uploader {
                                       HttpSession session) throws Exception {
         User user = (User) session.getAttribute("user");
         logger.info(user + " Getting file...");
-        if (user.getRole() != Role.Admin) {
+        if (user.getRole() != Role.Admin  && user.getRole() != Role.Superadmin) {
             logger.info(user + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
@@ -259,7 +259,7 @@ public class Uploader {
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
                     currencyId, rate, commission, amount, transportation, null, amountColor, user.getId(),
                     0.0, null, null, null, null, null,
-                    null);
+                    null, null);
         } catch (RuntimeException e) {
             e.printStackTrace();
             //if currency did not exist create it and try again
@@ -272,7 +272,7 @@ public class Uploader {
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
                     currencyId, rate, commission, amount, transportation, null, amountColor,
                     user.getId(), 0.0, null, null, null, null, null,
-                    null);
+                    null, null);
         }
         //setting parameters to default
         amount = 0;

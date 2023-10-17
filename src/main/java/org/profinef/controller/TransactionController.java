@@ -183,6 +183,8 @@ public class TransactionController {
         }
         List<String> clientDouble = new ArrayList<>();
         List<String> currencyDouble = new ArrayList<>();
+        System.out.println(clientName);
+        System.out.println(currencyName);
         for (int i = 0; i < clientName.size(); i++) {
             if (!clientDouble.contains(clientName.get(i))) {
                 clientDouble.add(clientName.get(i));
@@ -310,7 +312,7 @@ public class TransactionController {
                         currencyId.get(i), rate.get(i), commission.get(i), amount.get(i),
                         transportation.get(i), tran.getCommentColor(), tran.getAmountColor(), tr.getUser().getId(), balance,
                         tran.getInputColor(), tran.getOutputColor(), tran.getTarifColor(), tran.getCommissionColor(), tran.getRateColor(),
-                        tran.getTransportationColor());
+                        tran.getTransportationColor(), tran.getBalanceColor());
                 Map<Currency, Double> newBalance = new TreeMap<>();
                 if (newBalances.containsKey(clientManager.getClientExactly(clientName.get(i)))) {
                     newBalance = newBalances.get(clientManager.getClientExactly(clientName.get(i)));
@@ -576,7 +578,8 @@ public class TransactionController {
                                 @RequestParam(required = false) List<String> commissionColor,
                                 @RequestParam(required = false) List<String> rateColor,
                                 @RequestParam(required = false) List<String> transportationColor,
-                                @RequestParam(required = false) List<String> amountColor) {
+                                @RequestParam(required = false) List<String> amountColor,
+                                @RequestParam(required = false) List<String> balanceColor) {
         User user = (User) session.getAttribute("user");
         logger.info(user + " Creating new transaction...");
 
@@ -698,6 +701,8 @@ public class TransactionController {
             if (rateColor == null) rateColor = new ArrayList<>(arr);
             if (transportationColor == null) transportationColor = new ArrayList<>(arr);
             if (amountColor == null) amountColor = new ArrayList<>(arr);
+            if (balanceColor == null) balanceColor = new ArrayList<>(arr);
+
             for (int i = 0; i < clientName.size(); i++) {
                 if (commission.size() < clientName.size()) {
                     commission.add(0.0);
@@ -738,7 +743,7 @@ public class TransactionController {
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
                                 commentColor.get(i), amountColor.get(i), user.getId(), trBalance, inputColor.get(i),
                                 outputColor.get(i), tarifColor.get(i), commissionColor.get(i),
-                                rateColor.get(i), transportationColor.get(i));
+                                rateColor.get(i), transportationColor.get(i), balanceColor.get(i));
                         logger.trace("newBalance: " + newBalance);
                         List<Integer> list = new ArrayList<>();
                         list.add(currencyId.get(i));
@@ -750,7 +755,7 @@ public class TransactionController {
                                 currencyId.get(i), rate.get(i), commission.get(i), amount.get(i), transportation.get(i),
                                 commentColor.get(i), amountColor.get(i), user.getId(), 0.0, inputColor.get(i),
                                 outputColor.get(i), tarifColor.get(i), commissionColor.get(i),
-                                rateColor.get(i), transportationColor.get(i));
+                                rateColor.get(i), transportationColor.get(i), balanceColor.get(i));
                     }
                 } catch (Exception e) {
                     logger.info(user + " Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
@@ -912,6 +917,7 @@ public class TransactionController {
                     List<String> rateColor = new ArrayList<>();
                     List<String> transportationColor = new ArrayList<>();
                     List<String> amountColor = new ArrayList<>();
+                    List<String> balanceColor = new ArrayList<>();
                     for (Transaction transaction : transactions) {
                         transactionId.add(transaction.getId());
                         clientName.add(transaction.getClient().getPib());
@@ -930,11 +936,12 @@ public class TransactionController {
                         rateColor.add(transaction.getRateColor());
                         transportationColor.add(transaction.getTransportationColor());
                         amountColor.add(transaction.getAmountColor());
+                        balanceColor.add(transaction.getBalanceColor());
                     }
                     doTransaction(clientName, currencyName, comment, rate, commission, positiveAmount, negativeAmount,
                             transportation, new Date(date.getTime()), "UAHtr0_pAmount", session, commentColor,
                             inputColor, outputColor, tarifColor, commissionColor, rateColor, transportationColor,
-                            amountColor);
+                            amountColor, balanceColor);
                     //return "redirect:/client_info";
                 } else if (action.getName().matches("Добавление.*")) {
                     logger.debug("found add");
@@ -1039,6 +1046,7 @@ public class TransactionController {
                     List<String> rateColor = new ArrayList<>();
                     List<String> transportationColor = new ArrayList<>();
                     List<String> amountColor = new ArrayList<>();
+                    List<String> balanceColor = new ArrayList<>();
                     for (Transaction transaction : transactions) {
                         transactionId.add(transaction.getId());
                         clientName.add(transaction.getClient().getPib());
@@ -1057,11 +1065,12 @@ public class TransactionController {
                         rateColor.add(transaction.getRateColor());
                         transportationColor.add(transaction.getTransportationColor());
                         amountColor.add(transaction.getAmountColor());
+                        balanceColor.add(transaction.getBalanceColor());
                     }
                     doTransaction(clientName, currencyName, comment, rate, commission, positiveAmount, negativeAmount,
                             transportation, new Date(date.getTime()), "UAHtr0_pAmount", session, commentColor,
                             inputColor, outputColor, tarifColor, commissionColor, rateColor, transportationColor,
-                            amountColor);
+                            amountColor, balanceColor);
                     //return "redirect:/client_info";
                 }
             }

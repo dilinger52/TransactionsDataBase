@@ -153,8 +153,10 @@ public class AppController {
                 logger.debug("requested end date is null");
                 endDate = new Date(startDate.getTime() + 86400000);
             } else {
-                endDate = new Date(((Timestamp) session.getAttribute("endDate1" + clientId)).getTime());
+                endDate = new Date(((Timestamp) session.getAttribute("endDate1" + clientId)).getTime() + 86400000);
             }
+        } else {
+            endDate = new Date(endDate.getTime() +  86400000);
         }
         logger.trace("startDate = " + startDate);
         logger.trace("endDate = " + endDate);
@@ -225,8 +227,8 @@ public class AppController {
         session.setAttribute("currencies", currencies);
         session.setAttribute("total", total);
         session.setAttribute("startDate" + clientId, new Timestamp(startDate.getTime()));
-        session.setAttribute("endDate" + clientId, new Timestamp(endDate.getTime() - 1));
-        session.setAttribute("endDate1" + clientId, new Timestamp(endDate.getTime()));
+        session.setAttribute("endDate" + clientId, new Timestamp(endDate.getTime() - 86400000 - 1));
+        session.setAttribute("endDate1" + clientId, new Timestamp(endDate.getTime() - 86400000));
         session.setAttribute("client", client);
         session.setAttribute("transactions", transactions);
         session.setAttribute("transactionIds", transactionIds);
@@ -317,6 +319,7 @@ public class AppController {
         logger.info("Loading new client page...");
         session.setAttribute("path", "/new_client");
         logger.info("New client page loaded");
+        System.out.println(session.getAttribute("path"));
         return "addClient";
     }
 
@@ -334,6 +337,7 @@ public class AppController {
         session.setAttribute("client", client);
         session.setAttribute("path", "/edit_client");
         logger.info(user + " Edit client page loaded");
+        System.out.println(session.getAttribute("path"));
         return "addClient";
     }
 
@@ -385,6 +389,7 @@ public class AppController {
             }
             client.setTelegram(telegram);
         }
+        System.out.println(session.getAttribute("path"));
         try {
             if (session.getAttribute("path") == "/edit_client") {
                 logger.debug("Updating client");
@@ -499,12 +504,13 @@ public class AppController {
                 case "rate" -> transaction.setRateColor(list.get(1));
                 case "transportation" -> transaction.setTransportationColor(list.get(1));
                 case "total" -> transaction.setAmountColor(list.get(1));
+                case "balance" -> transaction.setBalanceColor(list.get(1));
             }
 
             transManager.save(transaction);
         }
         logger.info(user + " Colors saved");
-        return "redirect:/client_info";
+        return "1";
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -538,7 +544,7 @@ public class AppController {
 
         }
         logger.info(user + " Colors saved");
-        return "redirect:/client_info";
+        return "1";
     }
 
     @GetMapping("/recashe")
@@ -592,7 +598,8 @@ public class AppController {
             for (Transaction t : transactions) {
                 transManager.remittance(t.getId(), t.getDate(), t.getClient().getPib(), t.getComment(), t.getCurrency().getId(), t.getRate(), t.getCommission(),
                         t.getAmount(), t.getTransportation(), t.getCommentColor(), t.getAmountColor(), t.getUser().getId(), 0.0,
-                        t.getInputColor(), t.getOutputColor(), t.getTarifColor(), t.getCommissionColor(), t.getRateColor(), t.getTransportationColor());
+                        t.getInputColor(), t.getOutputColor(), t.getTarifColor(), t.getCommissionColor(), t.getRateColor(), t.getTransportationColor(),
+                        t.getBalanceColor());
             }
 
         }

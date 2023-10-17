@@ -25,16 +25,14 @@ const tables = document.querySelectorAll('table');
                                 });
 
                                 // Находим индексы начальной и конечной ячеек
-                                const startIndex = Array.from(startCell.parentElement.children).indexOf(startCell);
-                                const endIndex = Array.from(cell.parentElement.children).indexOf(cell);
+                                const startIndex = Array.from(startCell.parentElement.children).indexOf(startCell) - 2;
+                                const endIndex = Array.from(cell.parentElement.children).indexOf(cell) - 2;
                                 const startRow = Array.from(table.rows).indexOf(startCell.parentElement);
                                 const endRow = Array.from(table.rows).indexOf(cell.parentElement);
 
                                 // Выделяем прямоугольную область
                                 for (let row = Math.min(startRow, endRow); row <= Math.max(startRow, endRow); row++) {
                                     for (let col = Math.min(startIndex, endIndex); col <= Math.max(startIndex, endIndex); col++) {
-                                    console.log(row);
-                                    console.log(col);
                                         table.rows[row].cells[col].classList.add('highlight');
                                     }
                                 }
@@ -50,30 +48,21 @@ const tables = document.querySelectorAll('table');
     });
 
 function autoinsert(inputId, datalistId) {
-console.log('changed');
-console.log(inputId);
-console.log(datalistId);
   // Получите элементы формы и datalist
   var input = document.getElementById(inputId);
   var dataList = document.getElementById(datalistId);
-  console.log(input);
-  console.log(dataList);
-  console.log(dataList.options);
   // Получите все опции из datalist
   var options = Array.from(dataList.options);
-console.log(options);
   // Фильтрация опций на основе введенного значения
   var filteredOptions = options.filter(function(option) {
     return option.value.toLowerCase().includes(input.value.toLowerCase());
   });
-console.log(filteredOptions);
   // Если есть хотя бы одна видимая опция, установите значение input
   if (filteredOptions.length == 1) {
-  console.log(filteredOptions[0].value);
     input.value = filteredOptions[0].value;
+    input.setAttribute('readonly', true);
   }
-console.log('done');
-  // Отправьте форму
+
 }
 
 
@@ -94,11 +83,11 @@ console.log('done');
      console.log(elem.value);
      console.log(target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor);
      var color;
-        if (elem.value == 'color: rgb(255,255,255);') {
-            color = 'color:  lightblue;';
-        } else {
-            color = elem.value;
-        }
+      if (elem.value == 'color: rgb(255,255,255);') {
+       color = 'color: ' + target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor + ';';
+      } else {
+        color = elem.value;
+      }
 
           var style = document.getElementById(id).getAttribute("style");
           if (style == null) {
@@ -174,6 +163,7 @@ document.addEventListener('keydown',
 (event) => {
     if (event.key == 'Delete') {
         document.querySelector("input:focus").value = '';
+        document.querySelector("input:focus").removeAttribute('readonly');
     }
   },
   true,
@@ -227,9 +217,6 @@ async function autosave(element) {
             for (var pointer of document.getElementsByName("pointer")) {
                 pointer.value = element.srcElement.id;
             }
-            console.log(oldRow);
-            console.log(currentRow);
-            console.log(element.srcElement.parentElement.parentElement);
             if (oldRow != null) {
                 form = document.getElementById(oldRow.substring(3));
 
@@ -253,12 +240,13 @@ async function autosave(element) {
                 if (timerId != null) {
                     clearInterval(timerId);
                 }
-
+                for (var i = 0; i < positiveAmount.length; i++) {
                 if (form != null && Number(positiveAmount[i].value.replace(/ /g,'').replace(',','.')) + Number(negativeAmount[i].value.replace(/ /g,'').replace(',','.')) != 0) {
                     timerId = setInterval(function() {
                 	    form.submit();
                 	    element.srcElement.setAttribute('readonly', true);
                     }, 600000); //10 min
+                }
                 }
             }
 
@@ -569,9 +557,16 @@ function mapAwareReplacer(key, value) {
 
 function capture() {
 //window.scrollTo(0,0);
-html2canvas(document.querySelector("table th.highlight").parentElement.parentElement.parentElement, {
+console.log(document.querySelector("table th.highlight").parentElement.parentElement.parentElement.parentElement);
+html2canvas(document.querySelector("table th.highlight").parentElement.parentElement.parentElement.parentElement, {
     ignoreElements: (element) => {
-        if (element.classList.contains("highlight") || element.parentElement.classList.contains("highlight") || element.querySelectorAll(".highlight").length > 0 || element.tagName == 'HEAD' || element.parentElement.tagName == 'HEAD') {
+    console.log(element.id);
+    //console.log(element.parentElement.name);
+    //console.log(element.parentElement.parentElement.name);
+        if (element.classList.contains("highlight") || element.parentElement.classList.contains("highlight")
+         || element.querySelectorAll(".highlight").length > 0 || element.tagName == 'HEAD'
+          || element.parentElement.tagName == 'HEAD' || element.id == 'cap' || element.parentElement.id == 'cap'
+           || element.parentElement.parentElement.id == 'cap') {
             return false;
         } else {
             return true;
@@ -586,6 +581,7 @@ html2canvas(document.querySelector("table th.highlight").parentElement.parentEle
         var elements = clonDoc.querySelectorAll("*");
         for (var element of elements) {
             element.style.position = 'unset';
+            element.classList.remove("highlight");
         }
     }
 }).then(canvas => {
@@ -656,6 +652,7 @@ var rows = document.getElementsByName(id);
 }
 
 function addRow(id, form) {
+
  var $TR = $('tr[id^="' + id + 'tr"]:last');
  var num = parseInt( $TR.prop("id").match(/\d+/g), 10 ) +1;
  console.log(form);
@@ -690,8 +687,10 @@ function addRow(id, form) {
                 img.title = 'Удалить контрагента';
             input1.appendChild(img);
         th1.appendChild(input1);
+        th1.style.borderTop = "none";
     tr.appendChild(th1);
     const th2 = document.createElement('th');
+    th2.style.borderTop = "none";
     tr.appendChild(th2);
     const th3 = document.createElement('th');
         const input3 = document.createElement('input');
@@ -704,6 +703,7 @@ function addRow(id, form) {
             input3.addEventListener('focus', (element) => {autosave(element)});
             input3.setAttribute('onkeyup', "autoinsert('" + id + "tr" + num + "_client', 'client_datalist')");
         th3.appendChild(input3);
+        th3.style.borderTop = "none";
     tr.appendChild(th3);
     const th4 = document.createElement('th');
         const input4 = document.createElement('input');
@@ -713,6 +713,7 @@ function addRow(id, form) {
             input4.setAttribute("Form", 'form' + form);
             input4.addEventListener('focus', (element) => {autosave(element)});
         th4.appendChild(input4);
+        th4.style.borderTop = "none";
     tr.appendChild(th4);
     const th5 = document.createElement('th');
             const input5 = document.createElement('input');
@@ -728,6 +729,7 @@ function addRow(id, form) {
                 input5.dataset.id = id + "tr" + num;
                 input5.addEventListener('focus', (element) => {autosave(element)});
             th5.appendChild(input5);
+            th5.style.borderTop = "none";
     tr.appendChild(th5);
     const th6 = document.createElement('th');
             const input6 = document.createElement('input');
@@ -743,6 +745,7 @@ function addRow(id, form) {
                 input6.dataset.id = id + "tr" + num;
                 input6.addEventListener('focus', (element) => {autosave(element)});
             th6.appendChild(input6);
+            th6.style.borderTop = "none";
     tr.appendChild(th6);
     const th7 = document.createElement('th');
             const input7 = document.createElement('input');
@@ -756,9 +759,11 @@ function addRow(id, form) {
                 input7.addEventListener('focus', (element) => {autosave(element)});
                 input7.setAttribute("class", "commission");
             th7.appendChild(input7);
+            th7.style.borderTop = "none";
         tr.appendChild(th7);
     const th8 = document.createElement('th');
     th8.id = id + "tr" + num + "_com";
+    th8.style.borderTop = "none";
     tr.appendChild(th8);
     const th9 = document.createElement('th');
             const input9 = document.createElement('input');
@@ -769,6 +774,7 @@ function addRow(id, form) {
                 input9.setAttribute("class", "rate");
                 input9.addEventListener('focus', (element) => {autosave(element)});
             th9.appendChild(input9);
+            th9.style.borderTop = "none";
         tr.appendChild(th9);
         const th10 = document.createElement('th');
                 const input10 = document.createElement('input');
@@ -781,22 +787,29 @@ function addRow(id, form) {
                     input10.setAttribute("onkeyup", "changeAssociated('" + id + "tr" + num + "')");
                     input10.addEventListener('focus', (element) => {autosave(element)});
                 th10.appendChild(input10);
+                th10.style.borderTop = "none";
             tr.appendChild(th10);
     const th11 = document.createElement('th');
+        th11.style.borderTop = "none";
         th11.id = id + "tr" + num + "_total";
     tr.appendChild(th11);
+    const th12 = document.createElement('th');
+        th12.style.borderTop = "none";
+        th12.id = id + "tr" + num + "_balance";
+    tr.appendChild(th12);
            var tbody = document.getElementById(id);
     tbody.appendChild(tr);
     arithmetic(tr.id);
 }
 
 function addRowInside(id, table, form, date) {
+
  var i = id.substring(0, 3);
  var $TR = $('tr[id^="' + id + '"]:last');
  var num = $TR.prop("id") + 1;
 var pAmount = document.querySelectorAll("input[form='" + form + "'][name='positiveAmount']");
 var nAmount = document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']");
-
+showAgents(i + form);
 var sum = 0;
      for (var j = 0; j < pAmount.length; j++) {
         if (pAmount[j].parentElement.parentElement.id.substring(0, 3) != i) continue;
@@ -930,6 +943,10 @@ var sum = 0;
         th11.style.borderTop = "none";
         th11.id = num + "_total";
     tr.appendChild(th11);
+    const th12 = document.createElement('th');
+        th12.style.borderTop = "none";
+        th12.id = id + "tr" + num + "_balance";
+    tr.appendChild(th12);
     var tbody = document.getElementById(table);
 
 
@@ -957,11 +974,14 @@ var sum = 0;
 
 function deleteRow(id) {
 var element = document.querySelector("tr[id='" + id + "']");
-var form = element.querySelector("[id$='pAmount'").form.id;
+console.log(element);
+var form =  element.querySelector("[id$='pAmount'").form;
+var formId = form.id;
 
     element.remove();
 
-    changeAssociated(document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']")[0].dataset.id);
+    changeAssociated(document.querySelectorAll("input[form='" + formId + "'][name='negativeAmount']")[0].dataset.id);
+    form.submit();
 }
 
 function arithmetic(id) {
@@ -982,7 +1002,6 @@ function changeAssociated(id) {
         var i = document.getElementById(id + '_pAmount').parentElement.parentElement.id.substring(0, 3);
 var pAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][name='positiveAmount']"));
     var nAmount = Array.from(document.querySelectorAll("input[form='" + form + "'][name='negativeAmount']"));
-console.log(pAmount);
     /*for (var k = 0; k < pAmount.length; ) {
 
         if (pAmount[k].parentElement.parentElement.id.substring(0, 3) != i) {
@@ -1005,13 +1024,8 @@ var exchangeRates = document.getElementsByClassName("exchange");
         }
     }
 
-    console.log(currencyrate);
     var target = null;
     var sum = 0;
-    console.log(pAmount);
-    console.log(pAmount[1]);
-    console.log(pAmount[1].parentElement);
-    console.log(pAmount[1].parentElement.parentElement);
          for (var j = 0; j < pAmount.length; j++) {
 
 
@@ -1019,7 +1033,7 @@ var exchangeRates = document.getElementsByClassName("exchange");
                 target = pAmount[j].parentElement.parentElement;
                 continue;
             }
-            console.log(pAmount[j]);
+
             var rate = document.querySelector("input[form='" + form + "'][name='rate']").value;
             if (rate == '') rate = '1';
              if (currencyrate[pAmount[j].parentElement.parentElement.parentElement.id] > 1) {
@@ -1038,10 +1052,8 @@ var exchangeRates = document.getElementsByClassName("exchange");
             // sum -= Number(pAmount[j].value.replace(/ /g,'').replace(',','.'));
             // sum -= Number(nAmount[j].value.replace(/ /g,'').replace(',','.'));
          }
-    console.log('change');
     var target1;
     var target2;
-    console.log(target);
     if (target != null) {
     if (sum >= 0) {
         target1 = target.querySelector("[name='positiveAmount']");

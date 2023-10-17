@@ -13,7 +13,7 @@
         <label class="inline sphere2 lime label-for-check" for="connection" id="connectionLabel"></label>
         <p class="inline" th:text="${session.user.role.name}"></p>
         <h4 class="inline" th:text="${session.user.login}"></h4>
-        <form action="users" class="inline" method="get" th:if="${session.user.role.name == 'Admin'}">
+        <form action="users" class="inline" method="get" th:if="${session.user.role.name == 'Admin' || session.user.role.name == 'Superadmin'}">
             <input type="submit" value="Админпанель">
         </form>
         <form action="user_settings" class="inline" method="get">

@@ -25,6 +25,7 @@ public class Transaction implements Serializable {
     String commissionColor;
     String rateColor;
     String transportationColor;
+    String balanceColor;
     User user;
 
 
@@ -45,7 +46,7 @@ public class Transaction implements Serializable {
         this.user = user;
     }
 
-    public Transaction(Integer id, Timestamp date, Client client, Currency currency, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, String commentColor, String amountColor, String inputColor, String outputColor, String tarifColor, String commissionColor, String rateColor, String transportationColor, User user) {
+    public Transaction(Integer id, Timestamp date, Client client, Currency currency, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, String commentColor, String amountColor, String inputColor, String outputColor, String tarifColor, String commissionColor, String rateColor, String transportationColor, String balanceColor, User user) {
         this.id = id;
         this.date = date;
         this.client = client;
@@ -64,6 +65,7 @@ public class Transaction implements Serializable {
         this.commissionColor = commissionColor;
         this.rateColor = rateColor;
         this.transportationColor = transportationColor;
+        this.balanceColor = balanceColor;
         this.user = user;
     }
 
@@ -220,6 +222,14 @@ public class Transaction implements Serializable {
         this.transportationColor = transportationColor;
     }
 
+    public String getBalanceColor() {
+        return balanceColor;
+    }
+
+    public void setBalanceColor(String balanceColor) {
+        this.balanceColor = balanceColor;
+    }
+
     @Override
     public String toString() {
         return "Transaction{" +
@@ -241,6 +251,7 @@ public class Transaction implements Serializable {
                 ", commissionColor='" + commissionColor + '\'' +
                 ", rateColor='" + rateColor + '\'' +
                 ", transportationColor='" + transportationColor + '\'' +
+                ", balanceColor='" + balanceColor + '\'' +
                 ", user=" + user +
                 '}';
     }

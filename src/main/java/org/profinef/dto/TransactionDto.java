@@ -48,6 +48,8 @@ public class TransactionDto {
     String rateColor;
     @Column(name = "transportation_color")
     String transportationColor;
+    @Column(name = "balance_color")
+    String balanceColor;
 
     @Column(name = "user_id")
     int userId;
@@ -70,7 +72,7 @@ public class TransactionDto {
         this.userId = userId;
     }
 
-    public TransactionDto(Integer id, Timestamp date, Integer clientId, Integer currencyId, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, String commentColor, String amountColor, String inputColor, String outputColor, String tarifColor, String commisionColor, String rateColor, String transportationColor, int userId) {
+    public TransactionDto(Integer id, Timestamp date, Integer clientId, Integer currencyId, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, String commentColor, String amountColor, String inputColor, String outputColor, String tarifColor, String commisionColor, String rateColor, String transportationColor, String balanceColor, int userId) {
         this.id = id;
         this.date = date;
         this.clientId = clientId;
@@ -89,6 +91,7 @@ public class TransactionDto {
         this.commisionColor = commisionColor;
         this.rateColor = rateColor;
         this.transportationColor = transportationColor;
+        this.balanceColor = balanceColor;
         this.userId = userId;
     }
 
@@ -244,6 +247,14 @@ public class TransactionDto {
         this.transportationColor = transportationColor;
     }
 
+    public String getBalanceColor() {
+        return balanceColor;
+    }
+
+    public void setBalanceColor(String balanceColor) {
+        this.balanceColor = balanceColor;
+    }
+
     @Override
     public String toString() {
         return "TransactionDto{" +
@@ -265,6 +276,7 @@ public class TransactionDto {
                 ", commisionColor='" + commisionColor + '\'' +
                 ", rateColor='" + rateColor + '\'' +
                 ", transportationColor='" + transportationColor + '\'' +
+                ", balanceColor='" + balanceColor + '\'' +
                 ", userId=" + userId +
                 '}';
     }

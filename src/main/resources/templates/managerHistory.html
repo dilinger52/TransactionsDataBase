@@ -20,16 +20,16 @@
             <div class="inline">
                 <label for="client_name">Поиск по ФИО</label>
                 <input autocomplete="off" id="client_name" list="client_name_datalist" name="client_name" onkeyup="filterFunction(), autoinsert('client_name', 'client_name_datalist')"
-                       placeholder="Поиск.." type="text">
+                       placeholder="Поиск.." type="text" onchange="submit()">
                 <datalist id="client_name_datalist">
-                    <option th:each="client : ${session.clients}" th:value="${client.client.pib}"></option>
+                    <option th:each="client : ${session.clients}" th:value="${client.pib}"></option>
                 </datalist>
             </div>
-            <input class="inline" name="strDate" th:value="${#dates.format(session.strDate, 'yyyy-MM-dd')}" type="date">
-            <input class="inline" name="edDate" th:value="${#dates.format(session.edDate, 'yyyy-MM-dd')}" type="date">
+            <input class="inline" name="strDate" th:value="${#dates.format(session.strDate, 'yyyy-MM-dd')}" type="date" onchange="submit()">
+            <input class="inline" name="edDate" th:value="${#dates.format(session.edDate, 'yyyy-MM-dd')}" type="date" onchange="submit()">
             <th:block th:each="currency : ${session.currencies}">
                 <input class="inline" name="currency_id" th:checked="${#lists.contains(session.currency_name, currency.name)}" th:id="|currency_id${currency.id}|"
-                       th:value="${currency.id}" type="checkbox">
+                       th:value="${currency.id}" type="checkbox" onchange="submit()">
                 <label class="inline" th:for="|currency_id${currency.id}|" th:text="${currency.name}"></label>
             </th:block>
             <input class="inline" type="submit" value="Найти">

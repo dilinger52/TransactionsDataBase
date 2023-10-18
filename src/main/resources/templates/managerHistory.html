@@ -39,7 +39,7 @@
 <table class="under-header" id="capture">
     <thead id="thead">
     <tr>
-        <th th:if="${session.user.role.name == 'Admin'}">Менеджер</th>
+        <th th:if="${session.user.role.name == 'Admin' || session.user.role.name == 'Superadmin'}">Менеджер</th>
         <th>Участники</th>
         <th>Комментарий</th>
         <th>Дата и время</th>
@@ -49,7 +49,7 @@
     </thead>
     <tbody>
     <tr th:each="transaction : ${session.transactions}">
-        <th th:if="${session.user.role.name == 'Admin'}" th:text="${transaction.user.login}"></th>
+        <th th:if="${session.user.role.name == 'Admin' || session.user.role.name == 'Superadmin'}" th:text="${transaction.user.login}"></th>
         <th th:text="${transaction.client.pib}"></th>
         <th th:text="${transaction.comment}"></th>
         <th th:text="${#dates.format(transaction.date, 'dd-MM-yyyy HH:mm')}"></th>

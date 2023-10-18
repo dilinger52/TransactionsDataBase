@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class AdminController {
@@ -72,6 +74,17 @@ public class AdminController {
                 }
             }
         }
+
+        File directory = new File("backup\\");
+        List<File> files = new ArrayList<>(Arrays.stream(directory.listFiles(File::isFile)).toList());
+        /*for (File file :
+                files) {
+            file.a
+        }*/
+        Collections.reverse(files);
+        List<String> fs = files.stream().limit(30).map(File::getName).toList();
+        System.out.println(files);
+        session.setAttribute("files", fs);
         session.setAttribute("active", active);
         session.setAttribute("users", users);
         logger.info(currentUser + " Users page loaded");
@@ -243,7 +256,7 @@ public class AdminController {
     }
 
     @PostMapping("/database")
-    public String restoreBackUp(HttpSession session, HttpServletResponse response) throws Exception {
+    public String restoreBackUp(HttpSession session, @RequestParam(name = "file") String file) throws Exception {
         User currentUser = (User) session.getAttribute("user");
         logger.info(currentUser + " Restoring from backup...");
         if (currentUser.getRole() != Role.Admin && currentUser.getRole() != Role.Superadmin) {
@@ -252,7 +265,7 @@ public class AdminController {
             return "error";
         }
 
-        scheduler.restoreFromBackUp();
+        scheduler.restoreFromBackUp(file);
         logger.info(currentUser + " Backup restored");
         return "redirect:/users";
     }

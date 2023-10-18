@@ -2,9 +2,14 @@ const tables = document.querySelectorAll('table');
 
     let startCell = null;
     let isMouseDown = false;
+
+
     tables.forEach((table) => {
     const cells = table.querySelectorAll('th');
+
     table.addEventListener('mousedown', (e) => {
+
+
             isMouseDown = true;
             startCell = e.target;
             document.querySelectorAll('th').forEach((c) => {
@@ -13,12 +18,14 @@ const tables = document.querySelectorAll('table');
         });
 
         table.addEventListener('mouseup', () => {
+
             isMouseDown = false;
             startCell = null;
         });
         cells.forEach((cell) => {
                 cell.addEventListener('mouseenter', () => {
                 if (isMouseDown) {
+
                                 // Удаляем класс "highlight" у всех ячеек
                                 document.querySelectorAll('th').forEach((c) => {
                                     c.classList.remove('highlight');
@@ -68,63 +75,79 @@ function autoinsert(inputId, datalistId) {
 
 
  function changeColor(id) {
-     var elem = document.querySelector('input[name="color"]:checked');
-     var target = document.getElementById(id);
-     if (elem.id != 'bold' && elem.id != 'italic' && elem.id != 'nobold' && elem.id != 'noitalic' && elem.id != 'none') {
-        target.style.color = '';
+     console.log(id);
+     var elem = document.getElementById(id);
+     var targets = document.querySelectorAll('th.highlight');
+     for (var target of targets) {
+     if (target.children.length > 0) {
+        target = target.children[0];
      }
-     if (elem.id == 'bold' || elem.id == 'nobold') {
-        target.style.fontWeight = '';
-     }
-     if (elem.id == 'italic' || elem.id == 'noitalic') {
-        target.style.fontStyle = '';
-     }
-     if (elem.id != 'none') {
-     console.log(elem.value);
-     console.log(target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor);
-     var color;
-      if (elem.value == 'color: rgb(255,255,255);') {
-       color = 'color: ' + target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor + ';';
-      } else {
-        color = elem.value;
-      }
-
-          var style = document.getElementById(id).getAttribute("style");
-          if (style == null) {
-            style = '';
+     if (id != 'bold' && id != 'italic' && id != 'nobold' && id != 'noitalic' && id != 'none') {
+             target.style.color = '';
           }
-          document.getElementById(id).setAttribute("style", style + color);
-          saveColors(id);
+          if (id == 'bold' || id == 'nobold') {
+             target.style.fontWeight = '';
+          }
+          if (id == 'italic' || id == 'noitalic') {
+             target.style.fontStyle = '';
+          }
+          if (id != 'none') {
+          console.log(elem.value);
+          console.log(target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor);
+          var color;
+           if (elem.value == 'color: rgb(255,255,255);') {
+
+            if (target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor == '') {
+                color = 'color: ' + target.parentElement.parentElement.parentElement.style.backgroundColor + ';';
+            } else {
+                color = 'color: ' + target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor + ';';
+            }
+           } else {
+             color = elem.value;
+           }
+
+               var style = target.getAttribute("style");
+               if (style == null) {
+                 style = '';
+               }
+               target.setAttribute("style", style + color);
+
+          }
      }
+     saveColors(targets);
 
  }
 
 
 function changeMainColor(id) {
 
-     var elem = document.querySelector('input[name="color"]:checked');
-          var target = document.getElementById(id);
-          if (elem.id != 'bold' && elem.id != 'italic' && elem.id != 'nobold' && elem.id != 'noitalic' && elem.id != 'none') {
+    console.log(id);
+         var elem = document.getElementById(id);
+         var targets = document.querySelectorAll('th.highlight');
+         for(var target of targets) {
+          if (id != 'bold' && id != 'italic' && id != 'nobold' && id != 'noitalic' && id != 'none') {
              target.style.color = '';
           }
-          if (elem.id == 'bold' || elem.id == 'nobold') {
+          if (id == 'bold' || id == 'nobold') {
              target.style.fontWeight = '';
           }
-          if (elem.id == 'italic' || elem.id == 'noitalic') {
+          if (id == 'italic' || id == 'noitalic') {
              target.style.fontStyle = '';
           }
-          if (elem.id != 'none') {
-               var color = elem.value;
-               console.log(document.getElementById(id).getAttribute("style"));
-               console.log(document.getElementById(id).getAttribute("style") + color);
-               var style = document.getElementById(id).getAttribute("style");
+          if (id != 'none') {
+             var color = elem.value;
+
+               console.log(target.getAttribute("style"));
+               console.log(target.getAttribute("style") + color);
+               var style = target.getAttribute("style");
                          if (style == null) {
                            style = '';
                          }
-                         document.getElementById(id).setAttribute("style", style + color);
-               saveMainColors(id);
-          }
+                         target.setAttribute("style", style + color);
 
+          }
+          }
+    saveMainColors(targets);
  }
 
 
@@ -200,9 +223,9 @@ for (var z = 0; z < inputs.length; z++) {
 });*/
 
 async function autosave(element) {
-    if (!element.srcElement.id.match(/.+tr[0-9].+/)) {
+    /*if (!element.srcElement.id.match(/.+tr[0-9].+/)) {
         saveColors(element.srcElement.id);
-    }
+    }*/
 
         if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button' || element.srcElement.type == 'submit'  || element.srcElement.type == 'date') return;
         var form;
@@ -485,15 +508,23 @@ $.ajax({
 
 
 
-async function saveColors(id) {
-    var elements = document.getElementById(id);
+async function saveColors(elements) {
     const colors = new Map();
+    for (var element of elements) {
+     if (element != null){
 
-    if (elements != null){
-        if(elements.getAttribute('style') != null /*&& elements.getAttribute('style').length > 0*/ && elements.id.length > 0) {
-        console.log(elements.id);
-            colors.set(elements.getAttribute("id"), elements.getAttribute('style'));
-        }
+            if (element.id.length > 0) {
+                console.log(element.id);
+                colors.set(element.getAttribute("id"), element.getAttribute('style'));
+            } else {
+                console.log(element.children[0].id);
+                colors.set(element.children[0].getAttribute("id"), element.children[0].getAttribute('style'));
+            }
+
+
+    }
+    }
+
 
     console.log(colors);
     const colorsTemp = JSON.stringify(colors, mapAwareReplacer);
@@ -513,20 +544,22 @@ async function saveColors(id) {
             console.log("DONE");
         }
     });
-    }
+
 
 }
 
-async function saveMainColors(id) {
-    var elements = document.getElementById(id);
+async function saveMainColors(elements) {
     const colors = new Map();
+    for (var element of elements) {
 
-
-        if (/*elements.getAttribute('style').length > 0 && */elements.id.length > 0) {
-        console.log(elements.id);
-            colors.set(elements.getAttribute("id"), elements.getAttribute('style'));
-        }
-
+        if (element.id.length > 0) {
+                        console.log(element.id);
+                        colors.set(element.getAttribute("id"), element.getAttribute('style'));
+                    } else {
+                        console.log(element.children[0].id);
+                        colors.set(element.children[0].getAttribute("id"), element.children[0].getAttribute('style'));
+                    }
+}
     console.log(colors);
     const colorsTemp = JSON.stringify(colors, mapAwareReplacer);
     $.ajax({
@@ -822,7 +855,7 @@ var sum = 0;
     tr.id = num;
     tr.style.color = document.getElementById(id).style.color;
     tr.setAttribute("name", i + form);
-    tr.setAttribute("onclick", "changeColor('" + i + form + "')");
+    //tr.setAttribute("onclick", "changeColor('" + i + form + "')");
     const input0 = document.createElement('input');
         input0.type = "hidden";
         input0.name = "currency_name";

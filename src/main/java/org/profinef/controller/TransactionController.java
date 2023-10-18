@@ -123,7 +123,7 @@ public class TransactionController {
                                   @RequestParam(name = "positiveAmount") List<String> positiveAmountS,
                                   @RequestParam(name = "negativeAmount") List<String> negativeAmountS,
                                   @RequestParam(name = "transportation") List<String> transportationS,
-                                  @RequestParam(name = "pointer", required = false) String pointer,
+                                  @RequestParam(name = "pointer", required = false, defaultValue = "UAHtr0_pAmount") String pointer,
                                   HttpSession session) {
         User user = (User) session.getAttribute("user");
         logger.info(user + " Saving transaction after editing...");
@@ -183,8 +183,6 @@ public class TransactionController {
         }
         List<String> clientDouble = new ArrayList<>();
         List<String> currencyDouble = new ArrayList<>();
-        System.out.println(clientName);
-        System.out.println(currencyName);
         for (int i = 0; i < clientName.size(); i++) {
             if (!clientDouble.contains(clientName.get(i))) {
                 clientDouble.add(clientName.get(i));
@@ -382,8 +380,13 @@ public class TransactionController {
             reverse(redos);
             session.setAttribute("undos" + clientId.get(0), undos);
             session.setAttribute("redos" + clientId.get(0), redos);
-            /*String[] pp = pointer.split("_");
-            pointer = transactionId + "_" + currencyManager.getCurrency(pp[0].substring(0, 3)).getId() + "_" + clientId.get(0) + "_" + pp[1];*/
+
+            String[] pp = pointer.split("_");
+            if (pp.length < 3) {
+                if (pp[0].substring(0, 3).matches("[0-9]{3,}.*")) {
+                    pointer = transactionId.get(0) + "_" + pp[0].substring(0, 3) + "_" + clientId.get(clientId.size() - 1) + "_" + pp[1];
+                }
+            }
         } catch (Exception e) {
             logger.info(user + " Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
 

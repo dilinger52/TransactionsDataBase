@@ -70,7 +70,7 @@ public class AppController {
     public String loadPage(HttpSession session) {
         logger.info("Loading load files page");
         User user = (User) session.getAttribute("user");
-        if (user.getRole() != Role.Admin) {
+        if (user.getRole() != Role.Admin && user.getRole() != Role.Superadmin) {
             logger.info(user + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
@@ -489,8 +489,11 @@ public class AppController {
         logger.info(user + " Saving colors...");
         List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {
         });
+        System.out.println(entryList);
         for (List<String> list : entryList) {
+            System.out.println(list);
             String[] arr = list.get(0).split("_");
+            System.out.println(Arrays.toString(arr));
             int id = Integer.parseInt(arr[0]);
             int clientId = Integer.parseInt(arr[2]);
             int currencyId = Integer.parseInt(arr[1]);
@@ -506,11 +509,11 @@ public class AppController {
                 case "total" -> transaction.setAmountColor(list.get(1));
                 case "balance" -> transaction.setBalanceColor(list.get(1));
             }
-
+            System.out.println(transaction);
             transManager.save(transaction);
         }
         logger.info(user + " Colors saved");
-        return "1";
+        return "redirect:/client_info";
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -544,7 +547,7 @@ public class AppController {
 
         }
         logger.info(user + " Colors saved");
-        return "1";
+        return "redirect:/client";
     }
 
     @GetMapping("/recashe")

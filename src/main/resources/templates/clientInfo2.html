@@ -62,32 +62,32 @@
         </form>
         <form class="inline" id="color">
             <input class="inline check-with-label" id="white" name="color" type="radio"
-                   value="color: rgb(255,255,255);">
+                   value="color: rgb(255,255,255);" onclick="changeColor('white')">
             <label class="inline sphere white label-for-check" for="white"></label>
-            <input class="inline check-with-label" id="red" name="color" type="radio" value="color: rgb(255,0,0);">
+            <input class="inline check-with-label" id="red" name="color" type="radio" value="color: rgb(255,0,0);" onclick="changeColor('red')">
             <label class="inline sphere red label-for-check" for="red"></label>
-            <input class="inline check-with-label" id="yellow" name="color" type="radio" value="color: rgb(255,255,0);">
+            <input class="inline check-with-label" id="yellow" name="color" type="radio" value="color: rgb(255,255,0);" onclick="changeColor('yellow')">
             <label class="inline sphere yellow label-for-check" for="yellow"></label>
-            <input class="inline check-with-label" id="blue" name="color" type="radio" value="color: rgb(0,0,255);">
+            <input class="inline check-with-label" id="blue" name="color" type="radio" value="color: rgb(0,0,255);" onclick="changeColor('blue')">
             <label class="inline sphere blue label-for-check" for="blue"></label>
-            <input class="inline check-with-label" id="orange" name="color" type="radio" value="color: rgb(255,165,0);">
+            <input class="inline check-with-label" id="orange" name="color" type="radio" value="color: rgb(255,165,0);" onclick="changeColor('orange')">
             <label class="inline sphere orange label-for-check" for="orange"></label>
-            <input class="inline check-with-label" id="green" name="color" type="radio" value="color: rgb(0,128,0);">
+            <input class="inline check-with-label" id="green" name="color" type="radio" value="color: rgb(0,128,0);" onclick="changeColor('green')">
             <label class="inline sphere green label-for-check" for="green"></label>
             <input class="inline check-with-label" id="violet" name="color" type="radio"
-                   value="color: rgb(238,130,238);">
+                   value="color: rgb(238,130,238);" onclick="changeColor('violet')">
             <label class="inline sphere violet label-for-check" for="violet"></label>
-            <input class="inline check-with-label" id="black" name="color" type="radio" value="color: rgb(0,0,0);">
+            <input class="inline check-with-label" id="black" name="color" type="radio" value="color: rgb(0,0,0);" onclick="changeColor('black')">
             <label class="inline sphere black label-for-check" for="black"></label>
-            <input checked class="inline check-with-label" id="none" name="color" type="radio">
-            <label class="inline sphere none label-for-check" for="none"></label>
-            <input class="inline check-with-label" id="bold" name="color" type="radio" value="font-weight: bold;">
+            <!--/*<input checked class="inline check-with-label" id="none" name="color" type="radio" onclick="changeColor('none')">
+            <label class="inline sphere none label-for-check" for="none"></label>*/-->
+            <input class="inline check-with-label" id="bold" name="color" type="radio" value="font-weight: bold;" onclick="changeColor('bold')">
             <label class="inline bold sphere label-for-check" for="bold">B</label>
-            <input class="inline check-with-label" id="nobold" name="color" type="radio" value="">
+            <input class="inline check-with-label" id="nobold" name="color" type="radio" value="" onclick="changeColor('nobold')">
             <label class="inline bold sphere none label-for-check" for="nobold">B</label>
-            <input class="inline check-with-label" id="italic" name="color" type="radio" value="font-style: italic;">
+            <input class="inline check-with-label" id="italic" name="color" type="radio" value="font-style: italic;" onclick="changeColor('italic')">
             <label class="inline italic sphere  label-for-check" for="italic">i</label>
-            <input class="inline check-with-label" id="noitalic" name="color" type="radio" value="">
+            <input class="inline check-with-label" id="noitalic" name="color" type="radio" value="" onclick="changeColor('noitalic')">
             <label class="inline italic sphere none label-for-check" for="noitalic">i</label>
         </form>
         <button class="inline" onclick="capture()">
@@ -117,7 +117,7 @@
 <div class="currencies">
     <div class="inline tbl" style="vertical-align: top;"
          th:each="currency : ${session.currencies}" th:if="${#lists.contains(session.currency_name, currency.name) && currency.name != 'RUB'}">
-        <input id="pointer" name="pointer" th:form="|form${currency.id}|" type="hidden">
+        <!--/*<input id="pointer" name="pointer" th:form="|form${currency.id}|" type="hidden">*/-->
         <div id="cap" name="thead" style="background-color: white; position: sticky;">
             <!--/*<h3 class="inline" th:text="${currency.name}">HRN</h3>*/-->
             <img th:if="${currency.name == 'UAH'}" src="/images/hryvnia.png" height="16px" class="inline" title="UAH, гривна">
@@ -212,13 +212,13 @@
                                    th:if="${transaction.client.id != session.client.id || transaction.currency.id != currency.id}" th:value="${transaction.client.pib}"
                                     type="text" th:onkeyup="|autoinsert('${transaction.id}_${currency.id}_${transaction.client.id}_client', 'client_datalist')|">
                         </th>
-                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_comment')|"
+                        <th <!--/*th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_comment')|"*/-->
                             th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                             <input name="comment"
                                    th:form="${id}" th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_comment|" th:style="|${transaction.commentColor != null ? transaction.commentColor : ''}|" th:value="${transaction.comment}"
                                    type="text">
                         </th>
-                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_pAmount')|"
+                        <th <!--/*th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_pAmount')|"*/-->
                             th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                             <input autocomplete="off"
                                    name="positiveAmount" th:data-id="|${transaction.id}_${currency.id}_${transaction.client.id}|" th:form="${id}"
@@ -233,7 +233,7 @@
                                    th:onkeyup="changeAssociated(this.getAttribute('data-id'))"
                                    th:style="|${transaction.inputColor != null ? transaction.inputColor : ''}|" type="text">
                         </th>
-                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_nAmount')|"
+                        <th <!--/*th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_nAmount')|"*/-->
                             th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                             <input autocomplete="off"
                                    name="negativeAmount" th:data-id="|${transaction.id}_${currency.id}_${transaction.client.id}|" th:form="${id}"
@@ -248,7 +248,7 @@
                                    th:onkeyup="changeAssociated(this.getAttribute('data-id'))"
                                    th:style="|${transaction.outputColor != null ? transaction.outputColor : ''}|" type="text">
                         </th>
-                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_commission')|"
+                        <th <!--/*th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_commission')|"*/-->
                             th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                             <input class="commission"
                                    name="commission"
@@ -260,12 +260,12 @@
                                    type="text">
                         </th>
                         <th th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_com|"
-                            th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_com')|"
+                            <!--/*th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_com')|"*/-->
                             th:style="|${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''} ${transaction.commissionColor != null ? transaction.commissionColor : ''}|"
                             th:text="${#numbers.formatInteger(transaction.commission * transaction.amount / 100, 1,'WHITESPACE')}">
 
                         </th>
-                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_rate')|"
+                        <th <!--/*th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_rate')|"*/-->
                             th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                             <input class="rate"
                                    name="rate"
@@ -273,7 +273,7 @@
                                    th:style="|${transaction.rateColor != null ? transaction.rateColor : ''};|" th:value="${transaction.rate != 1 ? transaction.rate : ''}"
                                    type="text">
                         </th>
-                        <th th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_transportation')|"
+                        <th <!--/*th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_transportation')|"*/-->
                             th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}">
                             <input class="transportation"
                                    name="transportation"
@@ -284,11 +284,11 @@
                                    type="text">
                         </th>
                         <th th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_total|"
-                            th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_total')|"
+                            <!--/*th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_total')|"*/-->
                             th:style="|${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''} ${transaction.amountColor != null ? transaction.amountColor : ''};|"
                             th:text="${#numbers.formatInteger(transaction.amount + transaction.commission * transaction.amount / 100 + transaction.transportation, 1,'WHITESPACE')}"></th>
                         <th th:id="|${transaction.id}_${currency.id}_${transaction.client.id}_balance|"
-                            th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_balance')|"
+                            <!--/*th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_balance')|"*/-->
                             th:style="|${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''} ${transaction.balanceColor != null ? transaction.balanceColor : ''};|"
                             th:text="${#numbers.formatInteger(transaction.balance, 1,'WHITESPACE')}"></th>
                         <th th:if="${session.user.role.name == 'Admin' || session.user.role.name == 'Superadmin'}"
@@ -304,6 +304,7 @@
                 <tr th:id="|${currency.name}tr0|" th:name="|${currency.name}form${currency.id}|">
                     <input name="currency_name" th:form="|form${currency.id}|" th:value="${currency.name}" type="hidden">
                     <input name="client_name" th:form="|form${currency.id}|" th:value="${session.client.pib}" type="hidden">
+                    <input name="pointer" th:id="|pointer${currency.id}|" type="hidden">
                     <th>
                         <button style="display: none;" class="inline" th:form="|form${currency.id}|" type="submit" value="Сохранить">
                             <img src="/images/disk.png" height="16px" class="inline" title="Сохранить новую запись">
@@ -365,10 +366,19 @@
 <script src="main.js"></script>
 <script src="html2canvas.min.js"></script>
 <script th:inline="javascript">
+    "UAHtr0_pAmount"
     console.log("script works");
     var target = document.getElementById(/*[[${session.pointer}]]*/);
-    var pointer = document.querySelector('input[id=pointer' + target.form.id + ']');
+    if (target == null) {
+        target = document.getElementById("UAHtr0_pAmount");
+    }
     console.log(target);
+    console.log(target.form.id);
+    var pointer = document.querySelector('input[id=pointer' + target.form.id + ']');
+    if (pointer == null) {
+        console.log(target.form.id.substring(4));
+        pointer = document.querySelector('input[id=pointer' + target.form.id.substring(4) + ']');
+    }
     console.log(pointer);
     pointer.value = /*[[${session.pointer}]]*/;
     const end = target.value.length;

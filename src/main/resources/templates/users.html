@@ -19,6 +19,9 @@
 </form>
 <form action="database" method="post">
     <input type="submit" value="Восстановить из бэкапа">
+    <select name="file">
+        <option th:each="file : ${session.files}" th:value="${file}" th:text="${file}"></option>
+    </select>
 </form>
 <form action="excel" class="inline" method="get">
     <input type="submit" value="Загрузить таблицу">

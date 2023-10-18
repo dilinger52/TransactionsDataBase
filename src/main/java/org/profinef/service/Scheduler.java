@@ -46,7 +46,7 @@ public class Scheduler {
     }
 
     /*@Scheduled(cron = "0 30 22 * * *")*/
-    public void restoreFromBackUp() throws Exception {
+    public void restoreFromBackUp() {
         File directory = new File("backup\\");
         File[] files = directory.listFiles(File::isFile);
         long lastModifiedTime = Long.MIN_VALUE;
@@ -63,7 +63,12 @@ public class Scheduler {
             }
         }
         assert chosenFile != null;
-        boolean doneLocal = DatabaseUtil.restore("root", "2223334456", "transactions", chosenFile.getPath());
+        restoreFromBackUp(chosenFile.getName());
+    }
+
+    public void restoreFromBackUp(String chosenFile) {
+        assert chosenFile != null;
+        boolean doneLocal = DatabaseUtil.restore("root", "2223334456", "transactions", "backup\\" + chosenFile);
         if (doneLocal) {
             logger.info("Restored from backup");
         } else {

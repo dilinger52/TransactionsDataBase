@@ -76,9 +76,10 @@ function autoinsert(inputId, datalistId) {
 
  function changeColor(id) {
      console.log(id);
-     var elem = document.getElementById(id);
-     var targets = document.querySelectorAll('th.highlight');
-     for (var target of targets) {
+     var elem = document.querySelector('input[name=color]:checked');
+     console.log(elem);
+     var target = document.getElementById(id);
+
      if (target.children.length > 0) {
         target = target.children[0];
      }
@@ -113,8 +114,8 @@ function autoinsert(inputId, datalistId) {
                target.setAttribute("style", style + color);
 
           }
-     }
-     saveColors(targets);
+
+     saveColors(target);
 
  }
 
@@ -223,9 +224,9 @@ for (var z = 0; z < inputs.length; z++) {
 });*/
 
 async function autosave(element) {
-    /*if (!element.srcElement.id.match(/.+tr[0-9].+/)) {
+    if (!element.srcElement.id.match(/.+tr[0-9].+/)) {
         saveColors(element.srcElement.id);
-    }*/
+    }
 
         if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button' || element.srcElement.type == 'submit'  || element.srcElement.type == 'date') return;
         var form;
@@ -508,9 +509,9 @@ $.ajax({
 
 
 
-async function saveColors(elements) {
+async function saveColors(element) {
     const colors = new Map();
-    for (var element of elements) {
+
      if (element != null){
 
             if (element.id.length > 0) {
@@ -522,7 +523,7 @@ async function saveColors(elements) {
             }
 
 
-    }
+
     }
 
 
@@ -855,7 +856,7 @@ var sum = 0;
     tr.id = num;
     tr.style.color = document.getElementById(id).style.color;
     tr.setAttribute("name", i + form);
-    //tr.setAttribute("onclick", "changeColor('" + i + form + "')");
+    tr.setAttribute("onclick", "changeColor('" + i + form + "')");
     const input0 = document.createElement('input');
         input0.type = "hidden";
         input0.name = "currency_name";

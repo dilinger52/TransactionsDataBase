@@ -227,8 +227,8 @@ public class AppController {
         session.setAttribute("currencies", currencies);
         session.setAttribute("total", total);
         session.setAttribute("startDate" + clientId, new Timestamp(startDate.getTime()));
-        session.setAttribute("endDate" + clientId, new Timestamp(endDate.getTime() - 86400000 - 1));
-        session.setAttribute("endDate1" + clientId, new Timestamp(endDate.getTime() - 86400000));
+        //session.setAttribute("endDate" + clientId, new Timestamp(endDate.getTime() - 86400000 - 1));
+        session.setAttribute("endDate" + clientId, new Timestamp(endDate.getTime() - 86400000));
         session.setAttribute("client", client);
         session.setAttribute("transactions", transactions);
         session.setAttribute("transactionIds", transactionIds);

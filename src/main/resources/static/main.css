@@ -178,7 +178,7 @@ margin-right: 0px;
 margin-left: 14px;
 }
 
-.check-with-label:active + .label-for-check {
+.check-with-label:checked + .label-for-check {
   border: 2px solid black;
 }
 

@@ -76,14 +76,19 @@ public class AdminController {
         }
 
         File directory = new File("backup\\");
-        List<File> files = new ArrayList<>(Arrays.stream(directory.listFiles(File::isFile)).toList());
+        List<File> files = new ArrayList<>(Arrays.stream(directory.listFiles(File::isFile)).sorted(new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return Long.compare(o2.lastModified(), o1.lastModified());
+            }
+        }).toList());
         /*for (File file :
                 files) {
             file.a
         }*/
-        Collections.reverse(files);
+        //Collections.reverse(files);
         List<String> fs = files.stream().limit(30).map(File::getName).toList();
-        System.out.println(files);
+
         session.setAttribute("files", fs);
         session.setAttribute("active", active);
         session.setAttribute("users", users);

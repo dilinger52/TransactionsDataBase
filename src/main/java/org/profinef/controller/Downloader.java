@@ -215,7 +215,6 @@ public class Downloader {
                             XSSFFont clientsFont = (XSSFFont) book.createFont();
                             String[] styleSample = transaction.getCommentColor().split(";");
                             for (String sample : styleSample) {
-                                System.out.println(sample);
                                 if(sample.matches("^font-weight: bold")) clientsFont.setBold(true);
                                 if(sample.matches("^font-style: italic")) clientsFont.setItalic(true);
                                 if(sample.matches("^color:.+")) {
@@ -252,7 +251,6 @@ public class Downloader {
                                 styleSample = transaction.getOutputColor().split(";");
                             }
                             for (String sample : styleSample) {
-                                System.out.println(sample);
                                 if(sample.matches("^font-weight: bold")) amountFont.setBold(true);
                                 if(sample.matches("^font-style: italic")) amountFont.setItalic(true);
                                 if(sample.matches("^color:.+")) {
@@ -281,7 +279,6 @@ public class Downloader {
                             XSSFFont commissionFont = (XSSFFont) book.createFont();
                             String[] styleSample = transaction.getTarifColor().split(";");
                             for (String sample : styleSample) {
-                                System.out.println(sample);
                                 if(sample.matches("^font-weight: bold")) commissionFont.setBold(true);
                                 if(sample.matches("^font-style: italic")) commissionFont.setItalic(true);
                                 if(sample.matches("^color:.+")) {
@@ -311,7 +308,6 @@ public class Downloader {
                             XSSFFont comFont = (XSSFFont) book.createFont();
                             String[] styleSample = transaction.getCommissionColor().split(";");
                             for (String sample : styleSample) {
-                                System.out.println(sample);
                                 if(sample.matches("^font-weight: bold")) comFont.setBold(true);
                                 if(sample.matches("^font-style: italic")) comFont.setItalic(true);
                                 if(sample.matches("^color:.+")) {
@@ -340,7 +336,6 @@ public class Downloader {
                             XSSFFont rateFont = (XSSFFont) book.createFont();
                             String[] styleSample = transaction.getRateColor().split(";");
                             for (String sample : styleSample) {
-                                System.out.println(sample);
                                 if(sample.matches("^font-weight: bold")) rateFont.setBold(true);
                                 if(sample.matches("^font-style: italic")) rateFont.setItalic(true);
                                 if(sample.matches("^color:.+")) {
@@ -369,7 +364,6 @@ public class Downloader {
                             XSSFFont transportationFont = (XSSFFont) book.createFont();
                             String[] styleSample = transaction.getTransportationColor().split(";");
                             for (String sample : styleSample) {
-                                System.out.println(sample);
                                 if(sample.matches("^font-weight: bold")) transportationFont.setBold(true);
                                 if(sample.matches("^font-style: italic")) transportationFont.setItalic(true);
                                 if(sample.matches("^color:.+")) {
@@ -399,7 +393,6 @@ public class Downloader {
                             XSSFFont balanceFont = (XSSFFont) book.createFont();
                             String[] styleSample = transaction.getAmountColor().split(";");
                             for (String sample : styleSample) {
-                                System.out.println(sample);
                                 if(sample.matches("^font-weight: bold")) balanceFont.setBold(true);
                                 if(sample.matches("^font-style: italic")) balanceFont.setItalic(true);
                                 if(sample.matches("^color:.+")) {

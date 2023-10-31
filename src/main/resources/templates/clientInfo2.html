@@ -44,9 +44,9 @@
     <div>
         <form action="client_info" class="inline" method="get">
             <input class="inline" name="startDate"
-                   th:value="${#dates.format(session[startDate__${session.client.id}__], 'yyyy-MM-dd')}" type="date" onchange="submit()">
+                   th:value="${#dates.format(session[startDate__${session.client.id}__], 'yyyy-MM-dd')}" type="date" th:max="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" onchange="submit()">
             <input class="inline" name="endDate"
-                   th:value="${#dates.format(session[endDate__${session.client.id}__], 'yyyy-MM-dd')}" type="date" onchange="submit()">
+                   th:value="${#dates.format(session[endDate__${session.client.id}__], 'yyyy-MM-dd')}" type="date" th:max="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" onchange="submit()">
             <th:block th:each="currency : ${session.currencies}" th:if="${currency.name != 'RUB'}">
                 <input class="inline" name="currency_id" th:checked="${#lists.contains(session.currency_name, currency.name)}" th:id="|currency_id${currency.id}|"
                        th:value="${currency.id}" type="checkbox" onchange="submit()">
@@ -312,7 +312,7 @@
                     </th>
                     <th>
                         <input class="date" name="date" th:form="|form${currency.id}|"
-                               th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" type="date">
+                               th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" th:max="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" type="date">
                     </th>
                     <th>
                         <button th:data-form="|${currency.id}|" th:data-id="|${currency.name}|" th:onclick="addRow(this.getAttribute('data-id'), this.getAttribute('data-form'))"
@@ -366,7 +366,6 @@
 <script src="main.js"></script>
 <script src="html2canvas.min.js"></script>
 <script th:inline="javascript">
-    "UAHtr0_pAmount"
     console.log("script works");
     var target = document.getElementById(/*[[${session.pointer}]]*/);
     if (target == null) {
@@ -380,7 +379,7 @@
         pointer = document.querySelector('input[id=pointer' + target.form.id.substring(4) + ']');
     }
     console.log(pointer);
-    pointer.value = /*[[${session.pointer}]]*/;
+    pointer.value = target.id;
     const end = target.value.length;
     console.log(end);
         target.setSelectionRange(end, end);

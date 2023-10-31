@@ -146,17 +146,25 @@ public class AppController {
             } else {
                 startDate = new Date(((Timestamp) session.getAttribute("startDate" + clientId)).getTime());
             }
+        } else if (startDate.getTime() != ((Timestamp) session.getAttribute("startDate" + clientId)).getTime()) {
+            if (startDate.after(new Date(endDate.getTime() - 86400000))) {
+                endDate = new Date(startDate.getTime());
+
+            }
         }
         if (endDate == null) {
             logger.debug("requested end date is null");
-            if (session.getAttribute("endDate1" + clientId) == null) {
+            if (session.getAttribute("endDate" + clientId) == null) {
                 logger.debug("requested end date is null");
                 endDate = new Date(startDate.getTime() + 86400000);
             } else {
-                endDate = new Date(((Timestamp) session.getAttribute("endDate1" + clientId)).getTime() + 86400000);
+                endDate = new Date(((Timestamp) session.getAttribute("endDate" + clientId)).getTime() + 86400000);
             }
         } else {
             endDate = new Date(endDate.getTime() +  86400000);
+            if (startDate.after(new Date(endDate.getTime() - 86400000))) {
+                startDate = new Date(endDate.getTime() - 86400000);
+            }
         }
         logger.trace("startDate = " + startDate);
         logger.trace("endDate = " + endDate);
@@ -319,7 +327,6 @@ public class AppController {
         logger.info("Loading new client page...");
         session.setAttribute("path", "/new_client");
         logger.info("New client page loaded");
-        System.out.println(session.getAttribute("path"));
         return "addClient";
     }
 
@@ -337,7 +344,6 @@ public class AppController {
         session.setAttribute("client", client);
         session.setAttribute("path", "/edit_client");
         logger.info(user + " Edit client page loaded");
-        System.out.println(session.getAttribute("path"));
         return "addClient";
     }
 
@@ -389,7 +395,6 @@ public class AppController {
             }
             client.setTelegram(telegram);
         }
-        System.out.println(session.getAttribute("path"));
         try {
             if (session.getAttribute("path") == "/edit_client") {
                 logger.debug("Updating client");
@@ -489,11 +494,8 @@ public class AppController {
         logger.info(user + " Saving colors...");
         List<List<String>> entryList = new ObjectMapper().readValue(colors, new TypeReference<>() {
         });
-        System.out.println(entryList);
         for (List<String> list : entryList) {
-            System.out.println(list);
             String[] arr = list.get(0).split("_");
-            System.out.println(Arrays.toString(arr));
             int id = Integer.parseInt(arr[0]);
             int clientId = Integer.parseInt(arr[2]);
             int currencyId = Integer.parseInt(arr[1]);
@@ -509,7 +511,6 @@ public class AppController {
                 case "total" -> transaction.setAmountColor(list.get(1));
                 case "balance" -> transaction.setBalanceColor(list.get(1));
             }
-            System.out.println(transaction);
             transManager.save(transaction);
         }
         logger.info(user + " Colors saved");

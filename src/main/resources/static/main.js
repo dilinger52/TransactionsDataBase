@@ -83,16 +83,16 @@ function autoinsert(inputId, datalistId) {
      if (target.children.length > 0) {
         target = target.children[0];
      }
-     if (id != 'bold' && id != 'italic' && id != 'nobold' && id != 'noitalic' && id != 'none') {
+     if (elem.id != 'bold' && elem.id != 'italic' && elem.id != 'nobold' && elem.id != 'noitalic' && elem.id != 'none') {
              target.style.color = '';
           }
-          if (id == 'bold' || id == 'nobold') {
+          if (elem.id == 'bold' || elem.id == 'nobold') {
              target.style.fontWeight = '';
           }
-          if (id == 'italic' || id == 'noitalic') {
+          if (elem.id == 'italic' || elem.id == 'noitalic') {
              target.style.fontStyle = '';
           }
-          if (id != 'none') {
+          if (elem.id != 'none' && elem.id != 'nobold' && elem.id != 'noitalic') {
           console.log(elem.value);
           console.log(target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor);
           var color;
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 inputs = document.getElementsByTagName('input');
 
 for (var z = 0; z < inputs.length; z++) {
-    if (inputs[z].type != 'button' || inputs[z].type != 'submit' || element.srcElement.type == 'date') {
+    if (inputs[z].type != 'button' && inputs[z].type != 'submit' && inputs[z].type != 'date') {
         inputs[z].addEventListener('focus', (element) => {autosave(element)});
     }
     /*if (localStorage[inputs[z].id] != null && localStorage[inputs[z].id].length > 0 && (inputs[z].type != 'button' || inputs[z].type != 'submit' || element.srcElement.type == 'date')) {
@@ -229,6 +229,7 @@ async function autosave(element) {
     }
 
         if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button' || element.srcElement.type == 'submit'  || element.srcElement.type == 'date') return;
+        console.log('log');
         var form;
 
             var oldRow = currentRow;
@@ -736,6 +737,7 @@ function addRow(id, form) {
             input3.setAttribute("Form", 'form' + form);
             input3.addEventListener('focus', (element) => {autosave(element)});
             input3.setAttribute('onkeyup', "autoinsert('" + id + "tr" + num + "_client', 'client_datalist')");
+
         th3.appendChild(input3);
         th3.style.borderTop = "none";
     tr.appendChild(th3);

@@ -348,11 +348,11 @@ public class TransactionController {
             String change = findChanges(newTransactionList, transactionList, (Client) session.getAttribute("client"));
             if (!change.isEmpty()) {
                 logger.debug("found changes");
-                if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
+                if (session.getAttribute("do") != "undo" && session.getAttribute("do") != "redo") {
                     logger.debug("new action of editing");
                     redos.clear();
                 }
-                if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
+                if (session.getAttribute("do") != "undo" /*&& session.getAttribute("do") != "redo"*/) {
                     logger.debug("redoing of editing");
                     Action action = new Action();
                     action.setName("Редактирование " + change);
@@ -363,9 +363,9 @@ public class TransactionController {
                         logger.debug("new action");
                         undos.push(action);
                     }
-                    session.removeAttribute("path");
+                    session.removeAttribute("do");
                 }
-                if (session.getAttribute("path") == "undo") {
+                if (session.getAttribute("do") == "undo") {
                     logger.debug("undoing of editing");
                     Action action = getAction(change, transactionList);
                     logger.trace(String.valueOf(action));
@@ -373,7 +373,7 @@ public class TransactionController {
                         logger.debug("new action");
                         redos.push(action);
                     }
-                    session.removeAttribute("path");
+                    session.removeAttribute("do");
                 }
             }
             reverse(undos);
@@ -510,12 +510,12 @@ public class TransactionController {
         String change = findChanges(newTransactionList, transactionList, (Client) session.getAttribute("client"));
         if (!change.isEmpty()) {
             logger.debug("found changes");
-            if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
+            if (session.getAttribute("do") != "undo" && session.getAttribute("do") != "redo") {
                 redos.clear();
                 logger.debug("new action of deleting");
             }
 
-            if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
+            if (session.getAttribute("do") != "undo" /*&& session.getAttribute("do") != "redo"*/) {
                 logger.debug("redoing deleting");
                 Action action = new Action();
                 action.setName("Удаление " + change);
@@ -526,10 +526,10 @@ public class TransactionController {
                     logger.debug("new action");
                     undos.push(action);
                 }
-                session.removeAttribute("path");
+                session.removeAttribute("do");
 
             }
-            if (session.getAttribute("path") == "undo") {
+            if (session.getAttribute("do") == "undo") {
                 logger.debug("undoing adding");
                 Action action = new Action();
                 action.setName("Добавление " + change);
@@ -540,7 +540,7 @@ public class TransactionController {
                     logger.debug("new action");
                     redos.push(action);
                 }
-                session.removeAttribute("path");
+                session.removeAttribute("do");
 
             }
         }
@@ -595,7 +595,6 @@ public class TransactionController {
                 rate.add(null);
             }
         }
-        System.out.println(rate);
         List<Double> commission = new ArrayList<>();
         for (String s : commissionS) {
             s = s.replaceAll("\\s+", "").replaceAll(",", ".");
@@ -782,11 +781,11 @@ public class TransactionController {
             String change = findChanges(transactionList, oldTransactionList, (Client) session.getAttribute("client"));
             if (!change.isEmpty()) {
                 logger.debug("found changes");
-                if (session.getAttribute("path") != "undo" && session.getAttribute("path") != "redo") {
+                if (session.getAttribute("do") != "undo" && session.getAttribute("do") != "redo") {
                     logger.debug("new action of adding");
                     redos.clear();
                 }
-                if (session.getAttribute("path") != "undo" /*&& session.getAttribute("path") != "redo"*/) {
+                if (session.getAttribute("do") != "undo" /*&& session.getAttribute("do") != "redo"*/) {
                     logger.debug("redo adding");
                     Action action = new Action();
                     action.setName("Добавление " + change);
@@ -797,10 +796,10 @@ public class TransactionController {
                         logger.debug("new action");
                         undos.push(action);
                     }
-                    session.removeAttribute("path");
+                    session.removeAttribute("do");
 
                 }
-                if (session.getAttribute("path") == "undo") {
+                if (session.getAttribute("do") == "undo") {
                     logger.debug("undo deleting");
                     Action action = new Action();
                     action.setName("Удаление " + change);
@@ -811,7 +810,7 @@ public class TransactionController {
                         logger.debug("new action");
                         redos.push(action);
                     }
-                    session.removeAttribute("path");
+                    session.removeAttribute("do");
 
                 }
             }
@@ -828,9 +827,19 @@ public class TransactionController {
             }
             assert startDate != null;
             session.setAttribute("startDate" + clientId.get(0), new Timestamp(startDate.getTime()));
+            java.sql.Date endDate = new Date(((Timestamp) session.getAttribute("endDate" + clientId.get(0))).getTime());
+            if (endDate.before(date)) {
+                endDate = date;
+            }
+            assert endDate != null;
+            session.setAttribute("endDate" + clientId.get(0), new Timestamp(endDate.getTime()));
         } catch (Exception e) {
             logger.info(user + " Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
-            session.setAttribute("error", e.getMessage());
+            if (Objects.equals(e.getMessage(), "Index 0 out of bounds for length 0")) {
+                session.setAttribute("error", "Недопустимое зануление транзакции");
+            } else {
+                session.setAttribute("error", e.getMessage());
+            }
             return "error";
         }
 
@@ -848,7 +857,7 @@ public class TransactionController {
         if (id != -1) {
 
             for (int i = 0; i <= id; i++) {
-                session.setAttribute("path", "undo");
+                session.setAttribute("do", "undo");
 
                 Stack<Action> undos = (Stack<Action>) session.getAttribute("undos" + clientId);
                 if (undos == null) {
@@ -967,7 +976,7 @@ public class TransactionController {
         if (id != -1) {
 
             for (int i = 0; i <= id; i++) {
-                session.setAttribute("path", "redo");
+                session.setAttribute("do", "redo");
                 Stack<Action> undos = (Stack<Action>) session.getAttribute("undos" + clientId);
                 if (undos == null) {
                     undos = new Stack<>();

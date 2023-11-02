@@ -380,13 +380,14 @@ public class TransactionController {
             reverse(redos);
             session.setAttribute("undos" + clientId.get(0), undos);
             session.setAttribute("redos" + clientId.get(0), redos);
-
+            System.out.println(pointer);
             String[] pp = pointer.split("_");
             if (pp.length < 3) {
                 if (pp[0].substring(0, 3).matches("[0-9]{3,}.*")) {
                     pointer = transactionId.get(0) + "_" + pp[0].substring(0, 3) + "_" + clientId.get(clientId.size() - 1) + "_" + pp[1];
                 }
             }
+            System.out.println(pointer);
         } catch (Exception e) {
             logger.info(user + " Redirecting to error page with error: " + e.getMessage() + Arrays.toString(e.getStackTrace()));
 
@@ -819,8 +820,10 @@ public class TransactionController {
             session.setAttribute("undos" + clientId.get(0), undos);
             session.setAttribute("redos" + clientId.get(0), redos);
             clientId = clientId.stream().distinct().collect(Collectors.toList());
+            System.out.println(pointer);
             String[] pp = pointer.split("_");
             pointer = transactionId + "_" + currencyManager.getCurrency(pp[0].substring(0, 3)).getId() + "_" + clientId.get(Integer.parseInt(pp[0].substring(5))) + "_" + pp[1];
+            System.out.println(pointer);
             java.sql.Date startDate = new Date(((Timestamp) session.getAttribute("startDate" + clientId.get(0))).getTime());
             if (startDate.after(date)) {
                 startDate = date;

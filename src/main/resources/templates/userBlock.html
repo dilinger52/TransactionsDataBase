@@ -13,6 +13,9 @@
         <label class="inline sphere2 lime label-for-check" for="connection" id="connectionLabel"></label>
         <p class="inline" th:text="${session.user.role.name}"></p>
         <h4 class="inline" th:text="${session.user.login}"></h4>
+        <button class="inline" type="button" value="Заблокировать" onclick="lock()" id="lockBut">
+            <img src="/images/unlock.png" class="inline" height="12px" title="Заблокировать ввод" id="lockImg">
+        </button>
         <form action="users" class="inline" method="get" th:if="${session.user.role.name == 'Admin' || session.user.role.name == 'Superadmin'}">
             <input type="submit" value="Админпанель">
         </form>

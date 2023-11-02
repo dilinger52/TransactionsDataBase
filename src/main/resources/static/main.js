@@ -1,3 +1,28 @@
+function lock() {
+    var inputs = document.querySelectorAll('input');
+    for (var input of inputs) {
+        input.setAttribute('readonly', true);
+    }
+    var img = document.getElementById('lockImg');
+    img.setAttribute('src', 'images/lock.png');
+    var but = document.getElementById('lockBut');
+    but.setAttribute('onclick', 'unlock()');
+}
+
+function unlock() {
+    var inputs = document.querySelectorAll('input');
+    for (var input of inputs) {
+        input.removeAttribute('readonly');
+    }
+    var img = document.getElementById('lockImg');
+    img.setAttribute('src', 'images/unlock.png');
+    var but = document.getElementById('lockBut');
+    but.setAttribute('onclick', 'lock()');
+}
+
+
+
+
 const tables = document.querySelectorAll('table');
 
     let startCell = null;

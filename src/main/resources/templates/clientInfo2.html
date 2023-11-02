@@ -119,11 +119,14 @@
          th:each="currency : ${session.currencies}" th:if="${#lists.contains(session.currency_name, currency.name) && currency.name != 'RUB'}">
         <!--/*<input id="pointer" name="pointer" th:form="|form${currency.id}|" type="hidden">*/-->
         <div id="cap" name="thead" style="background-color: white; position: sticky;">
+            <input type="hidden">
+            <input type="hidden">
+            <input type="hidden">
             <!--/*<h3 class="inline" th:text="${currency.name}">HRN</h3>*/-->
-            <img th:if="${currency.name == 'UAH'}" src="/images/hryvnia.png" height="16px" class="inline" title="UAH, гривна">
-            <img th:if="${currency.name == 'USD'}" src="/images/dollar.png" height="16px" class="inline" title="USD, доллар">
-            <img th:if="${currency.name == 'EUR'}" src="/images/euro.png" height="16px" class="inline" title="EUR, евро">
-            <img th:if="${currency.name == 'PLN'}" src="/images/zloty.png" height="16px" class="inline" title="PLN, злотый">
+            <img th:if="${currency.name == 'UAH'}" src="/images/hryvnia.png" height="16px" class="inline" title="UAH, гривна" ondrag="return false" ondragdrop="return false" ondragstart="return false" >
+            <img th:if="${currency.name == 'USD'}" src="/images/dollar.png" height="16px" class="inline" title="USD, доллар" ondrag="return false" ondragdrop="return false" ondragstart="return false" >
+            <img th:if="${currency.name == 'EUR'}" src="/images/euro.png" height="16px" class="inline" title="EUR, евро" ondrag="return false" ondragdrop="return false" ondragstart="return false" >
+            <img th:if="${currency.name == 'PLN'}" src="/images/zloty.png" height="16px" class="inline" title="PLN, злотый" ondrag="return false" ondragdrop="return false" ondragstart="return false" >
             <h3 class="inline"
                 <!--/*th:text="|Баланс на начало ${#dates.format(session[startDate__${session.client.id}__], 'dd-MM-yyyy')}: ${#numbers.formatInteger(session.total['amount' + currency.id], 1, 'WHITESPACE')}|"*/-->>
                 <span th:text="|Баланс на начало ${#dates.format(session[startDate__${session.client.id}__], 'dd-MM-yyyy')}: |"></span>
@@ -135,6 +138,15 @@
                 <span style="color: red;" th:text="${#numbers.formatInteger(session.total['balance' + currency.id], 1, 'WHITESPACE')}"></span>
             </h3>
             <input class="exchange" th:name="${currency.name}" th:value="${currency.averageExchange}" type="hidden">
+
+            <input type="hidden">
+            <input type="hidden">
+            <input type="hidden">
+            <input type="hidden">
+            <input type="hidden">
+            <input type="hidden">
+            <input type="hidden">
+            <input th:if="${session.user.role.name == 'Admin' || session.user.role.name == 'Superadmin'}" type="hidden">
         </div>
         <table th:style="${currency.name == 'RUB' ? 'background-color: mistyrose;' : currency.name == 'USD' ? 'background-color: honeydew;' : currency.name == 'EUR' ? 'background-color: lavender;' : currency.name == 'PLN' ? 'background-color: lightcyan;' : currency.name == 'UAH' ? 'background-color: white;' : ''}">
             <thead name="thead2" style="background-color: inherit; position: sticky;">
@@ -363,7 +375,7 @@
 <div style="width: 100%; height: 40px;"></div>
 </body>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="main.js"></script>
+<script src="main2.js"></script>
 <script src="html2canvas.min.js"></script>
 <script th:inline="javascript">
     console.log("script works");

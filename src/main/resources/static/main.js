@@ -1,27 +1,31 @@
 function lock() {
-    var inputs = document.querySelectorAll('input');
-    for (var input of inputs) {
-        input.setAttribute('readonly', true);
-    }
+
     var img = document.getElementById('lockImg');
     img.setAttribute('src', 'images/lock.png');
     var but = document.getElementById('lockBut');
     but.setAttribute('onclick', 'unlock()');
+    var inputs = document.querySelectorAll('input, button, checkbox, select');
+    for (var input of inputs) {
+        if (input.id != 'lockBut') {
+            input.setAttribute('disabled', true);
+        }
+    }
+    document.querySelector('input#none').checked = true;
+
+
+
 }
 
 function unlock() {
-    var inputs = document.querySelectorAll('input');
-    for (var input of inputs) {
-        input.removeAttribute('readonly');
-    }
     var img = document.getElementById('lockImg');
     img.setAttribute('src', 'images/unlock.png');
     var but = document.getElementById('lockBut');
     but.setAttribute('onclick', 'lock()');
+    var inputs = document.querySelectorAll('input, button, checkbox, select');
+        for (var input of inputs) {
+            input.removeAttribute('disabled');
+        }
 }
-
-
-
 
 const tables = document.querySelectorAll('table');
 

@@ -17,6 +17,9 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+/**
+ * Класс предназначен для создания эксель файла отражающего данные в БД с заданными параметрами
+ */
 @Service
 public class ExcelManager {
     @Autowired
@@ -38,18 +41,24 @@ public class ExcelManager {
         this.accountManager = accountManager;
     }
 
+    /**
+     * Класс создает Excel файл содержащий информацию обо всех записях в БД
+     * @throws IOException выбрасывается при невозможности записать данные в файл
+     */
     public void createFull() throws IOException {
-        //creating workbook
+        //собираем информацию
         List<Client> clients = clientManager.findAll();
         List<Currency> currencies = currencyManager.getAllCurrencies();
         List<Transaction> transactions = transManager.getAllTransactions();
+        //создаем книгу
         Workbook book = createWorkbook(clients, currencies, transactions);
-
+        // создаем итоговый лист
         Sheet total = null;
         if (book != null) {
             total = book.createSheet("Итоговый");
         }
         logger.info("Created total sheet");
+        // создаем ряд стилей
         CellStyle boldStyle = book.createCellStyle();
         Font bold = book.createFont();
         bold.setBold(true);
@@ -63,17 +72,18 @@ public class ExcelManager {
         redBoldStyle.setBorderTop(BorderStyle.MEDIUM);
         logger.debug("Styles set");
 
+        //создаем первый ряд
         Row firstRow = total.createRow(0);
         Cell firstCell = firstRow.createCell(2);
         firstCell.setCellStyle(boldStyle);
         firstCell.setCellValue("Итоговый лист");
         logger.trace("Created first cell");
 
-        //creating style for date cells
         CellStyle dateStyle = book.createCellStyle();
         DataFormat format = book.createDataFormat();
         dateStyle.setDataFormat(format.getFormat("dd.mm.yyyy"));
 
+        // создаем второй ряд
         Row secondRow = total.createRow(1);
         Cell secondCell = secondRow.createCell(2);
         secondCell.setCellStyle(dateStyle);
@@ -81,8 +91,11 @@ public class ExcelManager {
         total.autoSizeColumn(2);
         logger.trace("Created second cell");
 
+        // создаем третий ряд
         Row thirdRow = total.createRow(2);
         logger.debug("Created third row");
+
+        //делаем заголовки с названиями валют
         int headerCellNum = 0;
         for (Currency currency : currencies) {
             Cell headerCell = thirdRow.createCell(++headerCellNum);
@@ -90,9 +103,12 @@ public class ExcelManager {
             headerCell.setCellValue(currency.getName());
             logger.trace("Created currency names cell with value = " + currency.getName());
         }
+        // счетчик ряда начинается с третьего, т.к. увеличение происходит в начале цикла
         int rowNum = 2;
         for (Client client : clients) {
+            // создаем ряд для клиента
             Row row = total.createRow(++rowNum);
+            // записываем имя
             Cell nameCell = row.createCell(0);
             nameCell.setCellStyle(boldStyle);
             nameCell.setCellValue(client.getPib());
@@ -100,6 +116,7 @@ public class ExcelManager {
             int cellNum = 0;
             Set<Map.Entry<Currency, Account.Properties>> currencySet = accountManager.getAccounts(client.getPib()).get(0)
                     .getCurrencies().entrySet();
+            // записываем балансы по каждой из валют
             for (Map.Entry<Currency, Account.Properties> currency : currencySet) {
                 Cell cell = row.createCell(++cellNum);
                 cell.setCellStyle(boldStyle);
@@ -108,13 +125,16 @@ public class ExcelManager {
             }
         }
 
+        // создаем итоговый ряд
         Row totalRow = total.createRow(++rowNum);
         logger.debug("Created row total");
+        // записывае имя
         Cell nameTotalCell = totalRow.createCell(0);
         nameTotalCell.setCellStyle(redBoldStyle);
         nameTotalCell.setCellValue("Итог");
         logger.trace("Created cell total names");
 
+        // записываем суммы балансов по всем клиентам для каждой из валют
         List<Map.Entry<Currency, Account.Properties>> currencyList = accountManager.getAllAccounts()
                 .stream()
                 .map(account -> account.getCurrencies().entrySet())
@@ -141,13 +161,20 @@ public class ExcelManager {
         logger.info("File created");
     }
 
+    /**
+     * Метод создания книги с заданной информацией
+     * @param clients список клиентов
+     * @param currencies список валют
+     * @param trans список записей
+     * @return созданную книгу Excel
+     */
     private Workbook createWorkbook(List<Client> clients, List<Currency> currencies, List<Transaction> trans) {
         try {
-            //creating workbook
+            // создаем книгу
             Workbook book = new XSSFWorkbook();
             logger.info("Work book created");
 
-            //creating style for header rows
+            // создаем стиль для строки заголовка
             CellStyle headerStyle = book.createCellStyle();
             headerStyle.setBorderBottom(BorderStyle.MEDIUM);
             headerStyle.setBorderLeft(BorderStyle.MEDIUM);
@@ -157,12 +184,12 @@ public class ExcelManager {
             headerFont.setBold(true);
             headerStyle.setFont(headerFont);
 
-            //creating style for date cells
+            // создаем стиль для ячеек с датой
             CellStyle dateStyle = book.createCellStyle();
             DataFormat format = book.createDataFormat();
             dateStyle.setDataFormat(format.getFormat("dd.mm.yyyy"));
 
-            //creating style for names cell
+            // создаем стиль для ячеек имени клиента
             CellStyle nameStyle = book.createCellStyle();
             Font font = book.createFont();
             font.setItalic(true);
@@ -172,60 +199,73 @@ public class ExcelManager {
             nameStyle.setBorderTop(BorderStyle.MEDIUM);
             nameStyle.setBorderRight(BorderStyle.MEDIUM);
 
-            //creating style for last row for each date
+            //создаем стиль для последнего ряда для каждой даты
             CellStyle lastForDateStyle = book.createCellStyle();
             lastForDateStyle.setBorderBottom(BorderStyle.MEDIUM);
 
-            //creating style for date in last row for each date
+            // создаем стиль для ячеек даты в последнем ряду для каждой даты
             CellStyle dateLastForDateStyle = book.createCellStyle();
             dateLastForDateStyle.setBorderBottom(BorderStyle.MEDIUM);
             dateLastForDateStyle.setDataFormat(format.getFormat("dd.mm.yyyy"));
 
+            // стиль ячеек комментария
             CellStyle commentStyle = book.createCellStyle();
             commentStyle.setBorderLeft(BorderStyle.THICK);
 
+            // стиль ячеек комментария в последнем ряду даты
             CellStyle commentLastForDateStyle = book.createCellStyle();
             commentLastForDateStyle.setBorderLeft(BorderStyle.THICK);
             commentLastForDateStyle.setBorderBottom(BorderStyle.MEDIUM);
 
+            // стиль для больших чисел
             CellStyle bigNumberStyle = book.createCellStyle();
             bigNumberStyle.setDataFormat(format.getFormat("# ### ### ##0"));
 
+            // стиль для больших чисел в последнем ряду даты
             CellStyle bigNumberLastForDateStyle = book.createCellStyle();
             bigNumberLastForDateStyle.setDataFormat(format.getFormat("# ### ### ##0"));
             bigNumberLastForDateStyle.setBorderBottom(BorderStyle.MEDIUM);
 
+            // стиль для малых чисел
             CellStyle smallNumberStyle = book.createCellStyle();
             smallNumberStyle.setDataFormat(format.getFormat("# ##0.##"));
 
+            // стиль для малых чисел в последнем ряду даты
             CellStyle smallNumberLastForDateStyle = book.createCellStyle();
             smallNumberLastForDateStyle.setDataFormat(format.getFormat("# ##0.##"));
             smallNumberLastForDateStyle.setBorderBottom(BorderStyle.MEDIUM);
 
 
             for (Client client : clients) {
-                //for each client create a sheet. names of sheet is client's names
+                // для каждого клиента создаем лист. название листа - это имя клиента
                 Sheet sheet = book.createSheet(client.getPib());
                 logger.info("Created sheet: " + sheet.getSheetName());
+                // создаем первый ряд
                 Row fistRow = sheet.createRow(0);
                 fistRow.setRowStyle(headerStyle);
                 logger.info("Created first row");
+                // создаем второй ряд
                 Row secondRow = sheet.createRow(1);
                 secondRow.setRowStyle(headerStyle);
                 logger.info("Created second row");
+                // записываем имя клиента в соответствующую ячейку
                 Cell nameCell = fistRow.createCell(0);
                 nameCell.setCellValue(client.getPib());
                 nameCell.setCellStyle(nameStyle);
                 logger.trace("Created names cell");
+                // записываем заголовок "Дата"
                 secondRow.createCell(0).setCellValue("Дата");
                 logger.trace("Created date cell");
+                // начальный номер валюты. равен -1, т.к. увеличение происходит в начале цикла
                 int initial = -1;
                 for (Currency currency : currencies) {
+                    // записываем название валюты
                     fistRow.createCell(2 + columnPerCurrency * ++initial).setCellValue(currency.getName());
                     for (int i = 2; i < fistRow.getLastCellNum() - 1; i += columnPerCurrency) {
                         fistRow.getCell(i).setCellStyle(headerStyle);
                     }
 
+                    // записываем заголовки для записей данной валюты
                     secondRow.createCell(1 + columnPerCurrency * initial).setCellValue("Комментарий");
                     secondRow.createCell(2 + columnPerCurrency * initial).setCellValue("Прием");
                     secondRow.createCell(3 + columnPerCurrency * initial).setCellValue("Выдача");
@@ -239,9 +279,12 @@ public class ExcelManager {
                         secondRow.getCell(i).setCellStyle(headerStyle);
                     }
                     logger.trace("Created cells for currency names: " + currency.getName());
+                    // выбираем записи, относящиеся к текущему клиенту и валюте
                     List<Transaction> transactions = trans.stream().filter(t -> t.getClient().equals(client)).filter(t -> t.getCurrency().equals(currency)).toList();
+                    // начальный номер ряда, соответствует второму, т.к. увеличение происходит в начале цикла
                     int rowNum = 1;
                     for (Transaction transaction : transactions) {
+                        // переходим на новый ряд, если его нет - создаем
                         Row row = sheet.getRow(++rowNum);
                         if (row == null) {
                             row = sheet.createRow(rowNum);
@@ -249,6 +292,7 @@ public class ExcelManager {
                         }
 
                         if (row.getCell(0) != null) {
+                            // если дата в ряду раньше даты записи - переходим на ряд ниже, при необходимости создаем его
                             while (row.getCell(0) != null && row.getCell(0).getDateCellValue().toInstant()
                                     .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay()
                                     .isBefore(transaction.getDate().toInstant().atZone(ZoneId.of("Europe/Kyiv"))
@@ -259,6 +303,7 @@ public class ExcelManager {
                                 }
 
                             }
+                            // если дата в ряду больше даты текущей записи - встраиваем новый ряд выше
                             if (row.getCell(0) != null && row.getCell(0).getDateCellValue().toInstant()
                                     .atZone(ZoneId.of("Europe/Kyiv")).toLocalDate().atStartOfDay()
                                     .isAfter(transaction.getDate().toInstant()
@@ -270,7 +315,7 @@ public class ExcelManager {
                                 }
                             }
                         }
-
+                        // если в ряду нет записи даты - вписываем дату текущей запсиси
                         if (row.getCell(0) == null) {
                             Cell cell = row.createCell(0);
                             cell.setCellValue(transaction.getDate());
@@ -278,6 +323,9 @@ public class ExcelManager {
                             sheet.autoSizeColumn(0);
                             logger.trace("Created date cell with value = " + transaction.getDate());
                         }
+
+                        // формируем строку комментария, выписывая имена контрагентов и комментарий и добавляем в
+                        // соответствующую ячейку
                         List<Transaction> tl = transManager.getTransaction(transaction.getId());
                         StringBuilder anotherClients = new StringBuilder();
                         for (Transaction t : tl) {
@@ -311,7 +359,7 @@ public class ExcelManager {
                             clientsCell.setCellStyle(clientsStyle);
                             sheet.autoSizeColumn(1);
                         }*/
-
+                        // вписываем объем записи в соответствующую ячейку
                         Cell amountCell;
                         if (transaction.getAmount() >= 0) {
                             amountCell = row.createCell(2 + columnPerCurrency * initial);
@@ -346,7 +394,7 @@ public class ExcelManager {
                             amountCell.setCellStyle(amountStyle);
                             sheet.autoSizeColumn(1);
                         }*/
-
+                        // вписываем тариф в соответствующую ячейку
                         Cell commissionCell = row.createCell(4 + columnPerCurrency * initial);
                         commissionCell.setCellValue(transaction.getCommission());
                         commissionCell.setCellStyle(smallNumberStyle);
@@ -372,7 +420,7 @@ public class ExcelManager {
                             clientsCell.setCellStyle(commissionStyle);
                             sheet.autoSizeColumn(1);
                         }*/
-
+                        // вписываем комиссию в соответствующую ячейку
                         Cell comCell = row.createCell(5 + columnPerCurrency * initial);
                         comCell.setCellValue(Math.abs(transaction.getCommission() / 100 * transaction.getAmount()));
                         comCell.setCellStyle(bigNumberStyle);
@@ -399,7 +447,7 @@ public class ExcelManager {
                             comCell.setCellStyle(comStyle);
                             sheet.autoSizeColumn(1);
                         }*/
-
+                        // вписываем курс в соответствующую ячейку
                         Cell rateCell = row.createCell(6 + columnPerCurrency * initial);
                         rateCell.setCellValue(transaction.getRate());
                         rateCell.setCellStyle(smallNumberStyle);
@@ -425,7 +473,7 @@ public class ExcelManager {
                             rateCell.setCellStyle(rateStyle);
                             sheet.autoSizeColumn(1);
                         }*/
-
+                        // вписываем инкасацию в соответствующую ячейку
                         Cell transportationCell = row.createCell(7 + columnPerCurrency * initial);
                         transportationCell.setCellValue(transaction.getTransportation());
                         transportationCell.setCellStyle(bigNumberStyle);
@@ -452,7 +500,7 @@ public class ExcelManager {
                             transportationCell.setCellStyle(transportationStyle);
                             sheet.autoSizeColumn(1);
                         }*/
-
+                        // вписываем баланс в соответствующую ячейку
                         Cell balanceCell = row.createCell(8 + columnPerCurrency * initial);
                         balanceCell.setCellValue(transaction.getAmount() * (1 + transaction.getCommission() / 100) + transaction.getTransportation());
                         balanceCell.setCellStyle(bigNumberStyle);
@@ -481,7 +529,8 @@ public class ExcelManager {
                         logger.info("Created row" + rowNum + " on sheet " + sheet.getSheetName() + ", currency " + currency.getName() + ", amount " + transaction.getAmount());
                     }
                 }
-                //sheet.shiftRows(0,0,0); //magick string that do nothing, but needed to program work
+                // применяем стили к последним строка каждой даты. это необходимо выполнять в конце, т.к. последняя
+                // строка для даты может измениться в процессе формирования листа
                 for (Row row : sheet) {
 
                     if (row.getRowNum() < 2) continue;

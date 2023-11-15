@@ -9,7 +9,10 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-
+/**
+ * Главный класс приложения, который инициирует запуск приложения, создание всех необходимых объектов, запуск сервера,
+ * системы логирования, подключением к базе данных и проводит стартовую конфигурацию этих и других необходимых систем.
+ */
 @SpringBootApplication
 @EnableScheduling
 public class TransactionApplication {

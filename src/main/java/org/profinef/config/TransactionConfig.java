@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
+/**
+ * Класс конфигурации менеджера транзакций
+ */
 @Configuration
 @EnableTransactionManagement
 public class TransactionConfig {

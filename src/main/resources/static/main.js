@@ -1,5 +1,5 @@
+// блокирует все активные элементы на странице
 function lock() {
-
     var img = document.getElementById('lockImg');
     img.setAttribute('src', 'images/lock.png');
     var but = document.getElementById('lockBut');
@@ -15,7 +15,7 @@ function lock() {
 
 
 }
-
+// разблокирует активные элементы на странице
 function unlock() {
     var img = document.getElementById('lockImg');
     img.setAttribute('src', 'images/unlock.png');
@@ -26,7 +26,7 @@ function unlock() {
             input.removeAttribute('disabled');
         }
 }
-
+// реализация кастомного выделения
 const tables = document.querySelectorAll('table');
 
     let startCell = null;
@@ -41,6 +41,7 @@ const tables = document.querySelectorAll('table');
 
             isMouseDown = true;
             startCell = e.target;
+            // очищение выделения по клику
             document.querySelectorAll('th').forEach((c) => {
                                                 c.classList.remove('highlight');
                                             });
@@ -83,6 +84,7 @@ const tables = document.querySelectorAll('table');
 
     });
 
+// автозаполнение если остался толко один возможный вариант + блокировка дальнейшего ввода
 function autoinsert(inputId, datalistId) {
   // Получите элементы формы и datalist
   var input = document.getElementById(inputId);
@@ -102,9 +104,10 @@ function autoinsert(inputId, datalistId) {
 }
 
 
-
+// смена стиля данных в ячейках таблицы
  function changeColor(id) {
      console.log(id);
+     // определяем нужный стиль по выбранному чекбоксу
      var elem = document.querySelector('input[name=color]:checked');
      console.log(elem);
      var target = document.getElementById(id);
@@ -112,15 +115,19 @@ function autoinsert(inputId, datalistId) {
      if (target.children.length > 0) {
         target = target.children[0];
      }
+     // удаляем цвет
      if (elem.id != 'bold' && elem.id != 'italic' && elem.id != 'nobold' && elem.id != 'noitalic' && elem.id != 'none') {
              target.style.color = '';
           }
+          // удаляем жирность
           if (elem.id == 'bold' || elem.id == 'nobold') {
              target.style.fontWeight = '';
           }
+          // удаляем курсив
           if (elem.id == 'italic' || elem.id == 'noitalic') {
              target.style.fontStyle = '';
           }
+          // применяем новое форматирование
           if (elem.id != 'none' && elem.id != 'nobold' && elem.id != 'noitalic') {
           console.log(elem.value);
           console.log(target.parentElement.parentElement.parentElement.parentElement.style.backgroundColor);
@@ -143,27 +150,33 @@ function autoinsert(inputId, datalistId) {
                target.setAttribute("style", style + color);
 
           }
-
+// сохраняем в базу
      saveColors(target);
 
  }
 
-
+// смена стиля данных на главной
 function changeMainColor(id) {
 
     console.log(id);
+    // определяем нужный стиль
          var elem = document.getElementById(id);
+         // определяем элементы для применения стиля
          var targets = document.querySelectorAll('th.highlight');
          for(var target of targets) {
+         // очищаем расцветку
           if (id != 'bold' && id != 'italic' && id != 'nobold' && id != 'noitalic' && id != 'none') {
              target.style.color = '';
           }
+          // очищаем жирность
           if (id == 'bold' || id == 'nobold') {
              target.style.fontWeight = '';
           }
+          // очищаем курсив
           if (id == 'italic' || id == 'noitalic') {
              target.style.fontStyle = '';
           }
+          // применяем новое форматирование
           if (id != 'none') {
              var color = elem.value;
 
@@ -177,11 +190,12 @@ function changeMainColor(id) {
 
           }
           }
+          // сохраняем в базу
     saveMainColors(targets);
  }
 
 
-
+// сохранение положения на странице при перезагрузке
  let cords = ['scrollX','scrollY'];
  // сохраняем позицию скролла в localStorage
  window.addEventListener('unload', e => cords.forEach(cord => localStorage[cord] = window[cord]));
@@ -196,7 +210,7 @@ function changeMainColor(id) {
      }
  });
 
-
+// сохраняем выбранный чекбокс со стилем
   window.addEventListener('unload', e => {
     localStorage[color] = document.querySelector('input[name="color"]:checked').id;
     alert(localStorage[color]);
@@ -212,6 +226,7 @@ function changeMainColor(id) {
  document.addEventListener('DOMContentLoaded', setTopPosition);
  window.onresize = setTopPosition;
 
+// кнопка 'Delete' очищает содержимое поля ввода и убирает запрет на редактирование
 document.addEventListener('keydown',
 (event) => {
     if (event.key == 'Delete') {
@@ -226,7 +241,7 @@ var timerId;
 var currentRow;
 document.addEventListener("DOMContentLoaded", function(e) {
 inputs = document.getElementsByTagName('input');
-
+// добавление функции автосохранения при выделение поля ввода
 for (var z = 0; z < inputs.length; z++) {
     if (inputs[z].type != 'button' && inputs[z].type != 'submit' && inputs[z].type != 'date') {
         inputs[z].addEventListener('focus', (element) => {autosave(element)});
@@ -252,7 +267,10 @@ for (var z = 0; z < inputs.length; z++) {
 
 });*/
 
+
+// функция автосохранения
 async function autosave(element) {
+// сохранение расцветки перед дальнейшими действиями
     if (!element.srcElement.id.match(/.+tr[0-9].+/)) {
         saveColors(element.srcElement.id);
     }
@@ -263,11 +281,13 @@ async function autosave(element) {
 
             var oldRow = currentRow;
             currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
+            // запоминаем выделенное поле ввода
             localStorage[focus] = element.srcElement.id;
             var inputs = document.querySelectorAll("input[type='text']");
             /*for (var p = 0; p < inputs.length; p++) {
                 localStorage[inputs[p].id] = inputs[p].value;
             }*/
+            // также записываем ИД выделенного поля ввода
             for (var pointer of document.getElementsByName("pointer")) {
                 pointer.value = element.srcElement.id;
             }
@@ -308,46 +328,8 @@ async function autosave(element) {
 
     }
 
-    /*async function autosave(element){
-            if (element.srcElement.parentElement == null || element.srcElement.parentElement.tagName != 'TH' || element.srcElement.type == 'button') return;
 
-
-
-            var form;
-
-            if (currentRow != element.srcElement.parentElement.parentElement.getAttribute("name")){
-                var oldRow = currentRow;
-                currentRow = element.srcElement.parentElement.parentElement.getAttribute("name");
-                localStorage[focus] = element.srcElement.id;
-
-                await new Promise(resolve => setTimeout(resolve, 150));
-                form = document.getElementById(oldRow.substring(3));
-                if (form != null) {
-                    form.submit();
-                }
-            }
-            if (timerId != null) {
-                clearInterval(timerId);
-            }
-            form = document.getElementById(currentRow.substring(3));
-            var inputs = element.srcElement.parentElement.parentElement.querySelectorAll("input[form='" + form.id + "'][type='text']");
-                                    for (var p = 0; p < inputs.length; p++) {
-                                        localStorage[inputs[p].id] = inputs[p].value;
-                                    }
-                                     console.log(localStorage);
-            var positiveAmount = Number(document.querySelector("input[form='" + form.id + "'][name='positiveAmount']").value.replace(/ /g,'').replace(',','.'));
-            console.log(positiveAmount);
-            var negativeAmount = Number(document.querySelector("input[form='" + form.id + "'][name='negativeAmount']").value.replace(/ /g,'').replace(',','.'));
-            console.log(negativeAmount);
-            console.log(positiveAmount + negativeAmount != 0);
-            if (form != null && positiveAmount + negativeAmount != 0) {
-                timerId = setInterval(function() {
-            	    form.submit();
-                }, 600000); //10 min
-            }
-        }*/
-
-
+// выделение ячейки после перезагрузки, которая была выделена до перезагрузки
 window.addEventListener('load', e => {
 if (document.activeElement == null) {
 inputs = document.getElementsByTagName('input');
@@ -372,7 +354,7 @@ inputs = document.getElementsByTagName('input');
 
  });
 
- // Function to set the top position based on the height of the reference element
+ // настройка высоты некоторых элементов, на основании высоты закрепленных элементов над ними
      function setTopPosition() {
        const referenceElement = document.getElementById('header');
        const targetElement = document.getElementById('capture');
@@ -401,8 +383,8 @@ if (targetElement3 != null) {
      }
 
 
-
-function filterFunction() {
+// кажись ниче не делает
+/*function filterFunction() {
   var input, filter, ul, li, a, i;
   input = document.getElementById("client_name");
   filter = input.value.toUpperCase();
@@ -416,18 +398,21 @@ function filterFunction() {
       button[i].style.display = "none";
     }
   }
-}
-
+}*/
+// выполняет пересчет объема для контрагента
 function sumInputs() {
 
    var numList = document.getElementsByName("amount");
    var rateList = document.getElementsByName("rate");
+   // рассчитываем величину для контрагента
    var sum = 0;
    for (var i = 0; i < numList.length; i++) {
         var div = document.getElementById("divIn" + i);
         var value = Number(numList[i].value) * Number(rateList[i].value);
         sum = sum + value;
    }
+
+   // применяем величину для контрагента
    for (var j = 0; j < numList.length; j++) {
         var d = document.getElementById("divIn" + j);
         var v  =  - (sum - Number(numList[j].value) * Number(rateList[j].value)) / Number(rateList[j].value);
@@ -439,7 +424,7 @@ function sumInputs() {
    document.getElementById("out").innerHTML = sum.toFixed(2);
 
 }
-
+// расчет объема записи контрагента на странице "Обмен валют"
 function convert() {
     var amount = document.getElementById("amount");
     var rate = document.getElementById("rate1");
@@ -471,7 +456,7 @@ function convert() {
     document.getElementById("changeInput").value = result.toFixed(2);
     document.getElementById("rate2").value = (rate.value);
 }
-
+// применение комментариев на странице "Обмен валют"
 function convertDescription() {
     var currency = document.getElementsByName("currency_name");
     var comment = document.getElementsByName("comment");
@@ -480,14 +465,14 @@ function convertDescription() {
     comment[1].value = "Обмен " + currency[0].value;
     convert();
 }
-
+// расчет курса записи контрагента на странице "Обмен валют"
 function convertRate() {
     var rate = document.getElementById("rate1");
     var result = 1 / Number(rate.value);
     rate.value = result;
     convert();
 }
-
+/* не используются
 function transferCurrency() {
     var currency1 = document.getElementById("currency1");
     document.getElementById("currency2").value = currency1.value;
@@ -536,12 +521,12 @@ $.ajax({
 });
 }
 }
+*/
 
-
-
+// сохраняем стили в базу
 async function saveColors(element) {
     const colors = new Map();
-
+// формируем список стилей
      if (element != null){
 
             if (element.id.length > 0) {
@@ -556,7 +541,7 @@ async function saveColors(element) {
 
     }
 
-
+// отправляем запрос к приложению, список изменений передаем в виде JSON строки
     console.log(colors);
     const colorsTemp = JSON.stringify(colors, mapAwareReplacer);
     $.ajax({
@@ -578,7 +563,7 @@ async function saveColors(element) {
 
 
 }
-
+// сохраняем стили в базу
 async function saveMainColors(elements) {
     const colors = new Map();
     for (var element of elements) {
@@ -611,7 +596,7 @@ async function saveMainColors(elements) {
     });
 
 }
-
+// вспомогательная функция для формирования строки JSON
 function mapAwareReplacer(key, value) {
     if (value instanceof Map && typeof value.toJSON !== "function") {
         return [...value.entries()]
@@ -619,23 +604,25 @@ function mapAwareReplacer(key, value) {
     return value
 }
 
+// функция скриншота, использует библиотеку html2canvas
 function capture() {
 //window.scrollTo(0,0);
 console.log(document.querySelector("table th.highlight").parentElement.parentElement.parentElement.parentElement);
+// выбираем элементы для добавления на скриншот
 html2canvas(document.querySelector("table th.highlight").parentElement.parentElement.parentElement.parentElement, {
     ignoreElements: (element) => {
-    console.log(element.id);
+    //console.log(element.querySelectorAll("[name='manager']"));
     //console.log(element.parentElement.name);
     //console.log(element.parentElement.parentElement.name);
         if (element.classList.contains("highlight") || element.parentElement.classList.contains("highlight")
          || element.querySelectorAll(".highlight").length > 0 || element.tagName == 'HEAD'
           || element.parentElement.tagName == 'HEAD' || element.id == 'cap' || element.parentElement.id == 'cap'
            || element.parentElement.parentElement.id == 'cap') {
+           if (element.id != 'manager') {
             return false;
-        } else {
-            return true;
+           }
         }
-
+        return true;
     },
     scale: 2,
     backgroundColor: null,
@@ -644,13 +631,14 @@ html2canvas(document.querySelector("table th.highlight").parentElement.parentEle
     onclone: (clonDoc) => {
         var elements = clonDoc.querySelectorAll("*");
         for (var element of elements) {
+        // убираем выделение и специфические варианты размещения на странице для элементов, которые будут на скриншоте
             element.style.position = 'unset';
             element.classList.remove("highlight");
         }
     }
 }).then(canvas => {
  canvas.toBlob((blob) => {
-
+// ложим скриншот в буфер обмена
           //document.clipboardData.setData([blob.type], blob).then(
           let data = [new ClipboardItem({ [blob.type]: blob })];
 
@@ -683,7 +671,7 @@ html2canvas(document.querySelector("table th.highlight").parentElement.parentEle
   console.log(range.commonAncestorContainer.parentNode);
 
 });*/
-
+// функция отображает контрагентов
 function showAgents(id) {
     var rows = document.getElementsByName(id);
     //var color = rows[0].style.color;
@@ -700,7 +688,7 @@ function showAgents(id) {
     img.src = '/images/eye-crossed.png';
     img.title = 'Скрыть контрагентов';
 }
-
+// скрывает контрагентов
 function hideAgents(id) {
 var rows = document.getElementsByName(id);
     for (var i = 1; i < rows.length; i++) {
@@ -714,7 +702,7 @@ var rows = document.getElementsByName(id);
     img.src = '/images/eye.png';
     img.title = 'Показать контрагентов';
 }
-
+// добавляет пустую строку для ввода контрагента
 function addRow(id, form) {
 
  var $TR = $('tr[id^="' + id + 'tr"]:last');
@@ -867,6 +855,7 @@ function addRow(id, form) {
     arithmetic(tr.id);
 }
 
+// добавляет пустую строку для ввода контрагента существующей записи
 function addRowInside(id, table, form, date) {
 
  var i = id.substring(0, 3);
@@ -1037,6 +1026,7 @@ var sum = 0;
     arithmetic(tr.id);
 }
 
+// удаление контрагента
 function deleteRow(id) {
 var element = document.querySelector("tr[id='" + id + "']");
 console.log(element);
@@ -1049,6 +1039,7 @@ var formId = form.id;
     form.submit();
 }
 
+// расчет результирующей суммы и ориентировочного баланса
 function arithmetic(id) {
     var positiveAmount = Number(document.getElementById(id + '_pAmount').value.replace(/ /g,'').replace(',','.'));
     console.log("arithmetic");
@@ -1061,6 +1052,8 @@ function arithmetic(id) {
     document.getElementById(id + '_total').innerHTML = numberWithSpaces(((positiveAmount + negativeAmount) + (positiveAmount + negativeAmount) * commission / 100 + trans).toFixed(0));
 }
 
+
+// расчет дял контрагента
 function changeAssociated(id) {
     arithmetic(id);
     var form = document.getElementById(id + '_pAmount').form.id;
@@ -1136,12 +1129,14 @@ var exchangeRates = document.getElementsByClassName("exchange");
     }
 }
 
+// заменяет спецсимволы на те, что читаются программой
 function numberWithSpaces(x) {
   var parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   return parts.join(".");
 }
 
+/* не используется
 function perevod(id) {
     addRow(id);
     var currentButton = document.getElementById("per" + id);
@@ -1413,11 +1408,9 @@ function cleanObm() {
                         }
                     }
 }
+*/
 
-function init(mes) {
-    alert(mes);
-}
-
+// проверяет есть ли соединение с сервером
 function checkConnection() {
 const tempId = 1;
     $.ajax({
@@ -1443,11 +1436,11 @@ const tempId = 1;
     });
 }
 
-setInterval(checkConnection, 1000);
-setInterval(displayConnection, 5000);
+setInterval(checkConnection, 1000); // каждую 1 сек
+setInterval(displayConnection, 5000); // каждые 5 сек
 
+// меняет цвет индикатора, в зависимости от наличия соединения
 var connection = false;
-
 function displayConnection() {
     var indicator = document.getElementById("connectionLabel");
     if (connection == false) {

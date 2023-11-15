@@ -165,7 +165,7 @@
                 <th>Инкас.</th>
                 <th>Итого</th>
                 <th>Баланс</th>
-                <th th:if="${session.user.role.name == 'Admin' || session.user.role.name == 'Superadmin'}">Менеджер</th>
+                <th th:if="${session.user.role.name == 'Admin' || session.user.role.name == 'Superadmin'}" id="manager">Менеджер</th>
             </tr>
             </thead>
             <tbody th:id="${currency.name}">
@@ -303,7 +303,7 @@
                             th:onclick="|changeColor('${transaction.id}_${currency.id}_${transaction.client.id}_balance')|"
                             th:style="|${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''} ${transaction.balanceColor != null ? transaction.balanceColor : ''};|"
                             th:text="${#numbers.formatInteger(transaction.balance, 1,'WHITESPACE')}"></th>
-                        <th th:if="${session.user.role.name == 'Admin' || session.user.role.name == 'Superadmin'}"
+                        <th th:if="${session.user.role.name == 'Admin' || session.user.role.name == 'Superadmin'}" name="manager" id="manager"
                             th:style="${transaction.client.id != session.client.id || transaction.currency.id != currency.id ? 'border-top: none;' : ''}" th:text="${transaction.user.login}"></th>
                         <input name="dateh" th:value="${transaction.date}" type="hidden">
                 </th:block>

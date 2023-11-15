@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Objects;
 import org.profinef.entity.Currency;
 
+/**
+ * Класс предназначен для получения официальных курсов НБУ
+ */
 @Service
 public class NBUManager {
 
@@ -28,7 +31,13 @@ public class NBUManager {
     public NBUManager(CurrencyManager currencyManager) {
         this.currencyManager = currencyManager;
     }
-    public void getTodayCurrencyExchange() throws Exception {
+
+    /**
+     * Метод посылает HTML запрос к REST приложению НБУ и извлекает из полученных данных в формате JSON актуальные курсы
+     * валют имеющихся в базе
+     */
+    public void getTodayCurrencyExchange() {
+        // формируем запрос
         String url = "https://bank.gov.ua/NBU_Exchange/exchange?json";
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -37,10 +46,13 @@ public class NBUManager {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Currency> currencys = new ArrayList<>();
         try {
+            // получаем ответ
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             logger.debug("Getting response");
             String responseBody = response.body();
+            // преобразуем строку JSON в объект
             List<NBUCurrency> nbuCurrencies = objectMapper.readValue(responseBody, new TypeReference<>() {});
+            // обновляем курсы валют
             List<Currency> currencyList = currencyManager.getAllCurrencies();
             for (Currency c : currencyList) {
                 for (NBUCurrency nbuCurrency : nbuCurrencies) {

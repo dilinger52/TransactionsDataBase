@@ -12,6 +12,9 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Класс предназначен для настройки выполнения автоматических, периодически повторяемых действий
+ */
 @Service
 public class Scheduler {
     @Autowired
@@ -24,15 +27,22 @@ public class Scheduler {
         this.excelManager = excelManager;
     }
 
+    /**
+     * Метод запускает обновление курсов валют каждый день в 16:00
+     */
     @Scheduled(cron = "0 0 16 * * *")
-    public void updateCurrencyExchange() throws Exception {
+    public void updateCurrencyExchange() {
         logger.info("Updating exchange rates");
         nbuManager.getTodayCurrencyExchange();
     }
+
+    /**
+     * Метод запускает создание бэкапа при запуске и остановке приложения, а также каждый день в 8:00, 14:00 и 22:00
+     */
     @PostConstruct
     @PreDestroy
     @Scheduled(cron = "0 0 8,14,22 * * *")
-    public void makeBackUp() throws Exception {
+    public void makeBackUp() {
         logger.info("Making backup");
         String date = new SimpleDateFormat("dd-MM-yyyy_HH-mm").format(new Date());
         boolean doneLocal = DatabaseUtil.backupLocal("root", "2223334456", "transactions", "backup\\" + date + ".sql");
@@ -45,6 +55,10 @@ public class Scheduler {
         logger.info("Network backup made");
     }
 
+    /**
+     * Метод автоматического восстановления БД из самого свежего бэкапа. Автоматическое выполнение настраивается для
+     * удаленного хранилища каждый день в 22:30
+     */
     /*@Scheduled(cron = "0 30 22 * * *")*/
     public void restoreFromBackUp() {
         File directory = new File("backup\\");
@@ -66,6 +80,10 @@ public class Scheduler {
         restoreFromBackUp(chosenFile.getName());
     }
 
+    /**
+     * Метод восстановления базы данных из выбранного файла бэкапа
+     * @param chosenFile файл бэкапа дял восстановления
+     */
     public void restoreFromBackUp(String chosenFile) {
         assert chosenFile != null;
         boolean doneLocal = DatabaseUtil.restore("root", "2223334456", "transactions", "backup\\" + chosenFile);
@@ -76,6 +94,11 @@ public class Scheduler {
         }
     }
 
+    /**
+     * Метод выполняет создание файла Excel который отражает всю информацию из БД. Автоматическое выполнение
+     * настраивается на удаленном хранилище каждый день в 23:00
+     * @throws Exception выбрасывается при невозможности создания файла
+     */
     /*@Scheduled(cron = "0 0 23 * * *")*/
     public void makeExcel() throws Exception {
         excelManager.createFull();

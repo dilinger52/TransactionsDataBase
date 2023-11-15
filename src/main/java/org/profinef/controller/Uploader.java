@@ -24,7 +24,8 @@ import java.sql.Timestamp;
 import java.util.*;
 
 /**
- * This class realised functionality to get file in office open xml format and use it for update the database
+ * Данный класс реализует функциональность для загрузки на сервер файла в формате office open xml и извлечением из него
+ * информации о записях с последующим обновлением базы данных
  */
 @Controller
 @RequestMapping(path = "/upload")
@@ -61,9 +62,14 @@ public class Uploader {
     }
 
     /**
-     * Method for getting file from user and updating the database
-     *
-     * @param file file with information to update
+     * Основной метод, реализующий обработку файла и обновление базы данных на его основе
+     * @param file импортированный файл для обработки
+     * @param dateAfter дата с которой включительно будут удалены записи из базы данных, а вместо них записаны те, что
+     *                  будут обнаружены в файле. Если дата не задана используется значение по умолчанию: 01-01-0001,
+     *                  т.е. база будет очищена полностью
+     * @param session
+     * @return
+     * @throws Exception может быть выброшено при проблемах считывания файла
      */
 
     @RequestMapping("/full")
@@ -72,15 +78,18 @@ public class Uploader {
                                       HttpSession session) throws Exception {
         User user = (User) session.getAttribute("user");
         logger.info(user + " Getting file...");
+        // проверка наличия необходимых прав у пользователя. Ввиду серьезных изменений в базе данных, данное действие
+        // запрещено к выполнению не администраторам
         if (user.getRole() != Role.Admin  && user.getRole() != Role.Superadmin) {
             logger.info(user + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
+        // выполняем удаление записей из базы данных
         transManager.deleteAfter(new Timestamp(dateAfter.getTime()));
 
         logger.info(user + " Data base cleared");
-        //creating workbook from file
+        //создаем книгу из файла
         InputStream stream = file.getInputStream();
 
         Workbook myExcelBook = StreamingReader.builder()
@@ -88,7 +97,9 @@ public class Uploader {
                 .bufferSize(1000000000)
                 .open(stream);
         logger.info(user + " Created workbook");
+        // для каждого листа
         for (Sheet sheet : myExcelBook) {
+            // игнорируем итоговый лист
             if (sheet.getSheetName().equals("Итоговый лист")) {
                 break;
             }
@@ -96,13 +107,15 @@ public class Uploader {
                 break;
             }
             logger.info(user + " Created sheet: " + sheet.getSheetName());
-
+            // создаем клиента с именем взятым из названия листа
             client = new Client(sheet.getSheetName());
+            // создаем новый аккаунт этого клиента, если его не существует
             try {
                 accountManager.addClient(client);
             } catch (RuntimeException ignored) {}
-            //first row contains information about currencies
+            //для каждого ряда
             for (Row row : sheet) {
+                // первый ряд содержит информацию о валютах
                 if (row.getRowNum() == 0) {
                     logger.debug("Created first row");
                     for (Cell cell : row) {
@@ -119,26 +132,33 @@ public class Uploader {
                     }
                     continue;
                 }
+                // второй ряд игнорируем
                 if (row.getRowNum() == 1) continue;
                 logger.debug("Created row" + row.getRowNum());
-
+                //обнуляем параметры записи
                 amount = 0;
                 commission = 0;
                 rate = 1;
                 transportation = 0;
                 isTransaction = false;
                 comment = "";
-
+                // для каждой ячейки в ряду
                 for (Cell cell : row) {
+                    // пустые ячейки игнорируются
                     if (cell == null) continue;
+                    // дефолтное значение числовых данных, позже может быть изменено и использовано в качестве значения
+                    // одного из параметров записи. Сбрасывается каждую итерацию
                     double value = 0.0;
+                    // если тип данных строчный
                     if (cell.getCellType() == CellType.STRING) {
+                        // если номер столбца 1-й для одной из валют - это комментарий
                         if (cell.getColumnIndex() % columnPerCurrency == 1) {
                             comment = cell
                                     .getStringCellValue();
                             logger.trace("Found comment: " + comment);
                             continue;
                         } else {
+                            //иначе это число со спецсимволом. удаляем его и получаем числовое значение
                             String valueS = cell.getStringCellValue().replace("'", "");
                             try {
                                 value = Double.parseDouble(valueS);
@@ -147,31 +167,37 @@ public class Uploader {
                             }
                         }
                     }
+                    // если тип данных - формула, получаем кэшированное значение в качестве числа
                     if (cell.getCellType() == CellType.FORMULA) {
                         if (Objects.requireNonNull(cell.getCachedFormulaResultType()) == CellType.NUMERIC) {
                             value = cell.getNumericCellValue();
                         }
                     }
+                    // если тип данных числовой
                     if (cell.getCellType() == CellType.NUMERIC) {
-                        //getting date
+                        // если в 1-ом столбце - это дата
                         if (cell.getColumnIndex() == 0) {
                             date = cell.getDateCellValue();
                             logger.trace("Found date: " + date);
                             continue;
                         }
 
-                        //cell can contain sum of other cells that is not usefully
+                        // если 1-ом столбце для одной из валют - это числовой комментарий. преобразуем его в строку
                         if (cell.getColumnIndex() % columnPerCurrency == 1) {
                             comment = String.valueOf(cell
                                     .getNumericCellValue());
                             logger.trace("Found comment: " + comment);
                             continue;
                         }
-
+                        // иначе записываем значение этой ячейки
                         value = cell.getNumericCellValue();
                     }
+                    // если дата до необходимой - игнорируем строку
                     if (date.before(dateAfter)) break;
+                    // если ранее полученное значение не 0
                     if (value != 0) {
+                        // если во 2-ом или 3-ем столбце - это объем. также наличие значения в этом столбце говорит о
+                        // наличии записи, в принципе
                         if (cell.getColumnIndex() % columnPerCurrency == 2 || cell.getColumnIndex() % columnPerCurrency == 3) {
                             amount = value;
                             logger.trace("Found amount: " + amount);
@@ -186,7 +212,7 @@ public class Uploader {
                             isTransaction = true;
                             continue;
                         }
-                        //getting commission
+                        //если в 4-ом столбце - это тариф
                         if (cell.getColumnIndex() % columnPerCurrency == 4) {
 
                             commission = value;
@@ -194,20 +220,21 @@ public class Uploader {
                             continue;
 
                         }
-                        //getting rate
+                        // если в 6 столбце - это курс
                         if (cell.getColumnIndex() % columnPerCurrency == 6) {
                             rate = value;
                             logger.trace("Found rate: " + rate);
                             continue;
                         }
-                        //getting transportation
+                        // если в 7 столбце - это инкасация
                         if (cell.getColumnIndex() % columnPerCurrency == 7) {
                             transportation = value;
                             logger.trace("Found transportation: " + transportation);
                             continue;
                         }
                     }
-                    //last cell for transaction. Insert transaction with previous info
+                    // если это крайний столбец и наличие записи подтверждено - добавляем в базу новую запись и обнуляю
+                    // параметры
                     if ((cell.getColumnIndex() % columnPerCurrency == 0) && isTransaction) {
                         logger.info(user + " Inserting transaction on sheet: " + sheet.getSheetName());
                         insertTransaction(row, cell.getColumnIndex(), currencies.get((cell.getColumnIndex() / columnPerCurrency) - 1), user);
@@ -219,14 +246,10 @@ public class Uploader {
                         comment = "";
                     }
                 }
-
-
-                //second row doesn't contain usefully cells
-                //next rows contains info about transactions
             }
+            // обнуляем список валют перед переходом на новый лист
             currencies = new ArrayList<>();
         }
-            //for each sheet except last creating user
             myExcelBook.close();
             logger.info(user + " File decoded and uploaded");
             return "redirect:/client";
@@ -234,11 +257,12 @@ public class Uploader {
 
 
     /**
-     * Insert transaction to database. Uses information from class fields and some additional params
+     * Вспомогательный метод, добавляющий запись в базу данных. Использует величины из полей класса и некоторую
+     * дополнительную информацию
      *
-     * @param row        contain information about color of balance cell
-     * @param cellNum    number of cell that contains balance value
-     * @param currencyId id of currency for which transaction will be created
+     * @param row        ряд, содержит информацию о стилях (в данный момент не используется)
+     * @param cellNum    номер ячейки содержащей баланс (в данный момент не используется)
+     * @param currencyId ИД валюты к которой относится запись
      */
     private void insertTransaction(Row row, int cellNum, int currencyId, User user) {
 
@@ -251,18 +275,19 @@ public class Uploader {
                     ","  + Byte.toUnsignedInt(c.getRGB()[2]) + ")";
             logger.trace("Found balance color: " + balanceColor);
         }*/
-        //Getting transaction id based on max id of transaction in database
+        //получаем ИД записи
         int transactionId = getTransactionId();
         try {
-            //writing transaction to database
+            // находим доступное время в эту дату
             date = transManager.getAvailableDate(new Timestamp(date.getTime()));
+            // добавляем в базу новую запись с заданными параметрами
             transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
                     currencyId, rate, commission, amount, transportation, null, amountColor, user.getId(),
                     0.0, null, null, null, null, null,
                     null, null);
         } catch (RuntimeException e) {
             e.printStackTrace();
-            //if currency did not exist create it and try again
+            //если валюты с указанным ИД не существует - создаем ее и повторяем добавление
             Currency currency = new Currency(currencyId, currencyBackFormatter(currencyId));
             try {
                 currencyManager.addCurrency(currency);
@@ -274,7 +299,7 @@ public class Uploader {
                     user.getId(), 0.0, null, null, null, null, null,
                     null, null);
         }
-        //setting parameters to default
+        //сбрасываем переменные
         amount = 0;
         commission = 0;
         rate = 1;
@@ -284,6 +309,10 @@ public class Uploader {
 
     }
 
+    /**
+     * Вспомогательный метод, определяющий доступный ИД записи. Находит существующий максимальный ИД и увеличивает его на 1
+     * @return ИД для новой записи
+     */
     private int getTransactionId() {
         int transactionId;
         try {
@@ -302,10 +331,9 @@ public class Uploader {
 
 
     /**
-     * Formatter that contain information about currencies, their names and codes/ids. Can be updated by adding more
-     * currencies
-     * @param name names of currency. Prefer short format of three uppercase letters
-     * @return code of currency that type is int. If there is no information about currency with such names return -1
+     * Вспомогательный метод, преобразующий текстовое название валюты в ее код/ИД
+     * @param name название валюты или общепринятая аббревиатура
+     * @return общепринятый код или ИД валюты
      */
     private int currencyFormatter(String name) {
         logger.debug("Currency formatting from names to id");
@@ -320,11 +348,9 @@ public class Uploader {
     }
 
     /**
-     * Formatter that contain information about currencies, their names and codes/ids. Can be updated by adding more
-     * currencies
-     * @param id code of currency. Must contain three digit
-     * @return names of currency in ISO format. If there is no information about currency with such id return empty
-     * string
+     * Вспомогательный метод, преобразующий код/ИД валюты в общепринятую аббревиатуру
+     * @param id общепринятый код или ИД валюты
+     * @return общепринятую аббревиатуру
      */
     private String currencyBackFormatter(int id) {
         logger.debug("Currency formatting from id to names");

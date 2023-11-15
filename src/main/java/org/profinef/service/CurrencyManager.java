@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+/**
+ * Класс отвечает за обработку данных валют полученных из базы данных перед передачей их в контроллер
+ */
 @Service
 public class CurrencyManager {
     @Autowired
@@ -20,6 +23,11 @@ public class CurrencyManager {
         this.currencyRepository = currencyRepository;
     }
 
+    /**
+     * Метод осуществляет поиск валюты в БД по ее ИД
+     * @param currencyId ИД валюты, которую необходимо найти
+     * @return найденную валюту
+     */
     public Currency getCurrency(Integer currencyId) {
         logger.debug("Getting currency by id");
         if (currencyId == null) return null;
@@ -29,6 +37,11 @@ public class CurrencyManager {
         return formatFromDto(currencyDto);
     }
 
+    /**
+     * Метод осуществляет поиск валюты в БД по ее названию
+     * @param currencyName название валюты
+     * @return найденную валюту
+     */
     public Currency getCurrency(String currencyName) {
         logger.debug("Getting currency by names");
         if (currencyName == null) return null;
@@ -37,6 +50,11 @@ public class CurrencyManager {
         return formatFromDto(currencyDto);
     }
 
+    /**
+     * Метод преобразует объект валюты с ИД связанных объектов в объект валюты со ссылками на связанные объекты
+     * @param currencyDto объект валюты для преобразования
+     * @return объект валюты после преобразования
+     */
     private static Currency formatFromDto(CurrencyDto currencyDto) {
         logger.debug("Formatting currency from dto to entity");
         Currency currency = new Currency();
@@ -47,6 +65,10 @@ public class CurrencyManager {
         return currency;
     }
 
+    /**
+     * Метод собирает все валюты имеющиеся в БД в список
+     * @return список всех валют
+     */
     public List<Currency> getAllCurrencies() {
         logger.debug("Getting all currencies");
         Iterable<CurrencyDto> it = currencyRepository.findAll();
@@ -54,6 +76,7 @@ public class CurrencyManager {
         for (CurrencyDto currencyDto : it) {
             currencies.add(formatFromDto(currencyDto));
         }
+        // сортируем в порядке "UAH", "USD", "EUR", "RUB", "PLN"
         currencies.sort((o1, o2) -> {
             if (Objects.equals(o1.getName(), "UAH") || Objects.equals(o2.getName(), "PLN")) return -1;
             if (Objects.equals(o2.getName(), "UAH") || Objects.equals(o1.getName(), "PLN")) return 1;
@@ -64,8 +87,13 @@ public class CurrencyManager {
         return currencies;
     }
 
+    /**
+     * Метод добавляет новую валюту в БД
+     * @param newCurrency валюта для добавления
+     */
     public void addCurrency(Currency newCurrency) {
         logger.debug("Adding currency");
+        // проверка наличия такой же валюты в БД
         if (currencyRepository.findById(newCurrency.getId()).isPresent()
         || currencyRepository.findByName(newCurrency.getName()) != null) {
             throw new RuntimeException("Данная валюта уже присутствует");
@@ -74,12 +102,21 @@ public class CurrencyManager {
         logger.debug("Currency saved");
     }
 
+    /**
+     * Метод обновляет параметры валюты в БД
+     * @param newCurrency валюта сновыми параметрами
+     */
     public void updateCurrency(Currency newCurrency) {
         logger.debug("Updating currency");
         currencyRepository.save(formatToDto(newCurrency));
         logger.debug("Currency updated");
     }
 
+    /**
+     * Метод преобразует объект валюты со ссылками на связанные объекты в объект валюты с ИД связанных объектов
+     * @param newCurrency объект валюты для преобразования
+     * @return объект валюты после преобразования
+     */
     private CurrencyDto formatToDto(Currency newCurrency) {
         logger.debug("Formatting from entity to dto");
         CurrencyDto currencyDto = new CurrencyDto();
@@ -90,7 +127,11 @@ public class CurrencyManager {
         return currencyDto;
     }
 
-    public void saveAll(List<Currency> newCurrencys) throws Exception {
+    /**
+     * Метод сохраняет в БД несколько валют, которые содержатся в списке
+     * @param newCurrencys список валют для сохранения
+     */
+    public void saveAll(List<Currency> newCurrencys) {
         for (Currency newCurrency : newCurrencys) {
             updateCurrency(newCurrency);
         }

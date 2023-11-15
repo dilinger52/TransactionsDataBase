@@ -22,10 +22,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Класс предназначен для обработки данных в базе и работы с бекапом
+ */
 @Service
 public final class DatabaseUtil {
 
     private static final Logger logger =  LoggerFactory.getLogger(DatabaseUtil.class);
+
+    /**
+     * Метод создает локальную копию базы данных с заданными параметрами для дальнейшего возможного отката изменений
+     * базы данных
+     * @param dbUsername имя пользователя БД
+     * @param dbPassword пароль БД
+     * @param dbName название БД
+     * @param outputFile название и путь к файлу, в который необходимо записать бекап
+     * @return статус выполнения по завершению (true/false)
+     */
     public static boolean backupLocal(String dbUsername, String dbPassword, String dbName, String outputFile) {
         try {
             String command = String.format("C:\\Program Files\\MySQL\\MySQL Workbench 8.0\\mysqldump -u%s -p%s --add-drop-table --databases %s -r %s",
@@ -39,18 +52,31 @@ public final class DatabaseUtil {
         return false;
     }
 
+    /**
+     * Метод создает копию файла бекапа (или любого другого по необходимости) на сетевом удаленном хранилище по указанным
+     * параметрам
+     * @param hostname имя хоста сети
+     * @param username имя пользователя в сети
+     * @param password пароль в сети
+     * @param domain сетевой домен
+     * @param shareName имя удаленного хранилища
+     * @param inputFile файл, который необходимо передать
+     */
     public static void copyBackup(String hostname, String username, String password, String domain, String shareName, String inputFile) {
         SMBClient client = new SMBClient();
+        // создаем соединение с хостом
         try (Connection connection = client.connect(hostname)) {
+            // проходим аутентификацию
             AuthenticationContext ac = new AuthenticationContext(username, password.toCharArray(), domain);
             Session session = connection.authenticate(ac);
             FileInputStream input = new FileInputStream(inputFile);
-            // Connect to Share
+            // коннектимся к сетевому хранилищу
             try (DiskShare share = (DiskShare) session.connectShare(shareName)) {
                 Set<FileAttributes> fileAttributes = new HashSet<>();
                 fileAttributes.add(FileAttributes.FILE_ATTRIBUTE_NORMAL);
                 Set<SMB2CreateOptions> createOptions = new HashSet<>();
                 createOptions.add(SMB2CreateOptions.FILE_RANDOM_ACCESS);
+                // отправляем файл
                 File f = share.openFile(inputFile, new HashSet<>(List.of(AccessMask.GENERIC_ALL)), fileAttributes, SMB2ShareAccess.ALL, SMB2CreateDisposition.FILE_OVERWRITE_IF, createOptions);
 
                 OutputStream oStream = f.getOutputStream();
@@ -67,6 +93,14 @@ public final class DatabaseUtil {
         }
     }
 
+    /**
+     * Метод восстанавливает базу данных на основании ранее созданного файла бекапа
+     * @param dbUsername имя пользователя БД
+     * @param dbPassword пароль БД
+     * @param dbName название БД
+     * @param inputFile файл бекапа для восстановления
+     * @return статус выполнения по завершению (true/false)
+     */
     public static boolean restore(String dbUsername, String dbPassword, String dbName, String inputFile) {
         try {
             String[] command= new String[]{"C:\\Program Files\\MySQL\\MySQL Workbench 8.0\\mysql", "--user=" + dbUsername, "--password=" + dbPassword, dbName,"-e", " source "+ inputFile};

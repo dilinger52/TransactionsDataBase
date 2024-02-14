@@ -51,7 +51,7 @@ public class Scheduler {
         } else {
             logger.info("some errors with local backup");
         }
-        DatabaseUtil.copyBackup("Desktop-7bo0mfq", "oper", "oper01", "Desktop-7bo0mfq", "qaz", "backup\\" + date + ".sql");//TODO uncomit before install
+        //DatabaseUtil.copyBackup("Desktop-7bo0mfq", "oper", "oper01", "Desktop-7bo0mfq", "qaz", "backup\\" + date + ".sql");
         logger.info("Network backup made");
     }
 

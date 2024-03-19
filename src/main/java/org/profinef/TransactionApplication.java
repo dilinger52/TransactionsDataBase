@@ -1,6 +1,5 @@
 package org.profinef;
 
-import org.profinef.controller.AppController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner;
@@ -16,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 public class TransactionApplication {
-    private static final Logger logger = LoggerFactory.getLogger(AppController.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionApplication.class);
     public static void main(String[] args) {
         logger.info("Application starts...");
         //SpringApplication.run(TransactionApplication.class, args);

@@ -1,8 +1,13 @@
 package org.profinef.repository;
 
-import org.profinef.dto.UserDto;
-import org.springframework.data.repository.CrudRepository;
+import org.profinef.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends CrudRepository<UserDto, Integer> {
-    UserDto findByLogin(String login);
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<User, Integer> {
+    Optional<User> findByLogin(String login);
+
+    Boolean existsByLogin(String login);
+
 }

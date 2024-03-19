@@ -2,6 +2,7 @@ package org.profinef.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.profinef.controller.CurrencyController;
 import org.profinef.entity.NBUCurrency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +26,11 @@ import org.profinef.entity.Currency;
 public class NBUManager {
 
     @Autowired
-    private final CurrencyManager currencyManager;
+    private final CurrencyController currencyController;
     private final Logger logger =  LoggerFactory.getLogger(NBUManager.class);
 
-    public NBUManager(CurrencyManager currencyManager) {
-        this.currencyManager = currencyManager;
+    public NBUManager(CurrencyController currencyController) {
+        this.currencyController = currencyController;
     }
 
     /**
@@ -53,7 +54,7 @@ public class NBUManager {
             // преобразуем строку JSON в объект
             List<NBUCurrency> nbuCurrencies = objectMapper.readValue(responseBody, new TypeReference<>() {});
             // обновляем курсы валют
-            List<Currency> currencyList = currencyManager.getAllCurrencies();
+            List<Currency> currencyList = currencyController.getAllCurrencies();
             for (Currency c : currencyList) {
                 for (NBUCurrency nbuCurrency : nbuCurrencies) {
                     if (Objects.equals(nbuCurrency.getCurrencyCodeL(), c.getName())) {
@@ -69,7 +70,7 @@ public class NBUManager {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-        currencyManager.saveAll(currencys);
+        currencyController.saveAll(currencys);
         logger.debug("Exchange rates updated");
     }
 }

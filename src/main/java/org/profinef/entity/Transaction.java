@@ -1,16 +1,23 @@
 package org.profinef.entity;
 
 
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
-
+@Entity
 public class Transaction implements Serializable {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
+    @Column(name = "operation_id")
+    int operationId;
     Timestamp date;
-    Client client;
-    Currency currency;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "account_id", nullable = false)
+    Account account;
     String comment;
     Double rate;
     Double commission;
@@ -26,31 +33,18 @@ public class Transaction implements Serializable {
     String rateColor;
     String transportationColor;
     String balanceColor;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "user_id", nullable = false)
     User user;
 
 
     public Transaction() {
     }
 
-    public Transaction(Integer id, Timestamp date, Client client, Currency currency, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, User user) {
-        this.id = id;
+    public Transaction(int operationId, Timestamp date, Account account, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, String commentColor, String amountColor, String inputColor, String outputColor, String tarifColor, String commissionColor, String rateColor, String transportationColor, String balanceColor, User user) {
         this.date = date;
-        this.client = client;
-        this.currency = currency;
-        this.comment = comment;
-        this.rate = rate;
-        this.commission = commission;
-        this.amount = amount;
-        this.balance = balance;
-        this.transportation = transportation;
-        this.user = user;
-    }
-
-    public Transaction(Integer id, Timestamp date, Client client, Currency currency, String comment, Double rate, Double commission, Double amount, Double balance, Double transportation, String commentColor, String amountColor, String inputColor, String outputColor, String tarifColor, String commissionColor, String rateColor, String transportationColor, String balanceColor, User user) {
-        this.id = id;
-        this.date = date;
-        this.client = client;
-        this.currency = currency;
+        this.account = account;
+        this.operationId = operationId;
         this.comment = comment;
         this.rate = rate;
         this.commission = commission;
@@ -69,6 +63,29 @@ public class Transaction implements Serializable {
         this.user = user;
     }
 
+    public Transaction(Transaction transaction) {
+        this.id = transaction.getId();
+        this.date = transaction.getDate();
+        this.account = transaction.getAccount();
+        this.operationId = transaction.getOperationId();
+        this.comment = transaction.getComment();
+        this.rate = transaction.getRate();
+        this.commission = transaction.getCommission();
+        this.amount = transaction.getAmount();
+        this.balance = transaction.getBalance();
+        this.transportation = transaction.getTransportation();
+        this.commentColor = transaction.getCommentColor();
+        this.amountColor = transaction.getAmountColor();
+        this.inputColor = transaction.getInputColor();
+        this.outputColor = transaction.getOutputColor();
+        this.tarifColor = transaction.getTarifColor();
+        this.commissionColor = transaction.getCommissionColor();
+        this.rateColor = transaction.getRateColor();
+        this.transportationColor = transaction.getTransportationColor();
+        this.balanceColor = transaction.getBalanceColor();
+        this.user = transaction.getUser();
+    }
+
     public Integer getId() {
         return id;
     }
@@ -85,20 +102,20 @@ public class Transaction implements Serializable {
         this.date = date;
     }
 
-    public Client getClient() {
-        return client;
+    public Account getAccount() {
+        return account;
     }
 
-    public void setClient(Client client) {
-        this.client = client;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
-    public Currency getCurrency() {
-        return currency;
+    public int getOperationId() {
+        return operationId;
     }
 
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public void setOperationId(int operationId) {
+        this.operationId = operationId;
     }
 
     public String getComment() {
@@ -234,9 +251,9 @@ public class Transaction implements Serializable {
     public String toString() {
         return "Transaction{" +
                 "id=" + id +
+                ", operationId=" + operationId +
                 ", date=" + date +
-                ", client=" + client +
-                ", currency=" + currency +
+                ", account=" + account +
                 ", comment='" + comment + '\'' +
                 ", rate=" + rate +
                 ", commission=" + commission +
@@ -260,11 +277,11 @@ public class Transaction implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Transaction that)) return false;
-        return Objects.equals(getId(), that.getId()) && Objects.equals(getClient(), that.getClient()) && Objects.equals(getCurrency(), that.getCurrency());
+        return Objects.equals(getId(), that.getId()) && Objects.equals(this.account, that.account);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getClient(), getCurrency());
+        return Objects.hash(getId(), getAccount());
     }
 }

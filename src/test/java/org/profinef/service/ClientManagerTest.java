@@ -19,7 +19,7 @@ import static org.powermock.configuration.ConfigurationType.PowerMock;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ClientDto.class)
 public class ClientManagerTest {
-    static ClientManager clientManager;
+    static ClientController clientManager;
 
     @BeforeAll
     public static void before() {
@@ -35,7 +35,7 @@ public class ClientManagerTest {
         when(clientRepository.findByIdOrderByPib(1)).thenReturn(Optional.of(client1));
         when(clientRepository.findAllByPibContainsIgnoreCaseOrderByPib("Ivan")).thenReturn(client1);
         when(clientRepository.save(mock(ClientDto.class)).getId()).thenReturn(7);
-        clientManager = new ClientManager(clientRepository);
+        clientManager = new ClientController(clientRepository);
 
     }
 

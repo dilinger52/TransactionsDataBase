@@ -1,20 +1,28 @@
 package org.profinef.entity;
 
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
+@Entity
 public class User implements Serializable {
-    int id;
-    Role role;
-    String login;
-    String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles;
+    private String login;
+    private String password;
 
     public User() {
     }
 
-    public User(int id, Role role, String login, String password) {
-        this.id = id;
-        this.role = role;
+    public User(String login, String password) {
         this.login = login;
         this.password = password;
     }
@@ -27,12 +35,12 @@ public class User implements Serializable {
         this.id = id;
     }
 
-    public Role getRole() {
-        return role;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
     public String getLogin() {
@@ -55,7 +63,6 @@ public class User implements Serializable {
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", role=" + role +
                 ", login='" + login + '\'' +
                 '}';
     }

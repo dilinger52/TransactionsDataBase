@@ -3,14 +3,9 @@ package org.profinef.controller;
 import com.monitorjbl.xlsx.StreamingReader;
 import jakarta.servlet.http.HttpSession;
 import org.apache.poi.ss.usermodel.*;
-import org.profinef.entity.Client;
+import org.profinef.entity.*;
 import org.profinef.entity.Currency;
-import org.profinef.entity.Role;
-import org.profinef.entity.User;
-import org.profinef.service.AccountManager;
-import org.profinef.service.ClientManager;
-import org.profinef.service.CurrencyManager;
-import org.profinef.service.TransManager;
+import org.profinef.payload.request.NewClientRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +27,15 @@ import java.util.*;
 public class Uploader {
 
     @Autowired
-    private final ClientManager clientManager;
+    private final ClientController clientController;
     @Autowired
-    private final TransManager transManager;
+    private final TransController transController;
     @Autowired
-    private final CurrencyManager currencyManager;
+    private final CurrencyController currencyController;
     @Autowired
-    private final AccountManager accountManager;
+    private final AccountController accountController;
+    @Autowired
+    private final RoleController roleController;
 
     private Client client;
     private Date date = null;
@@ -54,11 +51,12 @@ public class Uploader {
 
     private static final Logger logger = LoggerFactory.getLogger(Uploader.class);
 
-    public Uploader(ClientManager clientManager, TransManager transManager, CurrencyManager currencyManager, AccountManager accountManager) {
-        this.clientManager = clientManager;
-        this.transManager = transManager;
-        this.currencyManager = currencyManager;
-        this.accountManager = accountManager;
+    public Uploader(ClientController clientController, TransController transController, CurrencyController currencyController, AccountController accountController, RoleController roleController) {
+        this.clientController = clientController;
+        this.transController = transController;
+        this.currencyController = currencyController;
+        this.accountController = accountController;
+        this.roleController = roleController;
     }
 
     /**
@@ -80,13 +78,13 @@ public class Uploader {
         logger.info(user + " Getting file...");
         // проверка наличия необходимых прав у пользователя. Ввиду серьезных изменений в базе данных, данное действие
         // запрещено к выполнению не администраторам
-        if (user.getRole() != Role.Admin  && user.getRole() != Role.Superadmin) {
+        if (!user.getRoles().contains(roleController.get(ERole.ROLE_ADMIN)) && !user.getRoles().contains(roleController.get(ERole.ROLE_ADMIN))) {
             logger.info(user + " Redirecting to error page with error: Отказано в доступе");
             session.setAttribute("error", "Отказано в доступе");
             return "error";
         }
         // выполняем удаление записей из базы данных
-        transManager.deleteAfter(new Timestamp(dateAfter.getTime()));
+        transController.deleteAfter(new Timestamp(dateAfter.getTime()));
 
         logger.info(user + " Data base cleared");
         //создаем книгу из файла
@@ -109,9 +107,11 @@ public class Uploader {
             logger.info(user + " Created sheet: " + sheet.getSheetName());
             // создаем клиента с именем взятым из названия листа
             client = new Client(sheet.getSheetName());
+            NewClientRequest request = new NewClientRequest();
+            request.setPib(sheet.getSheetName());
             // создаем новый аккаунт этого клиента, если его не существует
             try {
-                accountManager.addClient(client);
+                accountController.addClient(request);
             } catch (RuntimeException ignored) {}
             //для каждого ряда
             for (Row row : sheet) {
@@ -279,10 +279,11 @@ public class Uploader {
         int transactionId = getTransactionId();
         try {
             // находим доступное время в эту дату
-            date = transManager.getAvailableDate(new Timestamp(date.getTime()));
+            date = transController.getAvailableDate(new Timestamp(date.getTime()));
             // добавляем в базу новую запись с заданными параметрами
-            transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor, user.getId(),
+            Account account = accountController.getAccount(client.getId(), currencyId);
+            transController.remittance(transactionId, new Timestamp(date.getTime()), account, comment,
+                    rate, commission, amount, transportation, null, amountColor, user.getId(),
                     0.0, null, null, null, null, null,
                     null, null);
         } catch (RuntimeException e) {
@@ -290,12 +291,13 @@ public class Uploader {
             //если валюты с указанным ИД не существует - создаем ее и повторяем добавление
             Currency currency = new Currency(currencyId, currencyBackFormatter(currencyId));
             try {
-                currencyManager.addCurrency(currency);
+                currencyController.addCurrency(currency);
             } catch (RuntimeException ex) {
                 ex.printStackTrace();
             }
-            transManager.remittance(transactionId, new Timestamp(date.getTime()), client.getPib(), comment,
-                    currencyId, rate, commission, amount, transportation, null, amountColor,
+            Account account = accountController.getAccount(client.getId(), currencyId);
+            transController.remittance(transactionId, new Timestamp(date.getTime()), account, comment,
+                    rate, commission, amount, transportation, null, amountColor,
                     user.getId(), 0.0, null, null, null, null, null,
                     null, null);
         }
@@ -316,8 +318,8 @@ public class Uploader {
     private int getTransactionId() {
         int transactionId;
         try {
-            transactionId = transManager.getMaxId() + 1;
-            /*transactionId = transManager.getAllTransactions()
+            transactionId = transController.getMaxId() + 1;
+            /*transactionId = transController.getAllTransactions()
                     .stream()
                     .flatMapToInt(t -> IntStream.of(t.getId()))
                     .max()

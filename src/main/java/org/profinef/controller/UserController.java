@@ -1,178 +1,202 @@
 package org.profinef.controller;
 
-import com.google.common.hash.Hashing;
-import jakarta.servlet.http.HttpSession;
+import org.profinef.entity.ERole;
+import org.profinef.entity.Role;
 import org.profinef.entity.User;
-import org.profinef.service.UserManager;
-import org.slf4j.LoggerFactory;
+import org.profinef.payload.request.ChangeLoginRequest;
+import org.profinef.payload.request.ChangePasswordRequest;
+import org.profinef.payload.request.NewUserRequest;
+import org.profinef.payload.response.JwtResponse;
+import org.profinef.payload.response.MessageResponse;
+import org.profinef.repository.RoleRepository;
+import org.profinef.repository.UserRepository;
+import org.profinef.security.jwt.JwtUtils;
+import org.profinef.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
-import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
-
-import org.slf4j.Logger;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Класс предназначен для обработки HTML запросов, связанных с действиями с аккаунтами пользователей
+ * Класс отвечает за обработку данных пользователя полученных из базы данных перед передачей их в контроллер
  */
-@SuppressWarnings("SameReturnValue")
-@Controller
+@CrossOrigin(origins = "*", maxAge = 3600)
+@RestController
+@RequestMapping("/api/users")
 public class UserController {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
-    private final UserManager userManager;
+    private final UserRepository userRepository;
+    @Autowired
+    private final AuthenticationManager authenticationManager;
+    @Autowired
+    private final JwtUtils jwtUtils;
+    @Autowired
+    private final PasswordEncoder encoder;
+    @Autowired
+    private final RoleRepository roleRepository;
+    @Autowired
+    private final UserDetailsService userDetailsService;
 
-    public UserController(UserManager userManager) {
-        this.userManager = userManager;
+    public UserController(UserRepository userRepository, AuthenticationManager authenticationManager, JwtUtils jwtUtils, PasswordEncoder encoder, RoleRepository roleRepository, UserDetailsService userDetailsService) {
+        this.userRepository = userRepository;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
+        this.encoder = encoder;
+        this.roleRepository = roleRepository;
+        this.userDetailsService = userDetailsService;
     }
 
     /**
-     * Метод обрабатывает HTML запросы, связанные с отображением странички авторизации
-     * @return
+     * Метод осуществляет поиск пользователя в БД по логину
+     * @param login логин пользователя, которого нужно найти
+     * @return найденного пользователя
      */
-    @GetMapping("/log_in")
-    public String getLoginPage() {
-        logger.info("Loading log in page");
-        return "login";
+    @GetMapping("/login/{login}")
+    public User getUser(@PathVariable String login) {
+        return userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("Пользователя с таким логином не существует"));
     }
 
     /**
-     * Метод обрабатывает HTML запросы, связанные с авторизацией пользователей
-     * @param session
-     * @param login введенный логин пользователя
-     * @param password введенный пароль пользователя
-     * @return
+     * Метод осуществляет поиск пользователя по ИД
+     * @param id ИД пользователя, которого нужно найти
+     * @return найденного пользователя
      */
-    @PostMapping("/log_in")
-    public String login(HttpSession session, @RequestParam String login, @RequestParam String password) {
-        User currentUser = (User) session.getAttribute("user");
-        logger.info(currentUser + " Checking user authorisation information...");
-        User user;
-        // ищем в базе пользователя с таким логином, иначе переводим на страницу ошибки
-        try {
-            user = userManager.getUser(login);
-        } catch (RuntimeException e) {
-            session.setAttribute("error", e.getMessage());
-            logger.info(currentUser + " Redirecting to error page with error: " + e.getMessage());
-            return "error";
-        }
-
-        //хэшируем введенный пароль и сравниваем с хэшем пароля в базе. если они не совпадают переводим на страницу ошибки
-        String sha256hex = Hashing.sha256()
-                .hashString(password, StandardCharsets.UTF_8)
-                .toString();
-        if (!sha256hex.equals(user.getPassword())) {
-            session.setAttribute("error", "Пароль не верный");
-            logger.info(currentUser + " Redirecting to error page with error: Пароль не верный");
-            return "error";
-        }
-        // добавляем данные пользователя в сессию и переводим клиента на главную
-        session.setAttribute("user", user);
-        logger.info(currentUser + " User accepted");
-        return "redirect:/client";
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable int id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) throw new RuntimeException("Пользователя не существует");
+        return user;
     }
 
     /**
-     * Метод обрабатывает HTML запросы, связанные с выходом пользователя из аккаунта. Удаляет данные текущего
-     * пользователя из сессии и уничтожает сессию
-     * @param session
-     * @return
+     * Метод осуществляет поиск всех пользователей в БД
+     * @return список всех пользователей
      */
-    @PostMapping("/log_out")
-    public String logout(HttpSession session) {
-        User currentUser = (User) session.getAttribute("user");
-        logger.info(currentUser + " Logging out");
-        session.invalidate();
-        return "redirect:/";
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     /**
-     * Метод обрабатывает HTML запросы, связанные с отображением страницы настроек аккаунта пользователя
-     * @return
+     * Метод сохраняет пользователя в БД
+     * @param user пользователь, которого необходимо сохранить
      */
-    @GetMapping("/user_settings")
-    public String getUserSettingsPage() {
-        logger.info("Loading user settings page");
-        return "userSettings";
+    @PostMapping
+    public void save(@RequestBody User user) {
+        userRepository.save(user);
     }
 
     /**
-     * Метод обрабатывает HTML запросы, связанные со сменой логина пользователя
-     * @param login новый логин пользователя
-     * @param session
-     * @return
+     * Метод удаляет пользователя из БД по его ИД
+     * @param id ИД пользователя, которого необходимо удалить
      */
-    @PostMapping("/change_login")
-    public String changeLogin(@RequestParam(name = "login") String login, HttpSession session) {
-
-        User user = (User) session.getAttribute("user");
-        logger.info(user + " Changing user login...");
-        // проверяем наличие пользователя в базе
-        user = userManager.getUser(user.getId());
-        try {
-            // проверяем наличие пользователя с таким же логином. если существует перенаправляем на страницу ошибки
-            userManager.getUser(login);
-            logger.info(user + " Redirecting to error page with error: Логин занят. Придумайте другой");
-            session.setAttribute("error", "Логин занят. Придумайте другой");
-            return "error";
-        } catch (RuntimeException e) {
-            // иначе меняем логин пользователя и сохраняем в базу
-            user.setLogin(login);
-            userManager.save(user);
-        }
-        // обновляем данные пользователя в сессии
-        session.setAttribute("user", user);
-        logger.info(user + " Login changed");
-        return "redirect:/user_settings";
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SUPERADMIN') or hasRole('ADMIN')")
+    public void delete(@PathVariable int id) {
+        userRepository.deleteById(id);
     }
 
-    /**
-     * Метод обрабатывает HTML запросы, связанные со сменой пароля пользователя
-     * @param oldPassword старый пароль, для улучшения безопасности аккаунта
-     * @param newPassword новый пароль
-     * @param checkPassword повторно новый пароль, обеспечит отсутствие опечаток в новом пароле
-     * @param session
-     * @return
-     */
-    @PostMapping("/change_password")
-    public String changePassword(@RequestParam(name = "old_password") String oldPassword,
-                                 @RequestParam(name = "new_password") String newPassword,
-                                 @RequestParam(name = "check_password") String checkPassword,
-                                 HttpSession session) {
+    @PostMapping("/login")
+    public ResponseEntity<?> changeLogin(@RequestBody ChangeLoginRequest request) {
+        User user = userRepository.findById(request.getUser().getId()).orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        if (userRepository.existsByLogin(request.getUsername())) return ResponseEntity
+                .badRequest()
+                .body(new MessageResponse("Ошибка: Логин занят!"));
+        user.setLogin(request.getUsername());
+        user = userRepository.save(user);
 
-        User user = (User) session.getAttribute("user");
-        logger.info(user + " Changing password...");
-        // проверка наличия пользователя в базе
-        user = userManager.getUser(user.getId());
-        // проверка соответвия хэша введенного старого пароля с хэшем пароля записанного в базе
-        String oldPassSha = Hashing.sha256()
-                .hashString(oldPassword, StandardCharsets.UTF_8)
-                .toString();
-        if (!Objects.equals(user.getPassword(), oldPassSha)) {
-            logger.info(user + " Redirecting to error page with error: Неверный пароль");
-            session.setAttribute("error", "Неверный пароль");
-            return "error";
-        }
-        // проверка совпадения нового пароля и проверочного пароля
-        if (!Objects.equals(newPassword, checkPassword)) {
-            logger.info(user + " Redirecting to error page with error: Пароли не совпадают");
-            session.setAttribute("error", "Пароли не совпадают");
-            return "error";
-        }
-        // хэшируем новый пароль и записываем в базу
-        String newPassSha = Hashing.sha256()
-                .hashString(newPassword, StandardCharsets.UTF_8)
-                .toString();
-        user.setPassword(newPassSha);
-        userManager.save(user);
-        // обновляем данные пользователя в сессии
-        session.setAttribute("user", user);
-        logger.info(user + " Password changed");
-        return "redirect:/user_settings";
+
+        UserDetails userDetails2 = userDetailsService.loadUserByUsername(request.getUsername());
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        userDetails2,
+                        null,
+                        userDetails2.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        AuthController.updateLoggedCounter((UserDetailsImpl) userDetails2);
+
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                user.getId(),
+                user.getLogin(),
+                user.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .collect(Collectors.toList())));
+    }
+
+    @PostMapping("/password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+        User user = userRepository.findById(request.getUser().getId()).orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        if (Objects.equals(user.getPassword(), encoder.encode(request.getOldPassword()))) return ResponseEntity
+                .badRequest()
+                .body(new MessageResponse("Ошибка: Неверный пароль!"));
+        user.setPassword(encoder.encode(request.getNewPassword()));
+        user = userRepository.save(user);
+
+        String username = jwtUtils.getUserNameFromJwtToken(request.getUser().getAccessToken());
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, request.getNewPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+
+
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                user.getId(),
+                user.getLogin(),
+                user.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .collect(Collectors.toList())));
+    }
+
+    @PostMapping("/restore/{id}")
+    @PreAuthorize("hasRole('SUPERADMIN') or hasRole('ADMIN')")
+    public User restorePassword(@PathVariable int id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        user.setPassword(encoder.encode("11111"));
+        user = userRepository.save(user);
+        return user;
+    }
+
+    @PostMapping("/{id}/role/{roleId}")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public User changeRole(@PathVariable int id, @PathVariable int roleId) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        Set<Role> roles = new HashSet<>();
+        roles.add(roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Роль не найдена")));
+        user.setRoles(roles);
+        user = userRepository.save(user);
+        return user;
+    }
+
+    @PostMapping("/new")
+    @PreAuthorize("hasRole('SUPERADMIN') or hasRole('ADMIN')")
+    public ResponseEntity<?> newUser(@RequestBody NewUserRequest request) {
+        if (userRepository.existsByLogin(request.getUsername())) return ResponseEntity.badRequest()
+                .body(new MessageResponse("Ошибка: Логин занят!"));
+        User user = new User();
+        user.setLogin(request.getUsername());
+        user.setPassword(encoder.encode("11111"));
+        Set<Role> roles = new HashSet<>();
+        roles.add(roleRepository.findByName(ERole.valueOf(request.getRole())).orElseThrow(() -> new RuntimeException("Роль не найдена")));
+        user.setRoles(roles);
+        return ResponseEntity.ok(userRepository.save(user));
+
     }
 }

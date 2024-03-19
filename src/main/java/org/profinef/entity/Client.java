@@ -1,17 +1,29 @@
 package org.profinef.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import org.profinef.repository.CurrencyRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
+@Entity
 public class Client implements Serializable, Comparable<Client>{
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
     String pib;
+    @Column(name = "phone_number")
     String phone;
     String telegram;
     String color;
 
+    public Client() {
+    }
 
     public Client(String pib) {
         this.id = 0;

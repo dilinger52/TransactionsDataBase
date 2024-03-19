@@ -60,9 +60,11 @@
     <root level="info">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
+        <appender-ref ref="Error" />
     </root>
     <logger name="org.profinef" level="trace" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
+        <appender-ref ref="Error" />
     </logger>
 </configuration>

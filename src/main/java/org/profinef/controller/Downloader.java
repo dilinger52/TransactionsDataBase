@@ -27,29 +27,29 @@ import java.util.*;
  * Этот класс используется для скачивания базы данных в формате office open xml excel-файла
  */
 @Controller
-@RequestMapping(path = "/download")
+@RequestMapping(path = "/api/download")
 public class Downloader {
 
     @Autowired
-    private final ClientManager clientManager;
+    private final ClientController clientController;
     @Autowired
-    private final CurrencyManager currencyManager;
+    private final CurrencyController currencyController;
     @Autowired
-    private final TransManager transManager;
+    private final TransController transController;
     @Autowired
-    private final AccountManager accountManager;
+    private final AccountController accountController;
     @Autowired
     private final ExcelManager excelManager;
     private final int columnPerCurrency = 8;
 
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
-    public Downloader(ClientManager clientManager, CurrencyManager currencyManager, TransManager transManager,
-                      AccountManager accountManager, ExcelManager excelManager) {
-        this.clientManager = clientManager;
-        this.currencyManager = currencyManager;
-        this.transManager = transManager;
-        this.accountManager = accountManager;
+    public Downloader(ClientController clientController, CurrencyController currencyController, TransController transController,
+                      AccountController accountController, ExcelManager excelManager) {
+        this.clientController = clientController;
+        this.currencyController = currencyController;
+        this.transController = transController;
+        this.accountController = accountController;
         this.excelManager = excelManager;
     }
 
@@ -182,7 +182,7 @@ public class Downloader {
                     logger.trace("Created cells for currency names: " + currency.getName());
 
                     // из списка записей отбираем те, что относятся к текущей валюте
-                    List<Transaction> transactions = trans.stream().filter(t -> t.getClient().equals(client)).filter(t -> t.getCurrency().equals(currency)).toList();
+                    List<Transaction> transactions = trans.stream().filter(t -> t.getAccount().getClient().equals(client)).filter(t -> t.getAccount().getCurrency().equals(currency)).toList();
                     // начальный номер столбца (соответсвует второму столбцу, т.к. увеличение происходит в начале цикла)
                     int rowNum = 1;
                     // для каждой записи
@@ -229,13 +229,13 @@ public class Downloader {
                         }
 
                         // находим все связанные записи
-                        List<Transaction> tl = transManager.getTransaction(transaction.getId());
+                        List<Transaction> tl = transController.getTransaction(transaction.getId());
                         // получаем имена контрагентов, и записываем в строку
                         StringBuilder anotherClients = new StringBuilder();
                         for (Transaction t : tl) {
-                            if (!t.getClient().getId().equals(transaction.getClient().getId())) {
+                            if (!t.getAccount().getClient().getId().equals(transaction.getAccount().getClient().getId())) {
                                 anotherClients.append(" ");
-                                anotherClients.append(t.getClient().getPib());
+                                anotherClients.append(t.getAccount().getClient().getPib());
                             }
                         }
                         // добавляем комментарий

@@ -1,25 +1,27 @@
 package org.profinef.repository;
 
-import org.profinef.dto.ClientDto;
+import org.profinef.entity.Client;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ClientRepository extends CrudRepository<ClientDto, Integer> {
+public interface ClientRepository extends JpaRepository<Client, Integer> {
     @Override
-    <S extends ClientDto> S save(S entity);
+    <S extends Client> S save(S entity);
     @Override
     void deleteById(Integer integer);
 
-    Optional<ClientDto> findByIdOrderByPib(Integer integer);
-    ClientDto findByPibIgnoreCaseOrderByPib(String name);
+    Optional<Client> findByIdOrderByPib(Integer integer);
+    Client findByPibIgnoreCaseOrderByPib(String name);
 
-    List<ClientDto> findAllByPibContainsIgnoreCaseOrderByPib(String name);
+    List<Client> findAllByPibContainsIgnoreCaseOrderByPib(String name);
 
 
-    List<ClientDto> findAllByPhoneContainsOrderByPib(String phone);
+    List<Client> findAllByPhoneContainsOrderByPib(String phone);
 
-    List<ClientDto> findAllByTelegramContainsOrderByPib(String telegram);
+    List<Client> findAllByTelegramContainsOrderByPib(String telegram);
 
+    List<Client> findAllByOrderByPib();
 }

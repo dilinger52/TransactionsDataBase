@@ -2,10 +2,15 @@ package org.profinef.service;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.profinef.controller.AccountController;
+import org.profinef.controller.ClientController;
+import org.profinef.controller.CurrencyController;
+import org.profinef.controller.TransController;
 import org.profinef.entity.Account;
 import org.profinef.entity.Client;
 import org.profinef.entity.Currency;
 import org.profinef.entity.Transaction;
+import org.profinef.repository.ClientRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,22 +28,22 @@ import java.util.*;
 @Service
 public class ExcelManager {
     @Autowired
-    private final ClientManager clientManager;
+    private final ClientRepository clientRepository;
     @Autowired
-    private final CurrencyManager currencyManager;
+    private final CurrencyController currencyController;
     @Autowired
-    private final TransManager transManager;
+    private final TransController transController;
     @Autowired
-    private final AccountManager accountManager;
+    private final AccountController accountController;
     private final int columnPerCurrency = 8;
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelManager.class);
 
-    public ExcelManager(ClientManager clientManager, CurrencyManager currencyManager, TransManager transManager, AccountManager accountManager) {
-        this.clientManager = clientManager;
-        this.currencyManager = currencyManager;
-        this.transManager = transManager;
-        this.accountManager = accountManager;
+    public ExcelManager(ClientRepository clientRepository, CurrencyController currencyController, TransController transController, AccountController accountController) {
+        this.clientRepository = clientRepository;
+        this.currencyController = currencyController;
+        this.transController = transController;
+        this.accountController = accountController;
     }
 
     /**
@@ -47,9 +52,9 @@ public class ExcelManager {
      */
     public void createFull() throws IOException {
         //собираем информацию
-        List<Client> clients = clientManager.findAll();
-        List<Currency> currencies = currencyManager.getAllCurrencies();
-        List<Transaction> transactions = transManager.getAllTransactions();
+        List<Client> clients = clientRepository.findAll();
+        List<Currency> currencies = currencyController.getAllCurrencies();
+        List<Transaction> transactions = transController.getAllTransactions();
         //создаем книгу
         Workbook book = createWorkbook(clients, currencies, transactions);
         // создаем итоговый лист
@@ -114,14 +119,13 @@ public class ExcelManager {
             nameCell.setCellValue(client.getPib());
             logger.trace("Created client cell with value = " + client.getPib());
             int cellNum = 0;
-            Set<Map.Entry<Currency, Account.Properties>> currencySet = accountManager.getAccounts(client.getPib()).get(0)
-                    .getCurrencies().entrySet();
+            List<Account> accounts = accountController.getAccountsExactly(client.getPib());
             // записываем балансы по каждой из валют
-            for (Map.Entry<Currency, Account.Properties> currency : currencySet) {
+            for (Account account : accounts) {
                 Cell cell = row.createCell(++cellNum);
                 cell.setCellStyle(boldStyle);
-                cell.setCellValue(currency.getValue().getAmount());
-                logger.trace("Created currency cell with value = " + currency.getValue());
+                cell.setCellValue(account.getBalance());
+                logger.trace("Created currency cell with value = " + account.getBalance());
             }
         }
 
@@ -135,25 +139,26 @@ public class ExcelManager {
         logger.trace("Created cell total names");
 
         // записываем суммы балансов по всем клиентам для каждой из валют
-        List<Map.Entry<Currency, Account.Properties>> currencyList = accountManager.getAllAccounts()
-                .stream()
-                .map(account -> account.getCurrencies().entrySet())
-                .flatMap(Collection::stream)
-                .toList();
-        Map<Integer, Double> totalMap = new HashMap<>();
-        for (Map.Entry<Currency, Account.Properties> entry : currencyList) {
-            if (totalMap.containsKey(entry.getKey().getId())) {
-                totalMap.put(entry.getKey().getId(), totalMap.get(entry.getKey().getId()) + entry.getValue().getAmount());
-            } else {
-                totalMap.put(entry.getKey().getId(), entry.getValue().getAmount());
+        List<Account> accounts = accountController.getAllAccounts();
+        List<Account> totalAccounts = new ArrayList<>();
+        for (Currency currency : currencies) {
+            Account totalAc = new Account(new Client("Итого"), currency);
+            double sum = 0;
+            for (Account account : accounts) {
+                if (account.getCurrency().equals(currency)) {
+                    sum += account.getBalance();
+                }
             }
+            totalAc.setBalance(sum);
+            totalAccounts.add(totalAc);
         }
+
         int totalCellNum = 0;
-        for (Map.Entry<Integer, Double> entry : totalMap.entrySet()) {
+        for (Account totalAc : totalAccounts) {
             Cell totalCell = totalRow.createCell(++totalCellNum);
             totalCell.setCellStyle(redBoldStyle);
-            totalCell.setCellValue(entry.getValue());
-            logger.trace("Created cell total with value = " + entry.getValue());
+            totalCell.setCellValue(totalAc.getBalance());
+            logger.trace("Created cell total with value = " + totalAc.getBalance());
         }
         // Записываем всё в файл
         book.write(new FileOutputStream("excel/info.xlsx"));
@@ -280,7 +285,7 @@ public class ExcelManager {
                     }
                     logger.trace("Created cells for currency names: " + currency.getName());
                     // выбираем записи, относящиеся к текущему клиенту и валюте
-                    List<Transaction> transactions = trans.stream().filter(t -> t.getClient().equals(client)).filter(t -> t.getCurrency().equals(currency)).toList();
+                    List<Transaction> transactions = trans.stream().filter(t -> t.getAccount().getClient().equals(client)).filter(t -> t.getAccount().getCurrency().equals(currency)).toList();
                     // начальный номер ряда, соответствует второму, т.к. увеличение происходит в начале цикла
                     int rowNum = 1;
                     for (Transaction transaction : transactions) {
@@ -326,12 +331,12 @@ public class ExcelManager {
 
                         // формируем строку комментария, выписывая имена контрагентов и комментарий и добавляем в
                         // соответствующую ячейку
-                        List<Transaction> tl = transManager.getTransaction(transaction.getId());
+                        List<Transaction> tl = transController.getTransaction(transaction.getId());
                         StringBuilder anotherClients = new StringBuilder();
                         for (Transaction t : tl) {
-                            if (!t.getClient().getId().equals(transaction.getClient().getId())) {
+                            if (!t.getAccount().getClient().getId().equals(transaction.getAccount().getClient().getId())) {
                                 anotherClients.append(" ");
-                                anotherClients.append(t.getClient().getPib());
+                                anotherClients.append(t.getAccount().getClient().getPib());
                             }
                         }
                         anotherClients.append(" ").append(transaction.getComment());

@@ -1,8 +1,9 @@
 package org.profinef.repository;
 
-import org.profinef.dto.CurrencyDto;
-import org.springframework.data.repository.CrudRepository;
+import org.profinef.entity.Currency;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CurrencyRepository extends CrudRepository<CurrencyDto, Integer> {
-    CurrencyDto findByName(String name);
+
+public interface CurrencyRepository extends JpaRepository<Currency, Integer> {
+    Currency findByName(String name);
 }

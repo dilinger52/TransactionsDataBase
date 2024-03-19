@@ -1,19 +1,47 @@
 package org.profinef.entity;
 
-import java.io.Serializable;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
-public class Account implements Serializable {
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+@Entity
+public class Account implements Serializable, Comparable<Account> {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    int id;
+    double balance;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "client_id", nullable = false)
     Client client;
-    Map<Currency, Properties> currencies;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "currency_id", nullable = false)
+    Currency currency;
+    @Column(name = "amount_color")
+    String amountColor;
 
 
     public Account() {
     }
 
-    public Account(Client client, Map<Currency, Properties> currencies) {
+    public Account(Client client, Currency currency) {
         this.client = client;
-        this.currencies = currencies;
+        this.currency = currency;
+    }
+
+    public Account(Client client, Currency currency, double balance) {
+        this.client = client;
+        this.currency = currency;
+        this.balance = balance;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public Client getClient() {
@@ -24,54 +52,36 @@ public class Account implements Serializable {
         this.client = client;
     }
 
-    public Map<Currency, Properties> getCurrencies() {
-        return currencies;
+    public Currency getCurrency() {
+        return currency;
     }
 
-    public void setCurrencies(Map<Currency, Properties> currencies) {
-        this.currencies = currencies;
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
 
     @Override
     public String toString() {
         return "Account{" +
-                "client=" + client +
-                ", currencies=" + currencies +
+                "id=" + id +
+                ", balance=" + balance +
+                ", client=" + client +
+                ", currency=" + currency +
                 '}';
     }
 
-    public static class Properties {
-        Double amount;
-        String color;
-
-        public Properties(double amount, String amountColor) {
-            this.amount = amount;
-            this.color = amountColor;
-        }
-
-        public Double getAmount() {
-            return amount;
-        }
-
-        public void setAmount(Double amount) {
-            this.amount = amount;
-        }
-
-        public String getColor() {
-            return color;
-        }
-
-        public void setColor(String color) {
-            this.color = color;
-        }
-
-        @Override
-        public String toString() {
-            return "Properties{" +
-                    "amount=" + amount +
-                    ", color='" + color + '\'' +
-                    '}';
-        }
+    @Override
+    public int compareTo(Account o) {
+        return this.currency.compareTo(o.currency);
     }
 }
 
